@@ -3,6 +3,6 @@
 
 """NN module
 
-File containing NN Aggregated/Binned Hawkes process estimation (MLP).
+File containing NN Aggregated/Binned Hawkes Process estimation (MLP).
 
 """

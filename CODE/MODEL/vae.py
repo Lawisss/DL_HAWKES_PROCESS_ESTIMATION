@@ -3,6 +3,6 @@
 
 """VAE module
 
-File containing VAE Aggregated/Binned Hawkes process estimation (Generative model).
+File containing VAE Aggregated/Binned Hawkes Process estimation (Generative model).
 
 """
