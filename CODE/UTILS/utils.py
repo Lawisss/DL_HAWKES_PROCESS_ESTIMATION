@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+
+"""Utils module
+
+File containing all utils functions used in other python files (modules).
+
+"""
+
 # CSV file writing function
 
 def write_csv(data, filepath='', mode='w', encoding='utf-8'):
