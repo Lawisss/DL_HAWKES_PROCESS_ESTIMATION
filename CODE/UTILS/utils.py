@@ -2,7 +2,7 @@
 
 """Utils module
 
-File containing all utils functions used in other python files (modules).
+File containing all utils functions used in other modules (python files).
 
 """
 
@@ -14,7 +14,7 @@ def write_csv(data, filepath='', mode='w', encoding='utf-8'):
         if not isinstance(data, list):
             data = [data]
 
-        # Write and field names initialisation
+        # Written and field names initialisation
         with open(filepath, mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
