@@ -21,9 +21,9 @@ def hawkes_simulation(kernel='exp', baseline='const', params={"mu": 0.1, "alpha"
     # Simulated a Hawkes process in the given time interval
     T = hawkes_process.simulate(interval)
     
-    # Plotted the number of events and intensity over time
-    hawkes_process.plot_N()
-    hawkes_process.plot_l()
+    # Plotted the number of events and intensity over time (don't work with many iteration)
+    # hawkes_process.plot_N()
+    # hawkes_process.plot_l()
 
     return hawkes_process, T
 
@@ -48,12 +48,12 @@ def hawkes_estimation(T, kernel='exp', baseline='const', interval=[0,100], end_T
 
     # Transformed times so that the first observation is at 0 and the last at 1
     [T_transform, interval_transform] = hawkes_process.t_trans() 
-    # Plotted the empirical survival function of the estimated Hawkes process
-    hawkes_process.plot_KS()
-
     # Predicted the Hawkes process 
     T_pred = hawkes_process.predict(end_T, num_seq) 
-    # Plotted the predicted number of events over time
-    hawkes_process.plot_N_pred()
+
+    # Plotted the empirical survival function of the estimated Hawkes process (don't work with many iteration)
+    # hawkes_process.plot_KS()
+    # Plotted the predicted number of events over time (don't work with many iteration)
+    # hawkes_process.plot_N_pred()
 
     return T_pred, metrics, T_transform, interval_transform

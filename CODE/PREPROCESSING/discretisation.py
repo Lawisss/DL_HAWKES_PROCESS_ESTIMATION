@@ -9,7 +9,7 @@ File containing Aggregated Hawkes Process functions (Hawkes Process conversion).
 
 import numpy as np
 
-# Computed the histogram of jump times for each process
+# Computed the histogram of jump times for each process (counted number of events which occurred over each interval)
 
 def discretise(jump_times, delta, horizon):
 
