@@ -58,16 +58,23 @@ python -m visualization.ipynb
 ```
 ## Usage
 
-* To run the code: visualization.ipynb. This file allows you to load the project python files and to visualize results.
-* To get details about dataset, model architecture, training and the visualization, go to the [Report](https://github.com/MoonMess/NLP_Project/blob/main/report.pdf) file.
+## Usage
 
-|                                         File                                           |               Extension               |               Function                |
-| -------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------- |
-| [Preprocessing](https://github.com/MoonMess/NLP_Project/blob/main/preprocessing.py)    | .py                                   | Data preprocessing                    |
-| [Modeling](https://github.com/MoonMess/NLP_Project/blob/main/model.py)                 | .py                                   | Model architecture                    |
-| [Training](https://github.com/MoonMess/NLP_Project/blob/main/train.py)                 | .py                                   | Model training                        |
-| [Visualization](https://github.com/MoonMess/NLP_Project/blob/main/visualization.ipynb) | .ipynb                                | Model results visualization           |
-| [Report](https://github.com/MoonMess/NLP_Project/blob/main/report.pdf)                 | .pdf                                  | Project report                        |
+* To run the code: [preprocessing.ipynb](https://github.com/Lawisss/G10_IRS_MARKET_TREND/blob/main/PREPROCESSING/preprocessing.ipynb). This file allows you to load python files and results.
+* To get details about model architecture, training and the visualization, contacted the project author directly.
+* To leverage regression SOTA/ML models results, most of them are not available for confidentiality reasons.
+
+|                                         File                                                                       |               Extension               |               Folder                  |               Complete                |               Function                |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
+| [Preprocessing](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/preprocessing.py)     | .py                                   | LIBRARY                  	     | ✔️                                   | Preprocessed EUREX EGB metaorders	                  |
+| [Kyle](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/kyle.py)   | .py                                   | LIBRARY                    	     | ✔️                                   | Executed Kyle model	                  |
+| [Sqrt_root_law](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/sqrt_root_law.py)                     | .py                                   | LIBRARY                           | ✔️                                   | Executed Square Root Law model                       |
+| [Istar](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/istar.py)     | .py                                   | LIBRARY           		     | ❌                                   | Executed I-STAR model                   |
+| [Automl](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/automl.py)       | .py                                   | LIBRARY                         | ✔️                                   | Executed AutoML model                |
+| [Autodl](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/autodl.py)    | .py                                   | LIBRARY                        | ❌                                   | Executed AutoDL model               |
+| [Evaluation](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/evaluation.py)				  | .py                                 | LIBRARY                       	     | ✔️                                   | Executed/Monitored evaluation          |
+
+
 
 
 ## Contacts
