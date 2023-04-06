@@ -54,7 +54,7 @@ git clone https://github.com/MoonMess/NLP_Project.git
 2. Open [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb) in your browser.
 
 ```sh
-python -m visualization.ipynb
+python -m tutorial.ipynb
 ```
 
 ## Usage
