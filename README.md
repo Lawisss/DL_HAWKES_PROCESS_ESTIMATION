@@ -46,12 +46,12 @@ tar -xf aclImdb_v1.tar.gz
 
 ### Installation
 
-1. Clone the [project](https://github.com/MoonMess/NLP_Project.git) with Git.
+1. Clone the [project](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION) with Git.
 
 ```sh
 git clone https://github.com/MoonMess/NLP_Project.git
 ```
-2. Open [visualization.ipynb](https://github.com/MoonMess/NLP_Project/blob/main/visualization.ipynb) in your browser.
+2. Open [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb) in your browser.
 
 ```sh
 python -m visualization.ipynb
@@ -59,9 +59,9 @@ python -m visualization.ipynb
 
 ## Usage
 
-* To run the code: [preprocessing.ipynb](https://github.com/Lawisss/G10_IRS_MARKET_TREND/blob/main/PREPROCESSING/preprocessing.ipynb). This file allows you to load python files and results.
+* To run the code: [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb). This file allows you to load python files and results.
 * To get details about model architecture, training and the visualization, contacted the project author directly.
-* To leverage regression SOTA/ML models results, most of them are not available for confidentiality reasons.
+* To leverage Aggregated Hawkes Process/MLP/VAE models results, most of them are not available for confidentiality reasons.
 
 |                                         File                                                                       |               Extension               |               Folder                  |               Complete                |               Function                |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
