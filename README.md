@@ -49,7 +49,7 @@ tar -xf aclImdb_v1.tar.gz
 1. Clone the [project](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION) with Git.
 
 ```sh
-git clone https://github.com/MoonMess/NLP_Project.git
+git clone https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION.git
 ```
 2. Open [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb) in your browser.
 
