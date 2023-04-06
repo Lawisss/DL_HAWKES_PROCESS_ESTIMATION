@@ -72,7 +72,7 @@ python -m visualization.ipynb
 
 ## Contacts
 
-* Nicolas Girard - nicolas.girard22@outlook.com.
+* Nicolas Girard - nico.girard22@gmail.com.
 
 ## License
 
