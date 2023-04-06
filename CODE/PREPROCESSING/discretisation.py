@@ -8,32 +8,33 @@ File containing Aggregated Hawkes Process functions (Hawkes Process conversion).
 """
 
 import numpy as np
+import VARIABLES.variables as var
 
 # Computed the histogram of jump times for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times, delta, horizon):
+def discretise(jump_times):
 
     # Initialized an array of zeros with dimensions (number of processes, number of jumps per unit of time)
-    counts = np.zeros((len(jump_times), int(horizon // delta)))
+    counts = np.zeros((len(jump_times), int(var.TIME_HORIZON // var.DISCRETISE_STEP)))
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
-        counts[j], _ = np.histogram(h, bins=np.arange(0, horizon+delta, delta))
+        counts[j], _ = np.histogram(h, bins=np.arange(0, var.TIME_HORIZON + var.DISCRETISE_STEP, var.DISCRETISE_STEP))
 
     return counts
 
 
 # Calculated minimum stepsize between events in a given Hawkes process 
 
-def temp_func(jump_times, horizon):
+def temp_func(jump_times):
 
-    # If no event has been recorded, step size = time horizon
+    # If no event has been recorded, step size = svar.TIME_HORIZON
     if len(jump_times) == 0:
-        stepsize = horizon 
+        stepsize = var.TIME_HORIZON 
 
     else:
         # Added event times and boundaries
-        times = np.concatenate(([0], jump_times, [horizon]))  
+        times = np.concatenate(([0], jump_times, [var.TIME_HORIZON]))  
         # Calculated the differences between the times
         diff = np.diff(times)  
         # Removed negative differences
@@ -44,19 +45,19 @@ def temp_func(jump_times, horizon):
     return stepsize
 
 
-# Calculated temp_func(x, horizon) minimum for each element x in jump_times
+# Calculated temp_func(x, var.TIME_HORIZON) minimum for each element x in jump_times
 
-def find_stepsize(jump_times, horizon):
+def find_stepsize(jump_times):
     # temp_func computed distance between x and the next value in jump_times
     # Minimum value is the minimum jump time between two successive events 
-    return np.min([temp_func(x, horizon) for x in jump_times])
+    return np.min([temp_func(x, var.TIME_HORIZON) for x in jump_times])
 
 
-# Computed jump times of point process from the events history and the time horizon
+# Computed jump times of point process from the events history and the time var.TIME_HORIZON
 
-def jump_times(h, horizon):
+def jump_times(h):
     # Size of each interval
-    stepsize = horizon / len(h)
+    stepsize = var.TIME_HORIZON / len(h)
 
     # Retrieval of intervals indices with single jump/multiple jumps
     idx_1 = np.nonzero(h == 1)[0]

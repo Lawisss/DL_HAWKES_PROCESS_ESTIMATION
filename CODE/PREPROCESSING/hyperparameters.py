@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Generation module
+"""Hyper-parameters module
 
-File containing Training/Testing dataset generation functions (Default Parameter Values).
+File containing Hawkes process hyper-parameters generation functions (Default Parameter Values).
 
 """
 
@@ -12,9 +12,9 @@ import pandas as pd
 
 import VARIABLES.variables as var
 
-# Generated training/testing dataset
+# Generated Hawkes process hyper-parameters (alpha, beta, mu)
 
-def data_generation(filename="hawkes_params.csv"):
+def hyper_params_simulation(filename="hawkes_hyperparams.csv"):
 
     # Generated random vectors of size TRAINING_PROCESS
     epsilon = np.random.normal(var.EXPECTED_ACTIVITY, var.STD, var.TRAINING_PROCESS)
