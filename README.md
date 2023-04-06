@@ -61,7 +61,7 @@ python -m tutorial.ipynb
 
 * To run the code: [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb). This file allows you to load python files and results.
 * To get details about model architecture, training and the visualization, contacted the project author directly.
-* To leverage Aggregated Hawkes Process/MLP/VAE models results, most of them are not available for confidentiality reasons.
+* To leverage AHP/MLP/VAE models results, most of them are not available for confidentiality reasons.
 
 |                                         File                                                                       |               Extension               |               Folder                  |               Complete                |               Function                |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
