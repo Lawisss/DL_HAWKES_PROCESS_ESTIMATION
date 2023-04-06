@@ -14,7 +14,7 @@ import VARIABLES.variables as var
 
 # Generated training/testing dataset
 
-def data_generation(filepath="C:/Users/Nicolas Girard/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/RESULTS/hawkes_params.csv"):
+def data_generation(filename="hawkes_params.csv"):
 
     # Generated random vectors of size TRAINING_PROCESS
     epsilon = np.random.normal(var.EXPECTED_ACTIVITY, var.STD, var.TRAINING_PROCESS)
@@ -30,6 +30,6 @@ def data_generation(filepath="C:/Users/Nicolas Girard/Documents/VAE_HAWKES_PROCE
 
     # Created a DataFrame, name the columns, and generate csv file
     df = pd.DataFrame(params, columns=["alpha", "beta", "mu"])
-    df.to_csv(filepath, index=False)
+    df.to_csv(f"{var.FILEPATH}{filename}", index=False)
 
     return params, alpha, beta, mu
