@@ -56,7 +56,6 @@ git clone https://github.com/MoonMess/NLP_Project.git
 ```sh
 python -m visualization.ipynb
 ```
-## Usage
 
 ## Usage
 
