@@ -61,14 +61,12 @@ class MLP(nn.Module):
 
         return x # .cuda()
     
-# Model/Optimizer initialization
+# Model/Optimizer/Loss initialization
 model = MLP(var.INPUT_SIZE, var.OUTPUT_SIZE, var.HIDDEN_SIZE, var.NUM_HIDDEN_LAYERS, var.L2_REG) # .cuda()
 optimizer = optim.Adam(model.parameters(), lr=0.01)
-
-# Loss function
 criterion = nn.MSELoss()
 
-def train_model(train_loader, val_loader, model, criterion, optimizer, var):
+def train_model(train_loader, val_loader, model, criterion, optimizer):
 
     best_loss = float('inf')
     no_improve_count = 0
