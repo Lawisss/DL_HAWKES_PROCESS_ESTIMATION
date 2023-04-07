@@ -8,18 +8,27 @@ File containing Aggregated Hawkes Process functions (Hawkes Process conversion).
 """
 
 import numpy as np
+import pandas as pd
+
 import VARIABLES.variables as var
 
 # Computed the histogram of jump times for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times):
+def discretise(jump_times, filename='binned_hawkes_simulations.csv'):
+
+    # Computed bins number
+    num_bins = int(var.TIME_HORIZON // var.DISCRETISE_STEP)
 
     # Initialized an array of zeros with dimensions (number of processes, number of jumps per unit of time)
-    counts = np.zeros((len(jump_times), int(var.TIME_HORIZON // var.DISCRETISE_STEP)))
+    counts = np.zeros((len(jump_times), num_bins))
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
-        counts[j], _ = np.histogram(h, bins=np.arange(0, var.TIME_HORIZON + var.DISCRETISE_STEP, var.DISCRETISE_STEP))
+        counts[j], _ = np.histogram(h, bins=np.linspace(0, var.TIME_HORIZON, num_bins + 1))
+                                    
+    # Created a DataFrame, name the columns, and generate csv file
+    df = pd.DataFrame(np.row_stack(counts))
+    df.to_csv(f"{var.FILEPATH}{filename}", index=False)
 
     return counts
 

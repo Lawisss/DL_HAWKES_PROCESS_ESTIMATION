@@ -33,9 +33,9 @@ def hawkes_simulation(params={"mu": 0.1, "alpha": 0.5, "beta": 10.0}):
 
 def hawkes_simulations(mu, alpha, beta, filename='hawkes_simulations.csv'):
     # Initialize a filled with zeros array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((var.TRAINING_PROCESS, var.TIME_HORIZON), dtype=np.float64)
+    simulated_events_seqs = np.zeros((var.PROCESS_NUM, var.TIME_HORIZON), dtype=np.float64)
 
-    for k in range(var.TRAINING_PROCESS):
+    for k in range(var.PROCESS_NUM):
         # Simulate a Hawkes processes with the current simulation parameters
         # The results are stored in the k-th row of the simulated_events_seqs array
         _, T = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
@@ -44,7 +44,7 @@ def hawkes_simulations(mu, alpha, beta, filename='hawkes_simulations.csv'):
         simulated_events_seqs[k,:] = np.asarray(T)[:var.TIME_HORIZON]
 
     # Created a DataFrame, name the columns, and generate csv file
-    df = pd.DataFrame(simulated_events_seqs, columns=["process"])
+    df = pd.DataFrame(np.row_stack(simulated_events_seqs))
     df.to_csv(f"{var.FILEPATH}{filename}", index=False)
 
     return simulated_events_seqs
