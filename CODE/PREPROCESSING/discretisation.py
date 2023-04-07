@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 
 import VARIABLES.variables as var
+from UTILS.utils import write_csv
 
 # Computed the histogram of jump times for each process (counted number of events which occurred over each interval)
 
@@ -27,8 +28,11 @@ def discretise(jump_times, filename='binned_hawkes_simulations.csv'):
         counts[j], _ = np.histogram(h, bins=np.linspace(0, var.TIME_HORIZON, num_bins + 1))
                                     
     # Created a DataFrame, name the columns, and generate csv file
-    df = pd.DataFrame(np.row_stack(counts))
-    df.to_csv(f"{var.FILEPATH}{filename}", index=False)
+    #df = pd.DataFrame(np.row_stack(counts))
+    #df.to_csv(f"{var.FILEPATH}{filename}", index=False)
+
+    # Write the counts to a CSV file
+    write_csv(counts, filepath=f"{var.FILEPATH}{filename}")
 
     return counts
 

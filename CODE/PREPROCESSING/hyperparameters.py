@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 
 import VARIABLES.variables as var
+from UTILS.utils import write_csv
 
 # Generated Hawkes process hyper-parameters (alpha, beta, mu)
 
@@ -25,8 +26,10 @@ def hyper_params_simulation(filename="hawkes_hyperparams.csv"):
     alpha = eta
     mu = (epsilon / var.TIME_HORIZON) * (1 - eta)
 
-    # Created a DataFrame, name the columns, and generate csv file
-    df = pd.DataFrame({"alpha": alpha, "beta": beta, "mu": mu})
-    df.to_csv(f"{var.FILEPATH}{filename}", index=False)
+    # Created a list of dictionaries containing the parameters
+    params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
+
+    # Write the parameters to a CSV file 
+    write_csv(params, filepath=f"{var.FILEPATH}{filename}") 
 
     return np.array([alpha, beta, mu]).T, alpha, beta, mu

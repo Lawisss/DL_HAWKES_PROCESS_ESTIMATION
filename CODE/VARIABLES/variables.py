@@ -23,7 +23,7 @@ BASELINE = 'const'
 TIME_ITV_START = 0
 TIME_HORIZON = 100
 
-PROCESS_NUM = 100
+PROCESS_NUM = 10
 
 # Especially used in the hawkes_estimation function
 END_T = 200
