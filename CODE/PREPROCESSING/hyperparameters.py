@@ -22,9 +22,9 @@ def hyper_params_simulation(filename="hawkes_hyperparams.csv"):
     beta = np.random.uniform(var.MIN_ITV_BETA, var.MAX_ITV_BETA, var.PROCESS_NUM)
 
     # Calculated alpha and mu vectors from beta and eta vectors (alpha = eta because of library exponential formula)
-    alpha = (beta * eta) / beta 
+    alpha = eta
     mu = (epsilon / var.TIME_HORIZON) * (1 - eta)
-    
+
     # Created a DataFrame, name the columns, and generate csv file
     df = pd.DataFrame({"alpha": alpha, "beta": beta, "mu": mu})
     df.to_csv(f"{var.FILEPATH}{filename}", index=False)
