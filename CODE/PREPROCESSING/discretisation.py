@@ -8,8 +8,8 @@ File containing Aggregated Hawkes Process functions (Hawkes Process conversion).
 """
 
 import numpy as np
-import pandas as pd
 from functools import partial
+from typing import List, Dict, Any
 
 import VARIABLES.variables as var
 from UTILS.utils import write_csv
@@ -17,7 +17,7 @@ from UTILS.utils import write_csv
 
 # Computed the histogram of jump times for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times, filename='binned_hawkes_simulations.csv') -> np.ndarray:
+def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.csv') -> np.ndarray:
 
     # Computed bins number
     num_bins = int(var.TIME_HORIZON // var.DISCRETISE_STEP)
@@ -40,7 +40,7 @@ def discretise(jump_times, filename='binned_hawkes_simulations.csv') -> np.ndarr
 
 # Calculated minimum stepsize between events in a given Hawkes process 
 
-def temp_func(jump_times) -> float:
+def temp_func(jump_times: np.ndarray) -> float:
 
     # If no event has been recorded, step size = svar.TIME_HORIZON
     if len(jump_times) == 0:
@@ -61,7 +61,7 @@ def temp_func(jump_times) -> float:
 
 # Calculated temp_func(x, var.TIME_HORIZON) minimum for each element x in jump_times
 
-def find_stepsize(jump_times) -> float:
+def find_stepsize(jump_times: np.ndarray) -> float:
     # temp_func computed distance between x and the next value in jump_times
     # Minimum value is the minimum jump time between two successive events 
     return np.min(list(map(temp_func, jump_times)))
@@ -69,7 +69,7 @@ def find_stepsize(jump_times) -> float:
 
 # Computed jump times of point process from the events history and the time var.TIME_HORIZON
 
-def jump_times(h) -> np.ndarray:
+def jump_times(h: np.ndarray) -> np.ndarray:
     # Size of each interval
     stepsize = var.TIME_HORIZON / len(h)
 

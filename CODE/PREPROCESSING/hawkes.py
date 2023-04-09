@@ -9,15 +9,16 @@ File containing Hawkes Process function (simulation/estimation).
 
 import numpy as np
 import Hawkes as hk
+from mpi4py import MPI
 from functools import partial
-from typing import List, Tuple, Dict
+from typing import Tuple, TypedDict
 
 from UTILS.utils import write_csv
 import VARIABLES.variables as var
 
 # Simulated Hawkes process 
 
-def hawkes_simulation(params: dict[str, float] = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> tuple[hk.simulator, np.ndarray]:
+def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> Tuple[hk.simulator, np.ndarray]:
     # Created a Hawkes process with the given kernel, baseline and parameters
     hawkes_process = hk.simulator().set_kernel(var.KERNEL).set_baseline(var.BASELINE).set_parameter(params)
     # Simulated a Hawkes process in the given time interval
@@ -32,7 +33,7 @@ def hawkes_simulation(params: dict[str, float] = {"mu": 0.1, "alpha": 0.5, "beta
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(mu: List[float], alpha: List[float], beta: List[float], filename: str='hawkes_simulations.csv') -> np.ndarray:
+def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.csv') -> np.ndarray:
     # Initialize a filled with zeros array to store Hawkes processes (Pre-allocate memory)
     simulated_events_seqs = np.zeros((var.PROCESS_NUM, var.TIME_HORIZON), dtype=np.float64)
 
@@ -55,7 +56,7 @@ def hawkes_simulations(mu: List[float], alpha: List[float], beta: List[float], f
 
 # Estimated Hawkes process
 
-def hawkes_estimation(T: List[float], filename: str = "hawkes_estimation.csv") -> Tuple[List[float], Dict[str, float], List[float], List[float]]:
+def hawkes_estimation(T: np.ndarray, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     # Estimated Hawkes process parameters with given kernel and baseline
     hawkes_process = hk.estimator().set_kernel(var.KERNEL).set_baseline(var.BASELINE)
@@ -82,3 +83,7 @@ def hawkes_estimation(T: List[float], filename: str = "hawkes_estimation.csv") -
     # hawkes_process.plot_N_pred()
 
     return T_pred, metrics, T_transform, interval_transform
+
+
+
+

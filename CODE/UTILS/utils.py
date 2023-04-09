@@ -9,10 +9,11 @@ File containing all utils functions used in other modules (python files).
 
 import pandas as pd
 import numpy as np
+from typing import List
 
 # CSV file writing function
 
-def write_csv(data, filepath='', mode='w', encoding='utf-8'):
+def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='utf-8') -> None:
     
     try:
         if not isinstance(data, list):
@@ -37,7 +38,7 @@ def write_csv(data, filepath='', mode='w', encoding='utf-8'):
 
 # CSV file reading function
 
-def read_csv(filepath, delimiter=',', mode='r', encoding='utf-8'):
+def read_csv(filepath: str, delimiter: str=',', mode: str='r', encoding: str='utf-8') -> pd.DataFrame:
 
     try:
         with open(filepath, mode=mode, encoding=encoding) as file:
