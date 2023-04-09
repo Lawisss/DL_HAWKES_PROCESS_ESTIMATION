@@ -6,6 +6,10 @@ File containing all utils functions used in other modules (python files).
 
 """
 
+
+import pandas as pd
+import numpy as np
+
 # CSV file writing function
 
 def write_csv(data, filepath='', mode='w', encoding='utf-8'):
@@ -27,5 +31,24 @@ def write_csv(data, filepath='', mode='w', encoding='utf-8'):
         # Close file properly    
         file.close()
                     
+    except IOError as e:
+        print(f"Cannot read the file: {e}.")
+
+
+# CSV file reading function
+
+def read_csv(filepath, delimiter=',', mode='r', encoding='utf-8'):
+
+    try:
+        with open(filepath, mode=mode, encoding=encoding) as file:
+
+            # Extract headers
+            headers = next(file).strip().split(delimiter)
+
+            # Extract rows using a list comprehension
+            rows = [line.strip().split(delimiter) for line in file]
+                
+        return pd.DataFrame(rows, columns=headers, dtype=np.float64)
+    
     except IOError as e:
         print(f"Cannot read the file: {e}.")
