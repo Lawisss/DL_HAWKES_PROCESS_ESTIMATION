@@ -27,7 +27,7 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[n
     mu = (epsilon / var.TIME_HORIZON) * (1 - eta)
 
     # Created a list of dictionaries containing the parameters
-    params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
+    params = list(map(lambda a, b, m: {"alpha": a, "beta": b, "mu": m}, alpha, beta, mu)) 
 
     # Written parameters to a CSV file 
     write_csv(params, filepath=f"{var.FILEPATH}{filename}") 

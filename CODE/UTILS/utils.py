@@ -11,16 +11,18 @@ import pandas as pd
 import numpy as np
 from typing import List
 
+import VARIABLES.variables as var
+
 # CSV file writing function
 
-def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='utf-8') -> None:
+def write_csv(data: List[dict], filename: str='', mode: str='w', encoding: str='utf-8') -> None:
     
     try:
         if not isinstance(data, list):
             data = [data]
 
         # Written and field names initialisation
-        with open(filepath, mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
@@ -29,7 +31,7 @@ def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='
                 file.write(','.join(str(x) for x in row.values()))
                 file.write('\n')
         
-        # Close file properly    
+        # Closed file    
         file.close()
                     
     except IOError as e:
@@ -38,16 +40,16 @@ def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='
 
 # CSV file reading function
 
-def read_csv(filepath: str, delimiter: str=',', mode: str='r', encoding: str='utf-8') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str=',', mode: str='r', encoding: str='utf-8') -> pd.DataFrame:
 
     try:
-        with open(filepath, mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
 
-            # Extract headers
+            # Extracted headers
             headers = next(file).strip().split(delimiter)
 
-            # Extract rows using a list comprehension
-            rows = [line.strip().split(delimiter) for line in file]
+            # Extracted rows
+            rows = np.array(list(map(lambda line: line.strip().split(delimiter), file)), dtype=np.float64)
                 
         return pd.DataFrame(rows, columns=headers, dtype=np.float64)
     

@@ -18,7 +18,7 @@ from UTILS.utils import write_csv
 
 def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
-    # Initialize MPI environment
+    # Initialize MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
