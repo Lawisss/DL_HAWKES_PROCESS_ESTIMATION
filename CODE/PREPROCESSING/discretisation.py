@@ -66,7 +66,7 @@ def find_stepsize(jump_times: np.ndarray) -> float:
     return np.min(list(map(temp_func, jump_times)))
 
 
-# Computed jump times of point process from the events history and the time var.TIME_HORIZON
+# Computed point process jump times from the events history and the time var.TIME_HORIZON
 
 def jump_times(h: np.ndarray) -> np.ndarray:
     # Size of each interval

@@ -16,17 +16,18 @@ from typing import Tuple, TypedDict
 from UTILS.utils import write_csv
 import VARIABLES.variables as var
 
+
 # Parallelized simulated Hawkes process 
 
-def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> Tuple[hk.simulator, np.ndarray]:
+def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, root: int = 0) -> Tuple[hk.simulator, np.ndarray]:
 
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    # Broadcast the parameters to all processes
-    params = comm.bcast(params, root=0)
+    # Broadcast parameters to all processes
+    params = comm.bcast(params, root=root)
 
     # Divided time horizon into equal intervals for each process
     time_intervals = np.linspace(var.TIME_ITV_START, var.TIME_HORIZON, size + 1)
@@ -35,14 +36,14 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
     start_time = time_intervals[rank]
     end_time = time_intervals[rank + 1]
 
-    # Created a Hawkes process with a given kernel, baseline and parameters
+    # Created Hawkes process with kernel, baseline and parameters
     hawkes_process = hk.simulator().set_kernel(var.KERNEL).set_baseline(var.BASELINE).set_parameter(params)
 
-    # Simulated a Hawkes process in a given time interval
+    # Simulated a Hawkes process in time interval
     T = hawkes_process.simulate([start_time, end_time])
 
-    # Gathered the results from all processes
-    T_processes = comm.gather(T, root=0)
+    # Gathered results from all processes
+    T_processes = comm.gather(T, root=root)
 
     # Concatenated results
     if rank == 0:
@@ -53,7 +54,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Parallelized simulated Hawkes processes
 
-def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.csv') -> np.ndarray:
+def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root: int = 0, filename: str='hawkes_simulations.csv') -> np.ndarray:
     
     # Initialized MPI
     comm = MPI.COMM_WORLD
@@ -61,26 +62,26 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
     rank = comm.Get_rank()
 
     # Splitted process number evenly among MPI ranks
-    local_process_num = var.PROCESS_NUM // size
+    chunk_num = var.PROCESS_NUM // size
 
     # Generated simulation parameters for each local process
-    local_mu = mu[rank * local_process_num:(rank + 1) * local_process_num]
-    local_alpha = alpha[rank * local_process_num:(rank + 1) * local_process_num]
-    local_beta = beta[rank * local_process_num:(rank + 1) * local_process_num]
+    chunk_mu = mu[rank * chunk_num:(rank + 1) * chunk_num]
+    chunk_alpha = alpha[rank * chunk_num:(rank + 1) * chunk_num]
+    chunk_beta = beta[rank * chunk_num:(rank + 1) * chunk_num]
 
-    # Initialized filled with zeros array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((local_process_num, var.TIME_HORIZON), dtype=np.float64)
+    # Initialized array to store Hawkes processes (Pre-allocate memory)
+    simulated_events_seqs = np.zeros((chunk_num, var.TIME_HORIZON), dtype=np.float64)
 
-    for k in range(local_process_num):
-        # Simulated a Hawkes processes with the current simulation parameters
-        # The results are stored in the k-th row of the simulated_events_seqs array
-        _, T = hawkes_simulation(params={"mu": local_mu[k], "alpha": local_alpha[k], "beta": local_beta[k]})
+    for k in range(chunk_num):
+        # Simulated Hawkes processes with current simulation parameters
+        # The results are stored in the k-th row of the simulated_events_seqs
+        _, T = hawkes_simulation(params={"mu": chunk_mu[k], "alpha": chunk_alpha[k], "beta": chunk_beta[k]})
         
         # Converted temporary list T to array and stored results in simulated_events_seqs
         simulated_events_seqs[k,:] = np.asarray(T)[:var.TIME_HORIZON]
 
     # Gather simulated_events_seqs from all ranks to root
-    simulated_events_seqs = comm.gather(simulated_events_seqs, root=0)
+    simulated_events_seqs = comm.gather(simulated_events_seqs, root=root)
 
     if rank == 0:
         # Concatenated simulated_events_seqs
@@ -97,29 +98,29 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
 
 # Estimated Hawkes process
 
-def hawkes_estimation(T: np.ndarray, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(T: np.ndarray, root: int = 0, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    # Estimated Hawkes process parameters with a given kernel and baseline
+    # Estimated Hawkes process parameters with kernel, baseline and parameters
     hawkes_process = hk.estimator().set_kernel(var.KERNEL).set_baseline(var.BASELINE)
 
     # Broadcast parameters
-    params = comm.bcast([var.TIME_ITV_START, var.TIME_HORIZON, var.END_T, var.NUM_SEQ], root=0)
+    params = comm.bcast([var.TIME_ITV_START, var.TIME_HORIZON, var.END_T, var.NUM_SEQ], root=root)
 
     # Distributed among processes
     T_chunks = np.array_split(T, size)
-    T_chunk = comm.scatter(T_chunks, root=0)
+    T_chunk = comm.scatter(T_chunks, root=root)
 
     # Fitted process on each chunk
     hawkes_process.fit(T_chunk, params)
     T_pred_chunk = hawkes_process.predict(params[2], params[3])
 
     # Gathered all predicted chunks
-    T_pred_chunks = comm.gather(T_pred_chunk, root=0)
+    T_pred_chunks = comm.gather(T_pred_chunk, root=root)
 
     if rank == 0:
         # Concatenated predictions

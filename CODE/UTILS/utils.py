@@ -13,6 +13,7 @@ from typing import List
 
 import VARIABLES.variables as var
 
+
 # CSV file writing function
 
 def write_csv(data: List[dict], filename: str='', mode: str='w', encoding: str='utf-8') -> None:
