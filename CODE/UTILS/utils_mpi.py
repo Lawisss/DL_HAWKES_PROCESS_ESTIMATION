@@ -17,6 +17,7 @@ import VARIABLES.variables as var
 
 def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='utf-8') -> None:
 
+    # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
@@ -55,7 +56,7 @@ def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='
 
 def read_csv(filename: str, delimiter: str=',', mode: str='r', encoding: str='utf-8') -> pd.DataFrame:
 
-    # Initialize MPI
+    # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
@@ -80,9 +81,9 @@ def read_csv(filename: str, delimiter: str=',', mode: str='r', encoding: str='ut
         # Splitted chunk into lines and extract data
         lines = chunk.split('\n')
         headers = lines[0].strip().split(delimiter)
-        rows = np.array([line.strip().split(delimiter) for line in lines[1:] if line.strip()], dtype=np.float64)
+        rows = np.array(list(map(lambda line: line.strip().split(delimiter), lines[1:])), dtype=np.float64)
 
-        # Gathered data from all processes and concatenate into an array
+        # Gathered and concatenated from all processes
         rows = comm.allgather(rows)
         rows = np.concatenate(rows)
 

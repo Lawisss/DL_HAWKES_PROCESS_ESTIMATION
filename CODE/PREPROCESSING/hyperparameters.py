@@ -22,7 +22,7 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[n
     eta = np.random.uniform(var.MIN_ITV_ETA, var.MAX_ITV_ETA, var.PROCESS_NUM)
     beta = np.random.uniform(var.MIN_ITV_BETA, var.MAX_ITV_BETA, var.PROCESS_NUM)
 
-    # Calculated alpha and mu vectors from beta and eta vectors (alpha = eta because of library exponential formula)
+    # Calculated alpha / mu vectors from beta / eta vectors (alpha = eta because of library exponential formula)
     alpha = eta
     mu = (epsilon / var.TIME_HORIZON) * (1 - eta)
 

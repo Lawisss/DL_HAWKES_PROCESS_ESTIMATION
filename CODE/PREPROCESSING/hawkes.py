@@ -9,7 +9,6 @@ File containing Hawkes Process function (simulation/estimation).
 
 import numpy as np
 import Hawkes as hk
-from mpi4py import MPI
 from functools import partial
 from typing import Tuple, TypedDict
 
@@ -34,15 +33,15 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 # Simulated several Hawkes processes
 
 def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.csv') -> np.ndarray:
-    # Initialize a filled with zeros array to store Hawkes processes (Pre-allocate memory)
+    # Initialized filled with zeros array to store Hawkes processes (Pre-allocate memory)
     simulated_events_seqs = np.zeros((var.PROCESS_NUM, var.TIME_HORIZON), dtype=np.float64)
 
     for k in range(var.PROCESS_NUM):
-        # Simulate a Hawkes processes with the current simulation parameters
+        # Simulated a Hawkes processes with the current simulation parameters
         # The results are stored in the k-th row of the simulated_events_seqs array
         _, T = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
         
-        # Convert temporary list T to an array and store the results in simulated_events_seqs
+        # Converted temporary list T to array and stored results in simulated_events_seqs
         simulated_events_seqs[k,:] = np.asarray(T)[:var.TIME_HORIZON]
     
     # Created list of dictionaries representing the simulated event sequences
@@ -62,7 +61,7 @@ def hawkes_estimation(T: np.ndarray, filename: str = "hawkes_estimation.csv") ->
     hawkes_process = hk.estimator().set_kernel(var.KERNEL).set_baseline(var.BASELINE)
     hawkes_process.fit(T, [var.TIME_ITV_START, var.TIME_HORIZON])
     
-    # Computed performance metrics for the estimated Hawkes process
+    # Computed performance metrics for estimated Hawkes process
     metrics = {'Event(s)': len(T),
                'Parameters': {k: round(v, 3) for k, v in hawkes_process.para.items()},
                'Branching Ratio': round(hawkes_process.br, 3),

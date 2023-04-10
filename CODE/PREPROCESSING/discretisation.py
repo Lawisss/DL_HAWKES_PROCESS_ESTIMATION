@@ -3,13 +3,12 @@
 
 """Discretisation module
 
-File containing Aggregated Hawkes Process functions (Hawkes Process conversion).
+File containing Aggregated Hawkes Process functions (Hawkes Process discrete conversion).
 
 """
 
 import numpy as np
 from functools import partial
-from typing import List, Dict, Any
 
 import VARIABLES.variables as var
 from UTILS.utils import write_csv

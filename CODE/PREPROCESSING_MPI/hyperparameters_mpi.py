@@ -18,12 +18,12 @@ from UTILS.utils import write_csv
 
 def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
-    # Initialize MPI
+    # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    # Generate random vectors on the root process
+    # Generated random vectors on root process
     if rank == 0:
         epsilon = np.random.normal(var.EXPECTED_ACTIVITY, var.STD, var.PROCESS_NUM)
         eta = np.random.uniform(var.MIN_ITV_ETA, var.MAX_ITV_ETA, var.PROCESS_NUM)
@@ -37,24 +37,24 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[n
     eta = comm.bcast(eta, root=0)
     beta = comm.bcast(beta, root=0)
 
-    # Divide indices of the vectors among processes
+    # Divided vectors indices among processes
     indices = np.array_split(range(var.PROCESS_NUM), size)
 
-    # Scatter indices to all processes
+    # Scattered indices to all processes
     indices = comm.scatter(indices, root=0)
 
-    # Calculate alpha and mu vectors in parallel
+    # Calculated alpha / mu vectors in parallel
     alpha = np.zeros(var.PROCESS_NUM, dtype=np.float64)
     mu = np.zeros(var.PROCESS_NUM, dtype=np.float64)
 
     alpha[indices] = eta[indices]
     mu[indices] = (epsilon[indices] / var.TIME_HORIZON) * (1 - eta[indices])
     
-    # Reduce alpha and mu vectors from all processes to the root process
+    # Reduced alpha / mu vectors from all processes to root process
     comm.Reduce(alpha, None, op=MPI.SUM, root=0)
     comm.Reduce(mu, None, op=MPI.SUM, root=0)
 
-    # Write parameters to a CSV file on the root process
+    # Written parameters to a CSV file on the root process
     if rank == 0:
         params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
         write_csv(params, filepath=f"{var.FILEPATH}{filename}")
