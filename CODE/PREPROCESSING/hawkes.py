@@ -33,7 +33,8 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 # Simulated several Hawkes processes
 
 def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.csv') -> np.ndarray:
-    # Initialized filled with zeros array to store Hawkes processes (Pre-allocate memory)
+    
+    # Initialized an array to store Hawkes processes (Pre-allocate memory)
     simulated_events_seqs = np.zeros((var.PROCESS_NUM, var.TIME_HORIZON), dtype=np.float64)
 
     for k in range(var.PROCESS_NUM):
@@ -44,11 +45,11 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
         # Converted temporary list T to array and stored results in simulated_events_seqs
         simulated_events_seqs[k,:] = np.asarray(T)[:var.TIME_HORIZON]
     
-    # Created list of dictionaries representing the simulated event sequences
+    # Created dictionaries list representing simulated event sequences
     seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(var.TIME_HORIZON)), simulated_events_seqs))
 
     # Written metrics to a CSV file
-    write_csv(seqs_list, filepath=f"{var.FILEPATH}{filename}")
+    write_csv(seqs_list, filename=filename)
 
     return simulated_events_seqs
 
@@ -57,7 +58,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
 
 def hawkes_estimation(T: np.ndarray, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
-    # Estimated Hawkes process parameters with given kernel and baseline
+    # Estimated Hawkes process parameters with the given kernel, baseline and parameters
     hawkes_process = hk.estimator().set_kernel(var.KERNEL).set_baseline(var.BASELINE)
     hawkes_process.fit(T, [var.TIME_ITV_START, var.TIME_HORIZON])
     
@@ -69,7 +70,7 @@ def hawkes_estimation(T: np.ndarray, filename: str = "hawkes_estimation.csv") ->
                'AIC': round(hawkes_process.AIC, 3)}
     
     # Written metrics to a CSV file
-    write_csv(metrics, f"{var.FILEPATH}{filename}")
+    write_csv(metrics, filename=filename)
 
     # Transformed times so that the first observation is at 0 and the last at 1
     [T_transform, interval_transform] = hawkes_process.t_trans() 

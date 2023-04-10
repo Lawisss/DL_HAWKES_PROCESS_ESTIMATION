@@ -22,7 +22,7 @@ def write_csv(data: List[dict], filename: str='', mode: str='w', encoding: str='
             data = [data]
 
         # Written and field names initialisation
-        with open(filepath=f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
+        with open(f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
@@ -43,7 +43,7 @@ def write_csv(data: List[dict], filename: str='', mode: str='w', encoding: str='
 def read_csv(filename: str, delimiter: str=',', mode: str='r', encoding: str='utf-8') -> pd.DataFrame:
 
     try:
-        with open(filepath=f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
+        with open(f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
 
             # Extracted headers
             headers = next(file).strip().split(delimiter)

@@ -22,15 +22,15 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[n
     eta = np.random.uniform(var.MIN_ITV_ETA, var.MAX_ITV_ETA, var.PROCESS_NUM)
     beta = np.random.uniform(var.MIN_ITV_BETA, var.MAX_ITV_BETA, var.PROCESS_NUM)
 
-    # Calculated alpha / mu vectors from beta / eta vectors (alpha = eta because of library exponential formula)
+    # Calculated alpha/mu vectors from beta/eta vectors (alpha = eta because of library exponential formula)
     alpha = eta
     mu = (epsilon / var.TIME_HORIZON) * (1 - eta)
 
-    # Created a list of dictionaries containing the parameters
+    # Created dictionaries list containing the parameters
     params = list(map(lambda a, b, m: {"alpha": a, "beta": b, "mu": m}, alpha, beta, mu)) 
 
     # Written parameters to a CSV file 
-    write_csv(params, filepath=f"{var.FILEPATH}{filename}") 
+    write_csv(params, filename=filename) 
 
     return np.array([alpha, beta, mu], dtype=np.float64).T, alpha, beta, mu
 

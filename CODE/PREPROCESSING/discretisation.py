@@ -14,25 +14,25 @@ import VARIABLES.variables as var
 from UTILS.utils import write_csv
 
 
-# Computed the histogram of jump times for each process (counted number of events which occurred over each interval)
+# Jump times histogram for each process (counted number of events which occurred over each interval)
 
 def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.csv') -> np.ndarray:
 
     # Computed bins number
     num_bins = int(var.TIME_HORIZON // var.DISCRETISE_STEP)
 
-    # Initialized an array of zeros with dimensions (number of processes, number of jumps per unit of time)
+    # Initialized an array with dimensions (number of processes, number of jumps per unit of time)
     counts = np.zeros((len(jump_times), num_bins), dtype=np.float64)
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
         counts[j], _ = np.histogram(h, bins=np.linspace(0, var.TIME_HORIZON, num_bins + 1))
-                                    
-    # Created ist of dictionaries representing the binned simulated event sequences
+
+    # Created dictionaries list representing binned simulated event sequences
     counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(var.TIME_HORIZON)), counts))
 
-    # Write the counts to a CSV file
-    write_csv(counts_list, filepath=f"{var.FILEPATH}{filename}")
+    # Written counts to CSV file
+    write_csv(counts_list, filename=filename)
 
     return counts
 
@@ -52,7 +52,7 @@ def temp_func(jump_times: np.ndarray) -> float:
         diff = np.diff(times)  
         # Removed negative differences
         diff = diff[diff > 0]  
-        # Taken the smallest positive difference and round to 1 decimal
+        # Taken the smallest positive difference
         stepsize = partial(np.around, decimals=1)(np.min(diff))    
 
     return stepsize
@@ -76,7 +76,7 @@ def jump_times(h: np.ndarray) -> np.ndarray:
     idx_1 = np.nonzero(h == 1)[0]
     idx_2 = np.nonzero(h > 1)[0]
 
-    # Initialization of the jump times list
+    # Initialized jump times list
     times = np.zeros(len(idx_2) + len(idx_1), dtype=np.float64)
 
     # Variable to track the index of the times list

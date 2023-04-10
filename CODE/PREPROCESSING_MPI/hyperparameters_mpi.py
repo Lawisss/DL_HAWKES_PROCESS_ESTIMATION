@@ -29,9 +29,6 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[n
         eta = np.random.uniform(var.MIN_ITV_ETA, var.MAX_ITV_ETA, var.PROCESS_NUM)
         beta = np.random.uniform(var.MIN_ITV_BETA, var.MAX_ITV_BETA, var.PROCESS_NUM)
 
-    else:
-        epsilon, eta, beta = None, None, None
-
     # Broadcast random vectors to all processes
     epsilon = comm.bcast(epsilon, root=0)
     eta = comm.bcast(eta, root=0)
@@ -60,6 +57,3 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[n
         write_csv(params, filepath=f"{var.FILEPATH}{filename}")
 
         return np.array([alpha, beta, mu], dtype=np.float64).T, alpha, beta, mu
-    
-    else:
-        return None, None, None, None

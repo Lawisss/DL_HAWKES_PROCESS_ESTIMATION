@@ -139,6 +139,3 @@ def hawkes_estimation(T: np.ndarray, filename: str = "hawkes_estimation.csv") ->
         [T_transform, interval_transform] = hawkes_process.t_trans() 
         
         return T_pred, metrics, T_transform, interval_transform
-    
-    else:
-        return None
