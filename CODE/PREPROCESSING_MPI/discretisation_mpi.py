@@ -46,7 +46,7 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
         counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(var.TIME_HORIZON)), counts))
 
         # Written counts to CSV file
-        write_csv(counts_list, filepath=f"{var.FILEPATH}{filename}")
+        write_csv(counts_list, filename=filename)
 
     return counts
 

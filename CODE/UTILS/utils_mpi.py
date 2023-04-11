@@ -15,7 +15,7 @@ import VARIABLES.variables as var
 
 # Parallelized CSV file writing function
 
-def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='utf-8') -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
 
     # Initialized MPI
     comm = MPI.COMM_WORLD
@@ -31,7 +31,7 @@ def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='
             data_chunk = [data_chunk]
 
         # Written and field names initialisation (only rank 0 writes headers)
-        with open(filepath, mode=mode, encoding=encoding) as file:
+        with open(f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
             if rank == 0:
                 file.write(','.join(data[0].keys()))
                 file.write('\n')
@@ -54,7 +54,7 @@ def write_csv(data: List[dict], filepath: str='', mode: str='w', encoding: str='
 
 # Parallelized CSV file reading function
 
-def read_csv(filename: str, delimiter: str=',', mode: str='r', encoding: str='utf-8') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
 
     # Initialized MPI
     comm = MPI.COMM_WORLD

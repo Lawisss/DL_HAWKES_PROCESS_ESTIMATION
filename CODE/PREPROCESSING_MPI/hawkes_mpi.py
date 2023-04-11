@@ -91,7 +91,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
         seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(var.TIME_HORIZON)), simulated_events_seqs))
 
         # Written metrics to a CSV file
-        write_csv(seqs_list, filepath=f"{var.FILEPATH}{filename}")
+        write_csv(seqs_list, filename=filename)
 
     return simulated_events_seqs
 
@@ -134,7 +134,7 @@ def hawkes_estimation(T: np.ndarray, root: int = 0, filename: str = "hawkes_esti
                    'AIC': round(hawkes_process.AIC, 3)}
         
         # Written metrics to a CSV file
-        write_csv(metrics, f"{var.FILEPATH}{filename}")
+        write_csv(metrics, filename=filename)
 
         # Transformed times so that the first observation is at 0 and the last at 1
         [T_transform, interval_transform] = hawkes_process.t_trans() 

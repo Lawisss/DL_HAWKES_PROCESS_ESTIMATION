@@ -28,27 +28,33 @@ train_size = len(X) - val_size - test_size
 train_X, val_X, test_X = torch.tensor(X[:train_size], dtype=torch.float32), torch.tensor(X[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(X[train_size+val_size:], dtype=torch.float32)
 train_Y, val_Y, test_Y = torch.tensor(Y[:train_size], dtype=torch.float32), torch.tensor(Y[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(Y[train_size+val_size:], dtype=torch.float32)
 
-# Creation of datasets
+# Moved tensors to GPU
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+train_X, val_X, test_X = train_X.to(device), val_X.to(device), test_X.to(device)
+train_Y, val_Y, test_Y = train_Y.to(device), val_Y.to(device), test_Y.to(device)
+
+# Datasets creation 
 train_dataset = TensorDataset(train_X, train_Y)
 val_dataset = TensorDataset(val_X, val_Y)
 test_dataset = TensorDataset(test_X, test_Y)
 
-# Creation of data loaders
-train_loader = DataLoader(train_dataset, batch_size=var.BATCH_SIZE, shuffle=True) # num_workers=4, pin_memory=True
-val_loader = DataLoader(val_dataset, batch_size=var.BATCH_SIZE) # num_workers=4, pin_memory=True
-test_loader = DataLoader(test_dataset, batch_size=var.BATCH_SIZE) # num_workers=4, pin_memory=True
+# Data Loaders creation (speed up loading process with drop_last, num_workers, pin_memory)
+train_loader = DataLoader(train_dataset, batch_size=var.BATCH_SIZE, shuffle=True, drop_last=True, num_workers=4, pin_memory=True)
+val_loader = DataLoader(val_dataset, batch_size=var.BATCH_SIZE, drop_last=True, num_workers=4, pin_memory=True) 
+test_loader = DataLoader(test_dataset, batch_size=var.BATCH_SIZE, drop_last=True, num_workers=4, pin_memory=True) 
 
-# MLP Creation
+# MLP creation
 class MLP(nn.Module):
     def __init__(self, input_size, output_size, hidden_size, num_hidden_layers, l2_reg):
         super().__init__()
 
-        self.layers = nn.ModuleList()
-        self.layers.append(nn.Linear(input_size, hidden_size))
+        # Parameters initialization
 
-        for _ in range(num_hidden_layers - 1):
-            self.layers.append(nn.Linear(hidden_size, hidden_size))
-
+        # Created linear layers (first layer = input_size neurons / hidden layers = hidden_size neurons) 
+        # * operator unpacked list comprehension into individual layers, which are then added to nn.ModuleList
+        self.layers = nn.ModuleList([nn.Linear(input_size, hidden_size), 
+                                     *(nn.Linear(hidden_size, hidden_size) for _ in range(num_hidden_layers - 1))])
+        
         self.output_layer = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()
         self.l2_reg = l2_reg
@@ -59,19 +65,19 @@ class MLP(nn.Module):
             x = self.relu(layer(x))
         x = self.output_layer(x)
 
-        return x # .cuda()
+        return x
     
 # Model/Optimizer/Loss initialization
-model = MLP(var.INPUT_SIZE, var.OUTPUT_SIZE, var.HIDDEN_SIZE, var.NUM_HIDDEN_LAYERS, var.L2_REG) # .cuda()
+model = MLP(var.INPUT_SIZE, var.OUTPUT_SIZE, var.HIDDEN_SIZE, var.NUM_HIDDEN_LAYERS, var.L2_REG).to(device)
 optimizer = optim.Adam(model.parameters(), lr=0.01)
-criterion = nn.MSELoss()
+criterion = nn.MSELoss().to(device)
+
+# Training fonction
 
 def train_model(train_loader, val_loader, model, criterion, optimizer):
 
     best_loss = float('inf')
     no_improve_count = 0
-    train_size = len(train_loader.dataset)
-    val_size = len(val_loader.dataset)
 
     # Training loop
     for _ in range(var.MAX_EPOCHS):
@@ -82,30 +88,33 @@ def train_model(train_loader, val_loader, model, criterion, optimizer):
         for x, y in train_loader:
 
             optimizer.zero_grad()
-            output = model(x) # .cuda()
-            loss = criterion(output, y) # .cuda()
+            output = model(x)
+            loss = criterion(output, y)
             l2_loss = sum(w.norm(2) for w in model.parameters())
             loss += var.L2_REG * l2_loss
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * x.shape[0]
 
-        train_loss /= train_size
+        # train_loss divided by train_size
+        train_loss /= len(train_loader.dataset)
 
         val_loss = 0
         model.eval()
 
+        # Deactivated gradient calculations to speed up evaluation
         with torch.no_grad():
             for x, y in val_loader:
 
-                output = model(x) # .cuda()
-                loss = criterion(output, y) # .cuda()
+                output = model(x)
+                loss = criterion(output, y)
                 val_loss += loss.item() * x.shape[0]
 
-            val_loss /= val_size
+            # val_loss divided by val_size
+            val_loss /= len(val_loader.dataset)
 
-        # Checked whether early stopping should be applied
-        # Save model if validation loss has decreased
+        # Checked early stopping application
+        # Save model if val_loss has decreased
         if val_loss < best_loss:
             torch.save(model.state_dict(), 'best_model.pt')
             best_loss = val_loss
@@ -124,7 +133,7 @@ def train_model(train_loader, val_loader, model, criterion, optimizer):
     # Evaluated model
     model.eval()
 
-    # Computed estimated parameters for the validation set
+    # Computed estimated parameters for validation set
     with torch.no_grad():
         y_val_pred = model(val_X)
         val_eta = y_val_pred[:, 0].mean().item()

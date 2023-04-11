@@ -16,7 +16,7 @@ import VARIABLES.variables as var
 
 # CSV file writing function
 
-def write_csv(data: List[dict], filename: str='', mode: str='w', encoding: str='utf-8') -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
     
     try:
         if not isinstance(data, list):
@@ -41,7 +41,7 @@ def write_csv(data: List[dict], filename: str='', mode: str='w', encoding: str='
 
 # CSV file reading function
 
-def read_csv(filename: str, delimiter: str=',', mode: str='r', encoding: str='utf-8') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
 
     try:
         with open(f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
