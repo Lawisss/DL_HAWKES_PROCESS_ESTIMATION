@@ -74,31 +74,36 @@ criterion = nn.MSELoss().to(device)
 
 # Training fonction
 
-def train_model(train_loader, val_loader, model, criterion, optimizer):
+def train_model(train_loader, val_loader, model, criterion, optimizer, filename="best_model.pt"):
 
     best_loss = float('inf')
     no_improve_count = 0
+    train_size = len(train_loader.dataset)
+    val_size = len(val_loader.dataset)
 
     # Training loop
-    for _ in range(var.MAX_EPOCHS):
+    for epoch in range(var.MAX_EPOCHS):
 
+        # Activated train mode 
         train_loss = 0
         model.train()
 
         for x, y in train_loader:
 
+            # Forward pass (Autograd)
             optimizer.zero_grad()
             output = model(x)
             loss = criterion(output, y)
-            l2_loss = sum(w.norm(2) for w in model.parameters())
-            loss += var.L2_REG * l2_loss
+            loss += var.L2_REG * sum(w.norm(2) for w in model.parameters())
+
+            # Backward pass (Autograd)
             loss.backward()
             optimizer.step()
-            train_loss += loss.item() * x.shape[0]
+            train_loss += loss.detach().item() * x.size(0)
 
-        # train_loss divided by train_size
-        train_loss /= len(train_loader.dataset)
+        train_loss /= train_size
 
+        # Activated validation mode 
         val_loss = 0
         model.eval()
 
@@ -108,15 +113,14 @@ def train_model(train_loader, val_loader, model, criterion, optimizer):
 
                 output = model(x)
                 loss = criterion(output, y)
-                val_loss += loss.item() * x.shape[0]
+                val_loss += loss.item() * x.size(0)
 
-            # val_loss divided by val_size
-            val_loss /= len(val_loader.dataset)
+            val_loss /= val_size
 
-        # Checked early stopping application
+        # Checked early stopping
         # Save model if val_loss has decreased
         if val_loss < best_loss:
-            torch.save(model.state_dict(), 'best_model.pt')
+            torch.save(model.state_dict(), f"{var.FILEPATH}{filename}")
             best_loss = val_loss
             no_improve_count = 0
         else:
@@ -126,12 +130,12 @@ def train_model(train_loader, val_loader, model, criterion, optimizer):
         if no_improve_count >= var.EARLY_STOP_PATIENCE:
             print(f"Early stopping, no val_loss improvement for {var.EARLY_STOP_PATIENCE} epochs")
             break
+        
+        # Training progress
+        print(f"Epoch {epoch + 1}/{var.MAX_EPOCHS} - train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}")
 
     # Loaded best model
-    model.load_state_dict(torch.load('best_model.pt'))
-
-    # Evaluated model
-    model.eval()
+    model.load_state_dict(torch.load(f"{var.FILEPATH}{filename}"))
 
     # Computed estimated parameters for validation set
     with torch.no_grad():
