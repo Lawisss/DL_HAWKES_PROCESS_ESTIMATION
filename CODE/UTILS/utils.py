@@ -50,9 +50,9 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
             headers = next(file).strip().split(delimiter)
 
             # Extracted rows
-            rows = np.array(list(map(lambda line: line.strip().split(delimiter), file)), dtype=np.float64)
+            rows = np.array(list(map(lambda line: line.strip().split(delimiter), file)), dtype=np.float32)
                 
-        return pd.DataFrame(rows, columns=headers, dtype=np.float64)
+        return pd.DataFrame(rows, columns=headers, dtype=np.float32)
     
     except IOError as e:
         print(f"Cannot read the file: {e}.")

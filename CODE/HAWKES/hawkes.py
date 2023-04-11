@@ -35,7 +35,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.csv') -> np.ndarray:
     
     # Initialized an array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((var.PROCESS_NUM, var.TIME_HORIZON), dtype=np.float64)
+    simulated_events_seqs = np.zeros((var.PROCESS_NUM, var.TIME_HORIZON), dtype=np.float32)
 
     for k in range(var.PROCESS_NUM):
         # Simulated a Hawkes processes with the current simulation parameters

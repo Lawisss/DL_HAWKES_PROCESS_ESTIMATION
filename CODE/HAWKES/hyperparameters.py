@@ -32,6 +32,6 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[n
     # Written parameters to a CSV file 
     write_csv(params, filename=filename) 
 
-    return np.array([alpha, beta, mu], dtype=np.float64).T, alpha, beta, mu
+    return np.array([alpha, beta, mu], dtype=np.float32).T, alpha, beta, mu
 
 

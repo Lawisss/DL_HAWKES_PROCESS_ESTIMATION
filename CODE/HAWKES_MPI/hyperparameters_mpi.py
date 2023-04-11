@@ -41,19 +41,19 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.c
     indices = comm.scatter(indices, root=root)
 
     # Calculated alpha/mu vectors in parallel
-    alpha = np.zeros(var.PROCESS_NUM, dtype=np.float64)
-    mu = np.zeros(var.PROCESS_NUM, dtype=np.float64)
+    alpha = np.zeros(var.PROCESS_NUM, dtype=np.float32)
+    mu = np.zeros(var.PROCESS_NUM, dtype=np.float32)
 
     alpha[indices] = eta[indices]
     mu[indices] = (epsilon[indices] / var.TIME_HORIZON) * (1 - eta[indices])
     
     # Reduced alpha/mu vectors from all processes to root process
-    comm.Reduce(alpha, np.zeros(var.PROCESS_NUM, dtype=np.float64), op=MPI.SUM, root=root)
-    comm.Reduce(mu, np.zeros(var.PROCESS_NUM, dtype=np.float64), op=MPI.SUM, root=root)
+    comm.Reduce(alpha, np.zeros(var.PROCESS_NUM, dtype=np.float32), op=MPI.SUM, root=root)
+    comm.Reduce(mu, np.zeros(var.PROCESS_NUM, dtype=np.float32), op=MPI.SUM, root=root)
 
     # Written CSV file on the root process
     if rank == 0:
         params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
         write_csv(params, filename=filename)
 
-        return np.array([alpha, beta, mu], dtype=np.float64).T, alpha, beta, mu
+        return np.array([alpha, beta, mu], dtype=np.float32).T, alpha, beta, mu

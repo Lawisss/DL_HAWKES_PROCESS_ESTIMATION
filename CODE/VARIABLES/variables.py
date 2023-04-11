@@ -6,6 +6,8 @@ File containing all project variables.
 
 """
 
+import torch
+
 # Hawkes process hyper-parameters generation parameters (hyperparameters.py)
 MIN_ITV_BETA = 1 
 MAX_ITV_BETA = 3
@@ -44,6 +46,9 @@ EARLY_STOP_PATIENCE = 25 # Number of epochs without improvement before triggerin
 EARLY_STOP_DELTA = 0.01 # Minimum reduction in validation loss to consider an improvement
 VAL_RATIO = 0.25 # Fraction of data used for validation
 TEST_RATIO = 0.125 # Fraction of data used for testing
+
+# Device parameter (dataset.py, mlp.py)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Global filepath to store different results from different modules (hawkes.py, hyperparameters.py)
 FILEPATH = "C:/Users/Nicolas Girard/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/RESULTS/"

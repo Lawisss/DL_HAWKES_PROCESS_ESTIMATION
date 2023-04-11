@@ -81,7 +81,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         # Splitted chunk into lines and extract data
         lines = chunk.split('\n')
         headers = lines[0].strip().split(delimiter)
-        rows = np.array(list(map(lambda line: line.strip().split(delimiter), lines[1:])), dtype=np.float64)
+        rows = np.array(list(map(lambda line: line.strip().split(delimiter), lines[1:])), dtype=np.float32)
 
         # Gathered and concatenated from all processes
         rows = comm.allgather(rows)

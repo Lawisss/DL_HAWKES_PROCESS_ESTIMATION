@@ -70,7 +70,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
     chunk_beta = beta[rank * chunk_num:(rank + 1) * chunk_num]
 
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((chunk_num, var.TIME_HORIZON), dtype=np.float64)
+    simulated_events_seqs = np.zeros((chunk_num, var.TIME_HORIZON), dtype=np.float32)
 
     for k in range(chunk_num):
         # Simulated Hawkes processes with current simulation parameters

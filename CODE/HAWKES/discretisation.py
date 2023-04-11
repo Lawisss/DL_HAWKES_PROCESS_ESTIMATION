@@ -22,7 +22,7 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
     num_bins = int(var.TIME_HORIZON // var.DISCRETISE_STEP)
 
     # Initialized an array with dimensions (number of processes, number of jumps per unit of time)
-    counts = np.zeros((len(jump_times), num_bins), dtype=np.float64)
+    counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
@@ -77,7 +77,7 @@ def jump_times(h: np.ndarray) -> np.ndarray:
     idx_2 = np.nonzero(h > 1)[0]
 
     # Initialized jump times list
-    times = np.zeros(len(idx_2) + len(idx_1), dtype=np.float64)
+    times = np.zeros(len(idx_2) + len(idx_1), dtype=np.float32)
 
     # Variable to track the index of the times list
     k = 0

@@ -29,7 +29,7 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 
     # Initialized array with dimensions (number of processes, number of jumps per unit of time)
     if rank == 0:
-        counts = np.zeros((len(jump_times), num_bins), dtype=np.float64)
+        counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
 
     # Pre-allocated memory and scattered data to all processes
     jumps_chunk = np.zeros(len(jump_times) // size, dtype=jump_times.dtype)
@@ -83,14 +83,14 @@ def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
     size = comm.Get_size()
 
     # Scattered data across processes
-    chunk = np.zeros(len(jump_times) // size, dtype=np.float64)
+    chunk = np.zeros(len(jump_times) // size, dtype=np.float32)
     comm.Scatter(jump_times, chunk, root=root)
 
     # Computed chunk minimum value
     chunk_min = np.min(list(map(temp_func, chunk)))
 
     # Reduced chunk minimum values to global minimum value
-    global_min = np.zeros(1, dtype=np.float64)
+    global_min = np.zeros(1, dtype=np.float32)
     comm.Reduce(chunk_min, global_min, op=MPI.MIN, root=root)
 
     # Broadcast global minimum value to all processes
@@ -119,7 +119,7 @@ def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
     chunks = np.array_split(idx_2, size)
 
     # Initialized jump times list
-    times_chunk = np.zeros(len(idx_2) // size + len(idx_1), dtype=np.float64)
+    times_chunk = np.zeros(len(idx_2) // size + len(idx_1), dtype=np.float32)
 
     # Intervals with multiple jumps
     if len(idx_2) > 0:

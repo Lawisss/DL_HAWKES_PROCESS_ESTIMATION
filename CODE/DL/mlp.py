@@ -15,33 +15,6 @@ import numpy as np
 
 import VARIABLES.variables as var
 
-# Input data
-X = np.random.randn(var.INPUT_SIZE, 1).astype(np.float32)
-Y = np.random.randn(var.INPUT_SIZE, var.OUTPUT_SIZE).astype(np.float32)
-
-# Train/Val/Test split
-
-val_size = int(len(X) * var.VAL_RATIO)
-test_size = int(len(X) * var.TEST_RATIO)
-train_size = len(X) - val_size - test_size
-
-train_X, val_X, test_X = torch.tensor(X[:train_size], dtype=torch.float32), torch.tensor(X[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(X[train_size+val_size:], dtype=torch.float32)
-train_Y, val_Y, test_Y = torch.tensor(Y[:train_size], dtype=torch.float32), torch.tensor(Y[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(Y[train_size+val_size:], dtype=torch.float32)
-
-# Moved tensors to GPU
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-train_X, val_X, test_X = train_X.to(device), val_X.to(device), test_X.to(device)
-train_Y, val_Y, test_Y = train_Y.to(device), val_Y.to(device), test_Y.to(device)
-
-# Datasets creation 
-train_dataset = TensorDataset(train_X, train_Y)
-val_dataset = TensorDataset(val_X, val_Y)
-test_dataset = TensorDataset(test_X, test_Y)
-
-# Data Loaders creation (speed up loading process with drop_last, num_workers, pin_memory)
-train_loader = DataLoader(train_dataset, batch_size=var.BATCH_SIZE, shuffle=True, drop_last=True, num_workers=4, pin_memory=True)
-val_loader = DataLoader(val_dataset, batch_size=var.BATCH_SIZE, drop_last=True, num_workers=4, pin_memory=True) 
-test_loader = DataLoader(test_dataset, batch_size=var.BATCH_SIZE, drop_last=True, num_workers=4, pin_memory=True) 
 
 # MLP creation
 class MLP(nn.Module):
@@ -68,9 +41,9 @@ class MLP(nn.Module):
         return x
     
 # Model/Optimizer/Loss initialization
-model = MLP(var.INPUT_SIZE, var.OUTPUT_SIZE, var.HIDDEN_SIZE, var.NUM_HIDDEN_LAYERS, var.L2_REG).to(device)
+model = MLP(var.INPUT_SIZE, var.OUTPUT_SIZE, var.HIDDEN_SIZE, var.NUM_HIDDEN_LAYERS, var.L2_REG).to(var.DEVICE)
 optimizer = optim.Adam(model.parameters(), lr=0.01)
-criterion = nn.MSELoss().to(device)
+criterion = nn.MSELoss().to(var.DEVICE)
 
 # Training fonction
 
@@ -94,7 +67,7 @@ def train_model(train_loader, val_loader, model, criterion, optimizer, filename=
             optimizer.zero_grad()
             output = model(x)
             loss = criterion(output, y)
-            loss += var.L2_REG * sum(w.norm(2) for w in model.parameters())
+            loss += var.L2_REG * torch.sum(torch.stack([torch.norm(w, 2) for w in model.parameters()]))
 
             # Backward pass (Autograd)
             loss.backward()
@@ -140,8 +113,8 @@ def train_model(train_loader, val_loader, model, criterion, optimizer, filename=
     # Computed estimated parameters for validation set
     with torch.no_grad():
         y_val_pred = model(val_X)
-        val_eta = y_val_pred[:, 0].mean().item()
-        val_mu = y_val_pred[:, 1].mean().item()
+        val_eta = torch.mean(y_val_pred[:, 0]).item()
+        val_mu = torch.mean(y_val_pred[:, 1]).item()
         print(f"Validation set - Estimated branching ratio (η): {val_eta:.4f}, Estimated baseline intensity (µ): {val_mu:.4f}")
 
     return model
