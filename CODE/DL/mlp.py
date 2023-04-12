@@ -8,7 +8,9 @@ File containing MLP Aggregated/Binned Hawkes Process estimation.
 """
 
 import torch
+import numpy as np
 import torch.nn as nn
+from tqdm import tqdm
 import torch.optim as optim
 from torch.linalg import norm
 from typing import Tuple, Union
@@ -138,25 +140,26 @@ def predict(val_X, model, dtype=torch.float32):
 
 def train_model(train_loader, val_loader, val_X, model, criterion, optimizer, filename="best_model.pt"):
 
-    train_loss_list = []
-    val_loss_list = []
+    train_losses = np.zeros(var.MAX_EPOCHS, dtype=np.float32)
+    val_losses = np.zeros(var.MAX_EPOCHS, dtype=np.float32)
 
-    for epoch in range(var.MAX_EPOCHS):
+    for epoch in tqdm(range(var.MAX_EPOCHS), desc='Training Progress', colour='green'):
 
         # Converged (Fitted) to optimal parameters
-        train_loss = run_epoch(train_loader, model, criterion, optimizer)
-        train_loss_list.append(train_loss)
+        train_losses[epoch] = run_epoch(train_loader, model, criterion, optimizer)
 
         # Evaluated on validation set
-        val_loss = evaluate(val_loader, model, criterion)
-        val_loss_list.append(val_loss)
+        val_losses[epoch] = evaluate(val_loader, model, criterion)
 
         # Checked early stopping
-        if early_stopping(model, val_loss, filename=filename):
+        if early_stopping(model, val_losses[epoch], filename=filename):
             break
 
-        # Training progress
-        print(f"Epoch {epoch + 1}/{var.MAX_EPOCHS} - train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}")
+        # Updated progress bar description
+        tqdm.set_description(f"Epoch {epoch + 1}/{var.MAX_EPOCHS} - train_loss: {train_losses[epoch]:.4f}, val_loss: {val_losses[epoch]:.4f}")
+
+        # Updated progress bar
+        tqdm.update(1)
 
     # Loaded best model
     model.load_state_dict(torch.load(f"{var.FILEPATH}{filename}"))
@@ -164,7 +167,7 @@ def train_model(train_loader, val_loader, val_X, model, criterion, optimizer, fi
     # Computed estimated parameters for validation set
     val_Y_pred, val_eta, val_mu = predict(val_X, model)
 
-    return model, train_loss, val_loss, val_Y_pred, val_eta, val_mu
+    return model, train_losses, val_losses, val_Y_pred, val_eta, val_mu
 
 
 
