@@ -10,6 +10,10 @@ File containing MLP Aggregated/Binned Hawkes Process estimation.
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.linalg import norm
+from typing import Tuple, Union
+from torch.utils.data import DataLoader
+from torch.nn.utils import parameters_to_vector
 
 import VARIABLES.variables as var
 
@@ -41,7 +45,7 @@ class MLP(nn.Module):
 
 # Building model function
 
-def build_model():
+def build_model() -> Tuple[nn.Module, optim.Optimizer, nn.Module]:
     
     # Model/Optimizer/Loss initialization
     model = MLP(var.INPUT_SIZE, var.OUTPUT_SIZE, var.HIDDEN_SIZE, var.NUM_HIDDEN_LAYERS, var.L2_REG).to(var.DEVICE)
@@ -51,9 +55,10 @@ def build_model():
     return model, optimizer, criterion
 
 
-# One run function
+# One run function (automatic gradients backpropagation)
 
-def run_epoch(train_loader, model, criterion, optimizer):
+@torch.enable_grad()
+def run_epoch(train_loader: DataLoader, model: nn.Module, criterion: nn.Module, optimizer: torch.optim.Optimizer) -> float:
     
     train_loss = 0
     model.train()
@@ -63,8 +68,7 @@ def run_epoch(train_loader, model, criterion, optimizer):
         # Forward pass (Autograd)
         optimizer.zero_grad()
         output = model(x)
-        loss = criterion(output, y)
-        loss += var.L2_REG * torch.sum(torch.stack([torch.norm(w, 2) for w in model.parameters()]))
+        loss = criterion(output, y) + (var.L2_REG * norm(parameters_to_vector(model.parameters()), ord=2, dtype=torch.float32))
 
         # Backward pass (Autograd)
         loss.backward()
@@ -76,21 +80,19 @@ def run_epoch(train_loader, model, criterion, optimizer):
     return train_loss
 
 
-# Evaluation function
+# Evaluation function (Deactivated gradient calculations to speed up evaluation)
 
-def evaluate(val_loader, model, criterion):
+@torch.no_grad()
+def evaluate(val_loader: DataLoader, model: nn.Module, criterion: nn.Module) -> float:
 
     val_loss = 0
     model.eval()
-
-    # Deactivated gradient calculations to speed up evaluation
-    with torch.no_grad():
-
-        for x, y in val_loader:
-
-            output = model(x)
-            loss = criterion(output, y)
-            val_loss += loss.item() * x.size(0)
+    
+    for x, y in val_loader:
+        
+        output = model(x)
+        loss = criterion(output, y)
+        val_loss += loss.item() * x.size(0)
 
     val_loss /= len(val_loader.dataset)
 
@@ -99,7 +101,7 @@ def evaluate(val_loader, model, criterion):
 
 # Early stopping function (checkpoint)
 
-def check_early_stopping(model, val_loss, best_loss=float('inf'), no_improve_count=0, filename="best_model.pt"):
+def early_stopping(model: nn.Module, val_loss: float, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0, filename: str = "best_model.pt") -> bool:
 
     # Checked early stopping
     # Save model if val_loss has decreased
@@ -121,17 +123,15 @@ def check_early_stopping(model, val_loss, best_loss=float('inf'), no_improve_cou
 
 
 # Prediction function (estimated Hawkes parameters)
-
+@torch.no_grad()
 def predict(val_X, model):
 
-    with torch.no_grad():
+    val_Y_pred = model(val_X)
+    val_eta = torch.mean(val_Y_pred[:, 0], dtype=torch.float32).item()
+    val_mu = torch.mean(val_Y_pred[:, 1], dtype=torch.float32).item()
+    print(f"Validation set - Estimated branching ratio (η): {val_eta:.4f}, Estimated baseline intensity (µ): {val_mu:.4f}")
 
-        val_Y_pred = model(val_X)
-        val_eta = torch.mean(val_Y_pred[:, 0]).item()
-        val_mu = torch.mean(val_Y_pred[:, 1]).item()
-        print(f"Validation set - Estimated branching ratio (η): {val_eta:.4f}, Estimated baseline intensity (µ): {val_mu:.4f}")
-
-    return val_eta, val_mu
+    return val_Y_pred, val_eta, val_mu
 
 
 # Training fonction
@@ -140,16 +140,14 @@ def train_model(train_loader, val_loader, val_X, model, criterion, optimizer, fi
 
     for epoch in range(var.MAX_EPOCHS):
 
-        # Run one epoch
+        # Converged (Fitted) to optimal parameters
         train_loss = run_epoch(train_loader, model, criterion, optimizer)
 
         # Evaluated on validation set
         val_loss = evaluate(val_loader, model, criterion)
 
         # Checked early stopping
-        early_stopping = check_early_stopping(model, val_loss, filename=filename)
-        
-        if early_stopping:
+        if early_stopping(model, val_loss, filename=filename):
             break
 
         # Training progress
@@ -159,9 +157,9 @@ def train_model(train_loader, val_loader, val_X, model, criterion, optimizer, fi
     model.load_state_dict(torch.load(f"{var.FILEPATH}{filename}"))
 
     # Computed estimated parameters for validation set
-    val_eta, val_mu = predict(val_X, model)
+    val_Y_pred, val_eta, val_mu = predict(val_X, model)
 
-    return model, train_loss, val_loss, val_eta, val_mu
+    return model, train_loss, val_loss, val_Y_pred, val_eta, val_mu
 
 
 
