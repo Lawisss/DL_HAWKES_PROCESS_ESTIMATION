@@ -19,6 +19,7 @@ from typing import Tuple, Union
 from torch.utils.data import DataLoader
 from torch.nn.utils import parameters_to_vector
 from torch.utils.tensorboard import SummaryWriter
+from torch.profiler import profile, record_function, ProfilerActivity
 
 import VARIABLES.variables as var
 
@@ -169,12 +170,13 @@ class MLPTrainer(MLP):
 
     def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_X: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
-        # Tensorboard initialization
+        # Initialized Tensorboard
         writer = SummaryWriter(f"{os.path.join(var.LOGDIR, var.RUN_NAME)}")
 
         # Displayed model summary
         print(self.summary_model())
 
+        # Start training
         for epoch in tqdm(range(var.MAX_EPOCHS), desc='Training Progress', colour='green'):
 
             # Converged (Fitted) to optimal parameters
@@ -193,16 +195,12 @@ class MLPTrainer(MLP):
             # Updated progress bar
             tqdm.update(1)
 
-            # Add losses in TensorBoard at each epoch
+            # Added losses in TensorBoard at each epoch
             writer.add_scalar("Training/Validation Loss", 
-                              {'Training' : self.train_losses[epoch], 'Validation' : self.val_losses[epoch]}, epoch)
+                            {'Training': self.train_losses[epoch], 'Validation': self.val_losses[epoch]}, epoch)
             
-        # Add model graph to TensorBoard
+        # Added model graph to TensorBoard
         writer.add_graph(self.model, val_X)
-    
-        # Stored on disk / Closed SummaryWriter()
-        writer.flush()
-        writer.close()
 
         # Loaded best model
         print(self.load_model())
@@ -210,11 +208,24 @@ class MLPTrainer(MLP):
         # Computed estimated parameters for validation set (After loaded best model)
         val_Y_pred, val_eta, val_mu = self.predict(val_X)
 
+        # Stored on disk / Closed SummaryWriter()
+        writer.flush()
+        writer.close()
+
         return self.model, self.train_losses, self.val_losses, val_Y_pred, val_eta, val_mu
 
 
 
+# # Start profiling
+# with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
+        
+#         # End profiling and add results to TensorBoard
+#         prof.export_chrome_trace(f"{os.path.join(var.LOGDIR, var.RUN_NAME)}.json")
+#         writer.add_scalar("Training Time (Total)", prof.total_average().cpu().numpy(), 0)
 
+#         # Add profiling results to TensorBoard
+#         for trace in prof.key_averages(group_by_input_shape=True):
+#             writer.add_scalar(trace.key, trace.value, 0)
 
 # # Training fonction
 
