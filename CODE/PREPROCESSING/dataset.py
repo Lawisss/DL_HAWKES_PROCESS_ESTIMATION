@@ -54,12 +54,12 @@ def create_datasets(train_X: torch.Tensor, train_Y: torch.Tensor, val_X: torch.T
 
 # Data Loaders creation function
 
-def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset, test_dataset: TensorDataset, batch_size: int) -> Tuple[DataLoader, DataLoader, DataLoader]:
+def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset, test_dataset: TensorDataset) -> Tuple[DataLoader, DataLoader, DataLoader]:
     
     # Data Loaders creation (speed up loading process with drop_last, num_workers, pin_memory)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4, pin_memory=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4, pin_memory=True) 
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=var.BATCH_SIZE, shuffle=var.SHUFFLE, drop_last=var.DROP_LAST, num_workers=var.NUM_WORKERS, pin_memory=var.PIN_MEMORY)
+    val_loader = DataLoader(val_dataset, batch_size=var.BATCH_SIZE, shuffle=var.SHUFFLE, drop_last=var.DROP_LAST, num_workers=var.NUM_WORKERS, pin_memory=var.PIN_MEMORY) 
+    test_loader = DataLoader(test_dataset, batch_size=var.BATCH_SIZE, shuffle=var.SHUFFLE, drop_last=var.DROP_LAST, num_workers=var.NUM_WORKERS, pin_memory=var.PIN_MEMORY)
 
     return train_loader, val_loader, test_loader
 

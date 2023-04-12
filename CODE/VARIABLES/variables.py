@@ -37,10 +37,14 @@ DISCRETISE_STEP = 1 # Discretise step = Delta
 # Datasets parameters (dataset.py)
 VAL_RATIO = 0.25 # Fraction of data used for validation
 TEST_RATIO = 0.125 # Fraction of data used for testing
+BATCH_SIZE = 128
+SHUFFLE = True # Shuffle data in each epoch
+DROP_LAST = True # Drop last incomplete batch if dataset size not divisible by batch size
+NUM_WORKERS = 4 # Number of worker processes to use for data loading
+PIN_MEMORY = True # Copy the tensors to pinned memory
 
 # MLP parameters (mlp.py)
 INPUT_SIZE = 100_000
-BATCH_SIZE = 128
 HIDDEN_SIZE = 100
 OUTPUT_SIZE = 2
 NUM_HIDDEN_LAYERS = 6
@@ -49,8 +53,14 @@ L2_REG = 0.001
 LEARNING_RATE = 0.01
 MAX_EPOCHS = 500
 
+FILENAME_BEST_MODEL = "best_model.pt"
 EARLY_STOP_PATIENCE = 25 # Number of epochs without improvement before triggering early stopping
 EARLY_STOP_DELTA = 0.01 # Minimum reduction in validation loss to consider an improvement
+
+SUMMARY_MODEL = "MLP"
+SUMMARY_COL_NAMES = ("input_size", "output_size", "num_params", "params_percent", "kernel_size", "mult_adds", "trainable")
+SUMMARY_MODE = 'train' # Two modes: train/eval
+SUMMARY_VERBOSE = 2
 
 # Device parameter (dataset.py, mlp.py)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
