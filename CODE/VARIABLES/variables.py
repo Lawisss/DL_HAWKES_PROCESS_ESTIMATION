@@ -6,6 +6,10 @@ File containing all project variables.
 
 """
 
+import os
+import socket
+from datetime import datetime
+
 import torch
 
 # Hawkes process hyper-parameters generation parameters (hyperparameters.py)
@@ -57,13 +61,18 @@ FILENAME_BEST_MODEL = "best_model.pt"
 EARLY_STOP_PATIENCE = 25 # Number of epochs without improvement before triggering early stopping
 EARLY_STOP_DELTA = 0.01 # Minimum reduction in validation loss to consider an improvement
 
+# Tensorboard
+LOGDIR = os.path.abspath("RESULTS/RUNS")
+RUN_NAME = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_" + socket.gethostname().upper()
+
+# Model summary
 SUMMARY_MODEL = "MLP"
 SUMMARY_COL_NAMES = ("input_size", "output_size", "num_params", "params_percent", "kernel_size", "mult_adds", "trainable")
-SUMMARY_MODE = 'train' # Two modes: train/eval
+SUMMARY_MODE = "train" # Two modes: train/eval
 SUMMARY_VERBOSE = 2
 
 # Device parameter (dataset.py, mlp.py)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Global filepath to store different results from different modules (hawkes.py, hyperparameters.py)
-FILEPATH = "C:/Users/Nicolas Girard/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/RESULTS/"
+FILEPATH = os.path.abspath("RESULTS")

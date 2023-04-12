@@ -6,6 +6,7 @@
 File containing MLP Aggregated/Binned Hawkes Process estimation.
 
 """
+import os 
 
 import torch
 import numpy as np
@@ -17,6 +18,7 @@ from torch.linalg import norm
 from typing import Tuple, Union
 from torch.utils.data import DataLoader
 from torch.nn.utils import parameters_to_vector
+from torch.utils.tensorboard import SummaryWriter
 
 import VARIABLES.variables as var
 
@@ -129,7 +131,7 @@ class MLPTrainer(MLP):
         # Save model if val_loss has decreased
         if self.val_loss < best_loss:
 
-            torch.save(self.model.state_dict(), f"{var.FILEPATH}{var.FILENAME_BEST_MODEL}")
+            torch.save(self.model.state_dict(), f"{os.path.join(var.FILEPATH, var.FILENAME_BEST_MODEL)}")
             best_loss = self.val_loss
             no_improve_count = 0
 
@@ -145,8 +147,8 @@ class MLPTrainer(MLP):
 
 
     # Loading model function (best model)
-    def load_model(self) -> str:
-        self.model.load_state_dict(torch.load(f"{var.FILEPATH}{var.FILENAME_BEST_MODEL}"))
+    def load_model(self) -> str:  
+        self.model.load_state_dict(torch.load(f"{os.path.join(var.FILEPATH, var.FILENAME_BEST_MODEL)}"))
         return f"Best model loading ({var.FILENAME_BEST_MODEL})..."
     
      
@@ -166,6 +168,9 @@ class MLPTrainer(MLP):
     # Training fonction
 
     def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_X: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+
+        # Tensorboard initialization
+        writer = SummaryWriter(f"{os.path.join(var.LOGDIR, var.RUN_NAME)}")
 
         # Displayed model summary
         print(self.summary_model())
@@ -187,6 +192,17 @@ class MLPTrainer(MLP):
 
             # Updated progress bar
             tqdm.update(1)
+
+            # Add losses in TensorBoard at each epoch
+            writer.add_scalar("Training/Validation Loss", 
+                              {'Training' : self.train_losses[epoch], 'Validation' : self.val_losses[epoch]}, epoch)
+            
+        # Add model graph to TensorBoard
+        writer.add_graph(self.model, val_X)
+    
+        # Stored on disk / Closed SummaryWriter()
+        writer.flush()
+        writer.close()
 
         # Loaded best model
         print(self.load_model())

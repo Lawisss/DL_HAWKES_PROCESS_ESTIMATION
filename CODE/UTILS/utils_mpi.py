@@ -6,6 +6,8 @@ File containing all MPI utils functions used in other modules (python files).
 
 """
 
+import os 
+
 import numpy as np
 import pandas as pd
 from typing import List
@@ -31,7 +33,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data_chunk = [data_chunk]
 
         # Written and field names initialisation (only rank 0 writes headers)
-        with open(f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{os.path.join(var.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
             if rank == 0:
                 file.write(','.join(data[0].keys()))
                 file.write('\n')
@@ -62,7 +64,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     size = comm.Get_size()
 
     try:
-        with open(filepath=f"{var.FILEPATH}{filename}", mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{os.path.join(var.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
 
             # Determined processes sizes portion
             file_size = file.seek(0, 2)
