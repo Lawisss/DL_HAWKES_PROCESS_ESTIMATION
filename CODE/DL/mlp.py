@@ -124,11 +124,11 @@ def early_stopping(model: nn.Module, val_loss: float, best_loss: Union[float, in
 
 # Prediction function (estimated Hawkes parameters)
 @torch.no_grad()
-def predict(val_X, model):
+def predict(val_X, model, dtype=torch.float32):
 
     val_Y_pred = model(val_X)
-    val_eta = torch.mean(val_Y_pred[:, 0], dtype=torch.float32).item()
-    val_mu = torch.mean(val_Y_pred[:, 1], dtype=torch.float32).item()
+    val_eta = torch.mean(val_Y_pred[:, 0], dtype=dtype).item()
+    val_mu = torch.mean(val_Y_pred[:, 1], dtype=dtype).item()
     print(f"Validation set - Estimated branching ratio (η): {val_eta:.4f}, Estimated baseline intensity (µ): {val_mu:.4f}")
 
     return val_Y_pred, val_eta, val_mu
@@ -138,13 +138,18 @@ def predict(val_X, model):
 
 def train_model(train_loader, val_loader, val_X, model, criterion, optimizer, filename="best_model.pt"):
 
+    train_loss_list = []
+    val_loss_list = []
+
     for epoch in range(var.MAX_EPOCHS):
 
         # Converged (Fitted) to optimal parameters
         train_loss = run_epoch(train_loader, model, criterion, optimizer)
+        train_loss_list.append(train_loss)
 
         # Evaluated on validation set
         val_loss = evaluate(val_loader, model, criterion)
+        val_loss_list.append(val_loss)
 
         # Checked early stopping
         if early_stopping(model, val_loss, filename=filename):
