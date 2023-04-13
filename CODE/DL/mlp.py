@@ -19,7 +19,6 @@ from typing import Tuple, Union
 from torch.utils.data import DataLoader
 from torch.nn.utils import parameters_to_vector
 from torch.utils.tensorboard import SummaryWriter
-from torch.profiler import profile, record_function, ProfilerActivity
 
 import VARIABLES.variables as var
 from UTILS.utils import profiling
@@ -33,8 +32,8 @@ class MLP(nn.Module):
 
         # Parameters initialization
 
-        # Created linear layers (first layer = input_size neurons / hidden layers = hidden_size neurons) 
-        # * operator unpacked list comprehension into individual layers, which are added to nn.ModuleList
+        # Created linear layers (first layer = input_size / hidden layers = hidden_size neurons) 
+        # * operator unpacked list comprehension into individual layers added to nn.ModuleList
         self.layers = nn.ModuleList([nn.Linear(var.INPUT_SIZE, var.HIDDEN_SIZE), 
                                      *(nn.Linear(var.HIDDEN_SIZE, var.HIDDEN_SIZE) for _ in range(var.NUM_HIDDEN_LAYERS - 1))])
         
@@ -42,7 +41,7 @@ class MLP(nn.Module):
         self.relu = nn.ReLU()
         self.l2_reg = var.L2_REG
 
-    # Propagates inputs through hidden layers, ReLU function and returns outputs
+    # Spread inputs through hidden layers, ReLU function and returns outputs
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
         for layer in self.layers:

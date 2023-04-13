@@ -16,6 +16,7 @@ import VARIABLES.variables as var
 
 
 # Input data
+
 X = np.random.randn(var.INPUT_SIZE, 1).astype(np.float32)
 Y = np.random.randn(var.INPUT_SIZE, var.OUTPUT_SIZE).astype(np.float32)
 
