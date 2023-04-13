@@ -14,7 +14,7 @@ from functools import partial
 from typing import Tuple, TypedDict
 
 from UTILS.utils import write_csv
-import VARIABLES.variables as var
+import VARIABLES.hawkes_var as hwk
 
 
 # Parallelized simulated Hawkes process 
@@ -30,14 +30,14 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
     params = comm.bcast(params, root=root)
 
     # Divided time horizon into equal intervals for each process
-    time_intervals = np.linspace(var.TIME_ITV_START, var.TIME_HORIZON, size + 1)
+    time_intervals = np.linspace(hwk.TIME_ITV_START, hwk.TIME_HORIZON, size + 1)
 
     # Determined the start / end time interval for current process
     start_time = time_intervals[rank]
     end_time = time_intervals[rank + 1]
 
     # Created Hawkes process with kernel, baseline and parameters
-    hawkes_process = hk.simulator().set_kernel(var.KERNEL).set_baseline(var.BASELINE).set_parameter(params)
+    hawkes_process = hk.simulator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE).set_parameter(params)
 
     # Simulated a Hawkes process in time interval
     T = hawkes_process.simulate([start_time, end_time])
@@ -62,7 +62,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
     rank = comm.Get_rank()
 
     # Splitted process number evenly among MPI ranks
-    chunk_num = var.PROCESS_NUM // size
+    chunk_num = hwk.PROCESS_NUM // size
 
     # Generated simulation parameters for each local process
     chunk_mu = mu[rank * chunk_num:(rank + 1) * chunk_num]
@@ -70,7 +70,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
     chunk_beta = beta[rank * chunk_num:(rank + 1) * chunk_num]
 
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((chunk_num, var.TIME_HORIZON), dtype=np.float32)
+    simulated_events_seqs = np.zeros((chunk_num, hwk.TIME_HORIZON), dtype=np.float32)
 
     for k in range(chunk_num):
         # Simulated Hawkes processes with current simulation parameters
@@ -78,7 +78,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
         _, T = hawkes_simulation(params={"mu": chunk_mu[k], "alpha": chunk_alpha[k], "beta": chunk_beta[k]})
         
         # Converted temporary list T to array and stored results in simulated_events_seqs
-        simulated_events_seqs[k,:] = np.asarray(T)[:var.TIME_HORIZON]
+        simulated_events_seqs[k,:] = np.asarray(T)[:hwk.TIME_HORIZON]
 
     # Gather simulated_events_seqs from all ranks to root
     simulated_events_seqs = comm.gather(simulated_events_seqs, root=root)
@@ -88,7 +88,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
         simulated_events_seqs = np.concatenate(simulated_events_seqs)
 
         # Created dictionaries list representing simulated event sequences
-        seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(var.TIME_HORIZON)), simulated_events_seqs))
+        seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
 
         # Written metrics to a CSV file
         write_csv(seqs_list, filename=filename)
@@ -106,10 +106,10 @@ def hawkes_estimation(T: np.ndarray, root: int = 0, filename: str = "hawkes_esti
     size = comm.Get_size()
 
     # Estimated Hawkes process parameters with kernel, baseline and parameters
-    hawkes_process = hk.estimator().set_kernel(var.KERNEL).set_baseline(var.BASELINE)
+    hawkes_process = hk.estimator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE)
 
     # Broadcast parameters
-    params = comm.bcast([var.TIME_ITV_START, var.TIME_HORIZON, var.END_T, var.NUM_SEQ], root=root)
+    params = comm.bcast([hwk.TIME_ITV_START, hwk.TIME_HORIZON, hwk.END_T, hwk.NUM_SEQ], root=root)
 
     # Distributed among processes
     T_chunks = np.array_split(T, size)

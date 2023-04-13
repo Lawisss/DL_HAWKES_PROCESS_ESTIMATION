@@ -10,7 +10,7 @@ File containing Hawkes process hyper-parameters generation functions (Default Pa
 import numpy as np
 from typing import Tuple
 
-import VARIABLES.variables as var
+import VARIABLES.hawkes_var as hwk
 from UTILS.utils import write_csv
 
 # Generated Hawkes process hyper-parameters (alpha, beta, mu)
@@ -18,13 +18,13 @@ from UTILS.utils import write_csv
 def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     # Generated random vectors of size PROCESS_NUM
-    epsilon = np.random.normal(var.EXPECTED_ACTIVITY, var.STD, var.PROCESS_NUM)
-    eta = np.random.uniform(var.MIN_ITV_ETA, var.MAX_ITV_ETA, var.PROCESS_NUM)
-    beta = np.random.uniform(var.MIN_ITV_BETA, var.MAX_ITV_BETA, var.PROCESS_NUM)
+    epsilon = np.random.normal(hwk.EXPECTED_ACTIVITY, hwk.STD, hwk.PROCESS_NUM)
+    eta = np.random.uniform(hwk.MIN_ITV_ETA, hwk.MAX_ITV_ETA, hwk.PROCESS_NUM)
+    beta = np.random.uniform(hwk.MIN_ITV_BETA, hwk.MAX_ITV_BETA, hwk.PROCESS_NUM)
 
     # Calculated alpha/mu vectors from beta/eta vectors (alpha = eta because of library exponential formula)
     alpha = eta
-    mu = (epsilon / var.TIME_HORIZON) * (1 - eta)
+    mu = (epsilon / hwk.TIME_HORIZON) * (1 - eta)
 
     # Created dictionaries list containing the parameters
     params = list(map(lambda a, b, m: {"alpha": a, "beta": b, "mu": m}, alpha, beta, mu)) 

@@ -8,16 +8,16 @@ File containing all utils functions used in other modules (python files).
 
 import os 
 
-import torch
 import pandas as pd
 import numpy as np
-from typing import List
+from typing import List, Callable
 from functools import wraps
 from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
 from torch.profiler import profile, ProfilerActivity
 
-import VARIABLES.variables as var
+import VARIABLES.preprocessing_var as prep
+import VARIABLES.evaluation_var as eval
 
 
 # CSV file writing function
@@ -29,7 +29,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data = [data]
 
         # Written and field names initialisation
-        with open(filepath=f"{os.path.join(var.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
@@ -50,7 +50,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
 
     try:
-        with open(filepath=f"{os.path.join(var.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
 
             # Extracted headers
             headers = next(file).strip().split(delimiter)
@@ -66,10 +66,10 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 # Pytorch Tensorboard Profiling 
 
-def profiling(func=None, enable=False):
+def profiling(func: Callable = None, enable: bool = False) -> Callable:
     
     # Executed only when decorating function
-    def prof_decorator(func):
+    def prof_decorator(func: Callable) -> Callable:
 
         # Decorated function information conservation
         @wraps(func)
@@ -78,21 +78,21 @@ def profiling(func=None, enable=False):
         def wrapper(*args, **kwargs):
 
             # Initialized Tensorboard
-            writer = SummaryWriter(f"{os.path.join(var.LOGDIPROF, var.RUN_NAME)}")
+            writer = SummaryWriter(f"{os.path.join(eval.LOGDIPROF, eval.RUN_NAME)}")
 
             # Activated profiling
             if enable:
                 
                 # Defined profiler options
                 profiler_options = {"activities": [ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                                    "schedule": schedule(wait=var.WAIT, warmup=var.WARMUP, active=var.ACTIVE, repeat=var.REPEAT, skip_first=var.SKIP_FIRST),
-                                    "on_trace_ready": tensorboard_trace_handler(var.LOGDIPROF),
-                                    "record_shapes": var.RECORD_SHAPES,
-                                    "profile_memory": var.PROFILE_MEMORY,
-                                    "with_stack": var.WITH_STACK,
-                                    "with_flops": var.WITH_FLOPS,
-                                    "with_modules": var.WITH_MODULES,
-                                    "use_cuda": var.DEVICE}
+                                    "schedule": schedule(wait=eval.WAIT, warmup=eval.WARMUP, active=eval.ACTIVE, repeat=eval.REPEAT, skip_first=eval.SKIP_FIRST),
+                                    "on_trace_ready": tensorboard_trace_handler(eval.LOGDIPROF),
+                                    "record_shapes": eval.RECORD_SHAPES,
+                                    "profile_memory": eval.PROFILE_MEMORY,
+                                    "with_stack": eval.WITH_STACK,
+                                    "with_flops": eval.WITH_FLOPS,
+                                    "with_modules": eval.WITH_MODULES,
+                                    "use_cuda": prep.DEVICE}
 
                 # Started profiling
                 with profile(**profiler_options) as prof:
@@ -100,17 +100,17 @@ def profiling(func=None, enable=False):
                     result = func(*args, **kwargs)
 
                     # Added profiling traces/results (average events + group by operator name/input shapes/stack) 
-                    for trace in prof.key_averages(group_by_input_shape=var.GROUP_BY_INPUT_SHAPE, 
-                                                   group_by_stack_n=var.GROUP_BY_STACK_N).table(sort_by=var.SORT_BY,
-                                                                                                row_limit=var.ROW_LIMIT):
+                    for trace in prof.key_averages(group_by_input_shape=eval.GROUP_BY_INPUT_SHAPE, 
+                                                   group_by_stack_n=eval.GROUP_BY_STACK_N).table(sort_by=eval.SORT_BY,
+                                                                                                 row_limit=eval.ROW_LIMIT):
                         writer.add_scalar(trace.key, trace.value, 0)
 
                     # Ended profiling and exported stack traces/collected traces
                     if prof.with_stack:
-                        prof.export_stacks(f"{os.path.join(var.LOGDIPROF, var.RUN_NAME)}.txt", 
-                                           "self_cuda_time_total" if var.DEVICE == "cuda" else "self_cpu_time_total")
+                        prof.export_stacks(f"{os.path.join(eval.LOGDIPROF, eval.RUN_NAME)}.txt", 
+                                           "self_cuda_time_total" if prep.DEVICE == "cuda" else "self_cpu_time_total")
 
-                    prof.export_chrome_trace(f"{os.path.join(var.LOGDIPROF, var.RUN_NAME)}.json")
+                    prof.export_chrome_trace(f"{os.path.join(eval.LOGDIPROF, eval.RUN_NAME)}.json")
                     writer.add_scalar("Training Time (Total)", prof.total_average().cpu().numpy(), 0)
 
                     # Closed SummaryWriter

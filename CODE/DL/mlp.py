@@ -20,8 +20,11 @@ from torch.utils.data import DataLoader
 from torch.nn.utils import parameters_to_vector
 from torch.utils.tensorboard import SummaryWriter
 
-import VARIABLES.variables as var
+import VARIABLES.mlp_var as mlp
 from UTILS.utils import profiling
+import VARIABLES.evaluation_var as eval
+import VARIABLES.preprocessing_var as prep
+
 
 
 # MLP creation
@@ -34,12 +37,12 @@ class MLP(nn.Module):
 
         # Created linear layers (first layer = input_size / hidden layers = hidden_size neurons) 
         # * operator unpacked list comprehension into individual layers added to nn.ModuleList
-        self.layers = nn.ModuleList([nn.Linear(var.INPUT_SIZE, var.HIDDEN_SIZE), 
-                                     *(nn.Linear(var.HIDDEN_SIZE, var.HIDDEN_SIZE) for _ in range(var.NUM_HIDDEN_LAYERS - 1))])
+        self.layers = nn.ModuleList([nn.Linear(mlp.INPUT_SIZE, mlp.HIDDEN_SIZE), 
+                                     *(nn.Linear(mlp.HIDDEN_SIZE, mlp.HIDDEN_SIZE) for _ in range(mlp.NUM_HIDDEN_LAYERS - 1))])
         
-        self.output_layer = nn.Linear(var.HIDDEN_SIZE, var.OUTPUT_SIZE)
+        self.output_layer = nn.Linear(mlp.HIDDEN_SIZE, mlp.OUTPUT_SIZE)
         self.relu = nn.ReLU()
-        self.l2_reg = var.L2_REG
+        self.l2_reg = mlp.L2_REG
 
     # Spread inputs through hidden layers, ReLU function and returns outputs
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -59,27 +62,27 @@ class MLPTrainer(MLP):
 
         # Parameters initialization
         # MLP parameters
-        self.model = MLP().to(var.DEVICE)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=var.LEARNING_RATE)
-        self.criterion = nn.MSELoss().to(var.DEVICE)
+        self.model = MLP().to(prep.DEVICE)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=mlp.LEARNING_RATE)
+        self.criterion = nn.MSELoss().to(prep.DEVICE)
 
         # One epoch train/val loss parameters
         self.train_loss = 0
         self.val_loss = 0
 
         # Training train/val losses parameters (Many epochs)
-        self.train_losses = np.zeros(var.MAX_EPOCHS, dtype=np.float32)
-        self.val_losses = np.zeros(var.MAX_EPOCHS, dtype=np.float32)
+        self.train_losses = np.zeros(mlp.MAX_EPOCHS, dtype=np.float32)
+        self.val_losses = np.zeros(mlp.MAX_EPOCHS, dtype=np.float32)
 
 
     # Sum-up model function
 
     def summary_model(self) -> str:
 
-        summary(self.model, input_size=var.INPUT_SIZE, input_data=[var.BATCH_SIZE, var.INPUT_SIZE], batch_dim=var.BATCH_SIZE, 
-                col_names=var.SUMMARY_COL_NAMES, device=var.DEVICE, mode=var.SUMMARY_MODE, verbose=var.SUMMARY_VERBOSE)
+        summary(self.model, input_size=mlp.INPUT_SIZE, input_data=[mlp.BATCH_SIZE, mlp.INPUT_SIZE], batch_dim=mlp.BATCH_SIZE, 
+                col_names=mlp.SUMMARY_COL_NAMES, device=mlp.DEVICE, mode=mlp.SUMMARY_MODE, verbose=mlp.SUMMARY_VERBOSE)
         
-        return f"{var.SUMMARY_MODEL:^30} Summary"
+        return f"{mlp.SUMMARY_MODEL:^30} Summary"
     
 
     # One run function (automatic gradients backpropagation)
@@ -94,7 +97,7 @@ class MLPTrainer(MLP):
             # Forward pass (Autograd)
             self.optimizer.zero_grad()
             output = self.model(x)
-            loss = self.criterion(output, y) + (var.L2_REG * norm(parameters_to_vector(self.model.parameters()), ord=2, dtype=torch.float32))
+            loss = self.criterion(output, y) + (mlp.L2_REG * norm(parameters_to_vector(self.model.parameters()), ord=2, dtype=torch.float32))
 
             # Backward pass (Autograd)
             loss.backward()
@@ -132,7 +135,7 @@ class MLPTrainer(MLP):
         # Save model if val_loss has decreased
         if self.val_loss < best_loss:
 
-            torch.save(self.model.state_dict(), f"{os.path.join(var.FILEPATH, var.FILENAME_BEST_MODEL)}")
+            torch.save(self.model.state_dict(), f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}")
             best_loss = self.val_loss
             no_improve_count = 0
 
@@ -140,8 +143,8 @@ class MLPTrainer(MLP):
             no_improve_count += 1
 
         # Early stopping condition
-        if no_improve_count >= var.EARLY_STOP_PATIENCE:
-            print(f"Early stopping, no val_loss improvement for {var.EARLY_STOP_PATIENCE} epochs")
+        if no_improve_count >= mlp.EARLY_STOP_PATIENCE:
+            print(f"Early stopping, no val_loss improvement for {mlp.EARLY_STOP_PATIENCE} epochs")
             return True
         else:
             return False
@@ -149,8 +152,8 @@ class MLPTrainer(MLP):
 
     # Loading model function (best model)
     def load_model(self) -> str:  
-        self.model.load_state_dict(torch.load(f"{os.path.join(var.FILEPATH, var.FILENAME_BEST_MODEL)}"))
-        return f"Best model loading ({var.FILENAME_BEST_MODEL})..."
+        self.model.load_state_dict(torch.load(f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}"))
+        return f"Best model loading ({mlp.FILENAME_BEST_MODEL})..."
     
      
     # Prediction function (estimated Hawkes parameters)
@@ -172,13 +175,13 @@ class MLPTrainer(MLP):
     def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_X: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
         # Initialized Tensorboard
-        writer = SummaryWriter(f"{os.path.join(var.LOGDIRUN, var.RUN_NAME)}")
+        writer = SummaryWriter(f"{os.path.join(eval.LOGDIRUN, eval.RUN_NAME)}")
 
         # Displayed model summary
         print(self.summary_model())
 
         # Start training
-        for epoch in tqdm(range(var.MAX_EPOCHS), desc='Training Progress', colour='green'):
+        for epoch in tqdm(range(mlp.MAX_EPOCHS), desc='Training Progress', colour='green'):
 
             # Converged (Fitted) to optimal parameters
             self.train_losses[epoch] = self.run_epoch(train_loader)
@@ -191,14 +194,14 @@ class MLPTrainer(MLP):
                 break
 
             # Updated progress bar description
-            tqdm.set_description(f"Epoch {epoch + 1}/{var.MAX_EPOCHS} - train_loss: {self.train_losses[epoch]:.4f}, val_loss: {self.val_losses[epoch]:.4f}")
+            tqdm.set_description(f"Epoch {epoch + 1}/{mlp.MAX_EPOCHS} - train_loss: {self.train_losses[epoch]:.4f}, val_loss: {self.val_losses[epoch]:.4f}")
 
             # Updated progress bar
             tqdm.update(1)
 
             # Added losses in TensorBoard at each epoch
             writer.add_scalar("Training/Validation Loss", 
-                            {'Training': self.train_losses[epoch], 'Validation': self.val_losses[epoch]}, epoch)
+                             {'Training': self.train_losses[epoch], 'Validation': self.val_losses[epoch]}, epoch)
             
         # Added model graph to TensorBoard
         writer.add_graph(self.model, val_X)
@@ -214,93 +217,3 @@ class MLPTrainer(MLP):
         writer.close()
 
         return self.model, self.train_losses, self.val_losses, val_Y_pred, val_eta, val_mu
-
-
-
-# # Start profiling
-# with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
-        
-#         # End profiling and add results to TensorBoard
-#         prof.export_chrome_trace(f"{os.path.join(var.LOGDIR, var.RUN_NAME)}.json")
-#         writer.add_scalar("Training Time (Total)", prof.total_average().cpu().numpy(), 0)
-
-#         # Add profiling results to TensorBoard
-#         for trace in prof.key_averages(group_by_input_shape=True):
-#             writer.add_scalar(trace.key, trace.value, 0)
-
-# # Training fonction
-
-# def train_model(train_loader, val_loader, model, criterion, optimizer, filename="best_model.pt"):
-
-#     best_loss = float('inf')
-#     no_improve_count = 0
-#     train_size = len(train_loader.dataset)
-#     val_size = len(val_loader.dataset)
-
-#     # Training loop
-#     for epoch in range(var.MAX_EPOCHS):
-
-#         # Activated train mode 
-#         train_loss = 0
-#         model.train()
-
-#         for x, y in train_loader:
-
-#             # Forward pass (Autograd)
-#             optimizer.zero_grad()
-#             output = model(x)
-#             loss = criterion(output, y)
-#             loss += var.L2_REG * torch.sum(torch.stack([torch.norm(w, 2) for w in model.parameters()]))
-
-#             # Backward pass (Autograd)
-#             loss.backward()
-#             optimizer.step()
-#             train_loss += loss.detach().item() * x.size(0)
-
-#         train_loss /= train_size
-
-#         # Activated validation mode 
-#         val_loss = 0
-#         model.eval()
-
-#         # Deactivated gradient calculations to speed up evaluation
-#         with torch.no_grad():
-#             for x, y in val_loader:
-
-#                 output = model(x)
-#                 loss = criterion(output, y)
-#                 val_loss += loss.item() * x.size(0)
-
-#             val_loss /= val_size
-
-#         # Checked early stopping
-#         # Save model if val_loss has decreased
-#         if val_loss < best_loss:
-#             torch.save(model.state_dict(), f"{var.FILEPATH}{filename}")
-#             best_loss = val_loss
-#             no_improve_count = 0
-#         else:
-#             no_improve_count += 1
-
-#         # Early stopping condition
-#         if no_improve_count >= var.EARLY_STOP_PATIENCE:
-#             print(f"Early stopping, no val_loss improvement for {var.EARLY_STOP_PATIENCE} epochs")
-#             break
-        
-#         # Training progress
-#         print(f"Epoch {epoch + 1}/{var.MAX_EPOCHS} - train_loss: {train_loss:.4f}, val_loss: {val_loss:.4f}")
-
-#     # Loaded best model
-#     model.load_state_dict(torch.load(f"{var.FILEPATH}{filename}"))
-
-#     # Computed estimated parameters for validation set
-#     with torch.no_grad():
-#         y_val_pred = model(val_X)
-#         val_eta = torch.mean(y_val_pred[:, 0]).item()
-#         val_mu = torch.mean(y_val_pred[:, 1]).item()
-#         print(f"Validation set - Estimated branching ratio (η): {val_eta:.4f}, Estimated baseline intensity (µ): {val_mu:.4f}")
-
-#     return model
-
-
-       

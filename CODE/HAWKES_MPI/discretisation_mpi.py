@@ -11,7 +11,7 @@ import numpy as np
 from mpi4py import MPI
 from functools import partial
 
-import VARIABLES.variables as var
+import VARIABLES.hawkes_var as hwk
 from UTILS.utils import write_csv
 
 
@@ -25,7 +25,7 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
     size = comm.Get_size()
 
     # Computed bins number
-    num_bins = int(var.TIME_HORIZON // var.DISCRETISE_STEP)
+    num_bins = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)
 
     # Initialized array with dimensions (number of processes, number of jumps per unit of time)
     if rank == 0:
@@ -36,14 +36,14 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
     comm.Scatter(jump_times, jumps_chunk, root=root)
 
     # Computed histogram for each process
-    counts_chunk, _ = np.histogram(jumps_chunk, bins=np.linspace(0, var.TIME_HORIZON, num_bins + 1))
+    counts_chunk, _ = np.histogram(jumps_chunk, bins=np.linspace(0, hwk.TIME_HORIZON, num_bins + 1))
 
     # Gathered results from all processes
     comm.Gather(counts_chunk, counts, root=root)
 
     if rank == 0:
         # Created dictionaries list representing binned simulated event sequences
-        counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(var.TIME_HORIZON)), counts))
+        counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
 
         # Written counts to CSV file
         write_csv(counts_list, filename=filename)
@@ -55,13 +55,13 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 
 def temp_func(jump_times: np.ndarray) -> float:
 
-    # If no event has been recorded, step size = svar.TIME_HORIZON
+    # If no event has been recorded, step size = hwk.TIME_HORIZON
     if len(jump_times) == 0:
-        stepsize = var.TIME_HORIZON 
+        stepsize = hwk.TIME_HORIZON 
 
     else:
         # Added event times and boundaries
-        times = np.concatenate(([0], jump_times, [var.TIME_HORIZON]))  
+        times = np.concatenate(([0], jump_times, [hwk.TIME_HORIZON]))  
         # Calculated the differences between the times
         diff = np.diff(times)  
         # Removed negative differences
@@ -73,7 +73,7 @@ def temp_func(jump_times: np.ndarray) -> float:
 
 
 
-# Calculated parallelized temp_func(x, var.TIME_HORIZON) minimum for each element x in jump_times
+# Calculated parallelized temp_func(x, hwk.TIME_HORIZON) minimum for each element x in jump_times
 
 def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
 
@@ -99,7 +99,7 @@ def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
     return global_min[0]
 
 
-# Computed parallelized point process jump times from the events history and the time var.TIME_HORIZON
+# Computed parallelized point process jump times from the events history and the time hwk.TIME_HORIZON
 
 def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
 
@@ -109,7 +109,7 @@ def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
     size = comm.Get_size()
 
     # Size of each interval
-    stepsize = var.TIME_HORIZON / len(h)
+    stepsize = hwk.TIME_HORIZON / len(h)
 
     # Retrieval of intervals indices with single jump/multiple jumps
     idx_1 = np.nonzero(h == 1)[0]
