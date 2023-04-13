@@ -22,6 +22,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import profile, record_function, ProfilerActivity
 
 import VARIABLES.variables as var
+from UTILS.utils import profiling
 
 
 # MLP creation
@@ -33,7 +34,7 @@ class MLP(nn.Module):
         # Parameters initialization
 
         # Created linear layers (first layer = input_size neurons / hidden layers = hidden_size neurons) 
-        # * operator unpacked list comprehension into individual layers, which are then added to nn.ModuleList
+        # * operator unpacked list comprehension into individual layers, which are added to nn.ModuleList
         self.layers = nn.ModuleList([nn.Linear(var.INPUT_SIZE, var.HIDDEN_SIZE), 
                                      *(nn.Linear(var.HIDDEN_SIZE, var.HIDDEN_SIZE) for _ in range(var.NUM_HIDDEN_LAYERS - 1))])
         
@@ -41,7 +42,7 @@ class MLP(nn.Module):
         self.relu = nn.ReLU()
         self.l2_reg = var.L2_REG
 
-    # Propagates inputs through hidden layers, ReLU activation function and returns outputs
+    # Propagates inputs through hidden layers, ReLU function and returns outputs
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
         for layer in self.layers:
@@ -166,12 +167,13 @@ class MLPTrainer(MLP):
         return val_Y_pred, val_eta, val_mu
 
 
-    # Training fonction
+    # Training fonction (PyTorch Profiler = disable)
 
+    @profiling(enable=False)
     def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_X: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
         # Initialized Tensorboard
-        writer = SummaryWriter(f"{os.path.join(var.LOGDIR, var.RUN_NAME)}")
+        writer = SummaryWriter(f"{os.path.join(var.LOGDIRUN, var.RUN_NAME)}")
 
         # Displayed model summary
         print(self.summary_model())
@@ -208,7 +210,7 @@ class MLPTrainer(MLP):
         # Computed estimated parameters for validation set (After loaded best model)
         val_Y_pred, val_eta, val_mu = self.predict(val_X)
 
-        # Stored on disk / Closed SummaryWriter()
+        # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
 
