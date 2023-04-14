@@ -3,7 +3,7 @@
 
 """Discretisation module
 
-File containing Aggregated Hawkes Process functions (Hawkes Process discrete conversion).
+File containing aggregated Hawkes process functions (Hawkes process discrete conversion).
 
 """
 

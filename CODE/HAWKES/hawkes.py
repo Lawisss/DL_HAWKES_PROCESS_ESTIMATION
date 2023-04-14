@@ -3,7 +3,7 @@
 
 """Hawkes module
 
-File containing Hawkes Process function (simulation/estimation).
+File containing Hawkes process function (simulation/estimation).
 
 """
 

@@ -3,7 +3,7 @@
 
 """Hawkes MPI module
 
-File containing parallelized Hawkes Process function (simulation/estimation).
+File containing parallelized Hawkes process function (simulation/estimation).
 
 """
 
