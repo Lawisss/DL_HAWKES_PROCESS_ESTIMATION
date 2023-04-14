@@ -1,0 +1,36 @@
+📦CODE
+ ┣ 📂DL
+ ┃ ┣ 📜mlp.py
+ ┃ ┗ 📜vae.py
+ ┣ 📂HAWKES
+ ┃ ┣ 📂__pycache__
+ ┃ ┣ 📜discretisation.py
+ ┃ ┣ 📜hawkes.py
+ ┃ ┗ 📜hyperparameters.py
+ ┣ 📂HAWKES_MPI
+ ┃ ┣ 📜discretisation_mpi.py
+ ┃ ┣ 📜hawkes_mpi.py
+ ┃ ┗ 📜hyperparameters_mpi.py
+ ┣ 📂PREPROCESSING
+ ┃ ┗ 📜dataset.py
+ ┣ 📂RESULTS
+ ┃ ┣ 📜train_binned_hawkes_simulations.csv
+ ┃ ┣ 📜train_hawkes_hyperparams.csv
+ ┃ ┗ 📜train_hawkes_simulations.csv
+ ┣ 📂SLURM
+ ┃ ┣ 📜discretisation.sh
+ ┃ ┣ 📜hawkes.sh
+ ┃ ┗ 📜hyperparameters.sh
+ ┣ 📂UTILS
+ ┃ ┣ 📂__pycache__
+ ┃ ┣ 📜utils.py
+ ┃ ┗ 📜utils_mpi.py
+ ┣ 📂VARIABLES
+ ┃ ┣ 📂__pycache__
+ ┃ ┣ 📜evaluation_var.py
+ ┃ ┣ 📜hawkes_var.py
+ ┃ ┣ 📜mlp_var.py
+ ┃ ┣ 📜preprocessing_var.py
+ ┃ ┗ 📜vae_var.py
+ ┣ 📜tutorial.ipynb
+ ┗ 📜__init__.py
