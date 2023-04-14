@@ -2,16 +2,16 @@
 
 #SBATCH --job-name=discretisation                          
 #SBATCH --partition=cpu_short                               
-#SBATCH --nodes=<nnodes>                                    
+#SBATCH --nodes=1                                
 #SBATCH --ntasks=1                                          
-#SBATCH --ntasks-per-node=<ntpn>
-#SBATCH --cpus-per-task=<ntpt>
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
-#SBATCH --gres=gpu:<ngpus>
-#SBATCH --time=00:20:00
+#SBATCH --gres=gpu:1
+#SBATCH --time=00:10:00
 
-#SBATCH --output=%x.o%j
-#SBATCH --error=%x.o%j
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.out
 
 #SBATCH --mail-user=nicolas.girard@centralesupelec.fr   
 #SBATCH --mail-type=ALL
@@ -26,12 +26,12 @@
 
 ###################################################################################################################
 
-# Loaded necessary modules
+# Cleaned and moaded necessary modules
 module purge
 module load anaconda3/2022.10/gcc-11.2.0 
 
 # Activated anaconda environment
-source activate numpy-env
+source activate hawkes
 
 # Run python script
 python discretisation.py

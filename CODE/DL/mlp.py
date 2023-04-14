@@ -6,7 +6,9 @@
 File containing MLP Aggregated/Binned Hawkes Process estimation.
 
 """
+
 import os 
+from typing import Tuple, Union
 
 import torch
 import numpy as np
@@ -15,7 +17,6 @@ from tqdm import tqdm
 import torch.optim as optim
 from torchinfo import summary
 from torch.linalg import norm
-from typing import Tuple, Union
 from torch.utils.data import DataLoader
 from torch.nn.utils import parameters_to_vector
 from torch.utils.tensorboard import SummaryWriter

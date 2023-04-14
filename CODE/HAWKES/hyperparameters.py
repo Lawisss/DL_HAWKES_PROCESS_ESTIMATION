@@ -7,8 +7,9 @@ File containing Hawkes process hyper-parameters generation functions (Default Pa
 
 """
 
-import numpy as np
 from typing import Tuple
+
+import numpy as np
 
 import VARIABLES.hawkes_var as hwk
 from UTILS.utils import write_csv

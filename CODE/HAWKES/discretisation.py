@@ -7,8 +7,9 @@ File containing aggregated Hawkes process functions (Hawkes process discrete con
 
 """
 
-import numpy as np
 from functools import partial
+
+import numpy as np
 
 import VARIABLES.hawkes_var as hwk
 from UTILS.utils import write_csv

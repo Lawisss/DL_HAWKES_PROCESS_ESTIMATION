@@ -7,10 +7,10 @@ File containing all MPI utils functions used in other modules (python files).
 """
 
 import os 
+from typing import List
 
 import numpy as np
 import pandas as pd
-from typing import List
 from mpi4py import MPI
 
 import VARIABLES.preprocessing_var as prep

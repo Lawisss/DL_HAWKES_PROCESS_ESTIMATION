@@ -7,11 +7,11 @@ File containing all utils functions used in other modules (python files).
 """
 
 import os 
+from functools import wraps
+from typing import List, Callable
 
 import pandas as pd
 import numpy as np
-from typing import List, Callable
-from functools import wraps
 from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
 from torch.profiler import profile, ProfilerActivity

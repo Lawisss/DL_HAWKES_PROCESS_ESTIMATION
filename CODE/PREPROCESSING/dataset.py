@@ -7,9 +7,10 @@ File containing DL preprocessing function.
 
 """
 
+from typing import Tuple
+
 import torch
 import numpy as np
-from typing import Tuple
 from torch.utils.data import DataLoader, TensorDataset
 
 import VARIABLES.preprocessing_var as prep

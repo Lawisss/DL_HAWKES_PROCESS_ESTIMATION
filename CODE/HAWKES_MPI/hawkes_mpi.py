@@ -7,11 +7,12 @@ File containing parallelized Hawkes process function (simulation/estimation).
 
 """
 
+from functools import partial
+from typing import Tuple, TypedDict
+
 import numpy as np
 import Hawkes as hk
 from mpi4py import MPI
-from functools import partial
-from typing import Tuple, TypedDict
 
 from UTILS.utils import write_csv
 import VARIABLES.hawkes_var as hwk

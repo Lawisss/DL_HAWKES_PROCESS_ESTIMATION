@@ -7,10 +7,11 @@ File containing Hawkes process function (simulation/estimation).
 
 """
 
-import numpy as np
-import Hawkes as hk
 from functools import partial
 from typing import Tuple, TypedDict
+
+import numpy as np
+import Hawkes as hk
 
 from UTILS.utils import write_csv
 import VARIABLES.hawkes_var as hwk

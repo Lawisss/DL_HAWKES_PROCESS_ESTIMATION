@@ -7,9 +7,10 @@ File containing parallelized Hawkes process hyper-parameters generation function
 
 """
 
+from typing import Tuple
+
 import numpy as np
 from mpi4py import MPI
-from typing import Tuple
 
 import VARIABLES.hawkes_var as hwk
 from UTILS.utils import write_csv
