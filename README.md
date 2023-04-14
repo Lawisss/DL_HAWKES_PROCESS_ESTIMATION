@@ -74,7 +74,11 @@ python -m tutorial.ipynb
 | [Evaluation](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/evaluation.py)				  | .py                                 | LIBRARY                       	     | ✔️                                   | Executed/Monitored evaluation          |
 
 
+## Roadmap
 
+* Leveraged document-level sentiment annotations abundant online (consumer reviews for movies or products). 
+* Described our dataset ([Large Movie Review Dataset](https://ai.stanford.edu/~amaas/data/sentiment/)) and our model. 
+* Evaluated our approach on a large dataset of informal movie reviews to compare it with published results.
 
 ## Contacts
 
