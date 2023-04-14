@@ -18,6 +18,13 @@ from UTILS.utils import write_csv
 
 def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
+    """_summary_
+
+    Returns:
+        _type_: _description_
+
+    """
+    
     # Generated random vectors of size PROCESS_NUM
     epsilon = np.random.normal(hwk.EXPECTED_ACTIVITY, hwk.STD, hwk.PROCESS_NUM)
     eta = np.random.uniform(hwk.MIN_ITV_ETA, hwk.MAX_ITV_ETA, hwk.PROCESS_NUM)

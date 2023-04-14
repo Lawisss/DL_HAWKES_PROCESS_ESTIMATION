@@ -20,6 +20,13 @@ from UTILS.utils import write_csv
 
 def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_hawkes_simulations.csv') -> np.ndarray:
 
+    """AI is creating summary for 
+
+    Returns:
+        [type]: [description]
+
+    """    
+
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -55,6 +62,13 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 # Calculated minimum stepsize between events in a given Hawkes process 
 
 def temp_func(jump_times: np.ndarray) -> float:
+
+    """AI is creating summary for 
+
+    Returns:
+        [type]: [description]
+        
+    """    
 
     # If no event has been recorded, step size = hwk.TIME_HORIZON
     if len(jump_times) == 0:

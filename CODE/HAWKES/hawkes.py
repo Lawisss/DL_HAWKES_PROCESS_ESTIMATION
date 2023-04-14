@@ -19,6 +19,17 @@ import VARIABLES.hawkes_var as hwk
 # Simulated Hawkes process 
 
 def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> Tuple[hk.simulator, np.ndarray]:
+    
+    """AI is creating summary for hawkes_simulation
+
+    Args:
+        params (TypedDict, optional): [description]. Defaults to {"mu": 0.1, "alpha": 0.5, "beta": 10.0}.
+
+    Returns:
+        Tuple[hk.simulator, np.ndarray]: [description]
+
+    """
+
     # Created Hawkes process with a given kernel, baseline and parameters
     hawkes_process = hk.simulator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE).set_parameter(params)
     # Simulated Hawkes process in a given time interval
@@ -35,6 +46,19 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.csv') -> np.ndarray:
     
+    """_summary_
+
+    Args:
+        mu (np.ndarray): _description_
+        alpha (np.ndarray): _description_
+        beta (np.ndarray): _description_
+        filename (str, optional): _description_. Defaults to 'hawkes_simulations.csv'.
+
+    Returns:
+        np.ndarray: _description_
+
+    """
+
     # Initialized array to store Hawkes processes (Pre-allocate memory)
     simulated_events_seqs = np.zeros((hwk.PROCESS_NUM, hwk.TIME_HORIZON), dtype=np.float32)
 
@@ -59,6 +83,13 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
 
 def hawkes_estimation(T: np.ndarray, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
+    """_summary_
+
+    Returns:
+        _type_: _description_
+        
+    """
+
     # Estimated Hawkes process parameters with the given kernel, baseline and parameters
     hawkes_process = hk.estimator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE)
     hawkes_process.fit(T, [hwk.TIME_ITV_START, hwk.TIME_HORIZON])

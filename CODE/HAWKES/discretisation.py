@@ -18,6 +18,17 @@ from UTILS.utils import write_csv
 # Jump times histogram for each process (counted number of events which occurred over each interval)
 
 def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.csv') -> np.ndarray:
+    
+    """AI is creating summary for discretise
+
+    Args:
+        jump_times (np.ndarray): [description]
+        filename (str, optional): [description]. Defaults to 'binned_hawkes_simulations.csv'.
+
+    Returns:
+        np.ndarray: [description]
+
+    """
 
     # Computed bins number
     num_bins = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)
@@ -42,6 +53,13 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
 
 def temp_func(jump_times: np.ndarray) -> float:
 
+    """AI is creating summary for 
+
+    Returns:
+        [type]: [description]
+
+    """    
+
     # If no event has been recorded, step size = hwk.TIME_HORIZON
     if len(jump_times) == 0:
         stepsize = hwk.TIME_HORIZON 
@@ -62,6 +80,13 @@ def temp_func(jump_times: np.ndarray) -> float:
 # Calculated temp_func(x, hwk.TIME_HORIZON) minimum for each element x in jump_times
 
 def find_stepsize(jump_times: np.ndarray) -> float:
+
+    """AI is creating summary for 
+
+    Returns:
+        [type]: [description]
+    """    
+
     # temp_func computed distance between x and the next value in jump_times
     # Minimum value is the minimum jump time between two successive events 
     return np.min(list(map(temp_func, jump_times)))
@@ -70,6 +95,13 @@ def find_stepsize(jump_times: np.ndarray) -> float:
 # Computed point process jump times from the events history and the time hwk.TIME_HORIZON
 
 def jump_times(h: np.ndarray) -> np.ndarray:
+
+    """AI is creating summary for 
+
+    Returns:
+        [type]: [description]
+    """    
+
     # Size of each interval
     stepsize = hwk.TIME_HORIZON / len(h)
 
