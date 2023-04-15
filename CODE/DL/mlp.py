@@ -183,7 +183,7 @@ class MLPTrainer(MLP):
         # Checked early stopping
         # Save model if val_loss has decreased
         if self.val_loss < best_loss:
-
+            
             torch.save(self.model.state_dict(), f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}")
             best_loss = self.val_loss
             no_improve_count = 0
