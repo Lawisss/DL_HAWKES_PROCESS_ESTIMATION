@@ -3,7 +3,7 @@
 
 """Hyper-parameters MPI module
 
-File containing parallelized Hawkes process hyper-parameters generation functions (Default Parameter Values).
+File containing parallelized Hawkes process hyper-parameters generation functions (Default Parameter Values)
 
 """
 

@@ -3,7 +3,7 @@
 
 """Dataset module
 
-File containing DL preprocessing function.
+File containing DL preprocessing function
 
 """
 

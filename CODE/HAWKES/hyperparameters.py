@@ -3,7 +3,7 @@
 
 """Hyper-parameters module
 
-File containing Hawkes process hyper-parameters generation functions (Default Parameter Values).
+File containing Hawkes process hyper-parameters generation functions (Default Parameter Values)
 
 """
 

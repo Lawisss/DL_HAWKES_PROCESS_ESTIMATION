@@ -3,7 +3,7 @@
 
 """Discretisation MPI module
 
-File containing parallelized Aggregated Hawkes process functions (Hawkes process discrete conversion).
+File containing parallelized Aggregated Hawkes process functions (Hawkes process discrete conversion)
 
 """
 

@@ -2,7 +2,7 @@
 
 """Utils module
 
-File containing all utils functions used in other modules (python files).
+File containing all utils functions used in other modules (python files)
 
 """
 
@@ -25,7 +25,7 @@ import VARIABLES.evaluation_var as eval
 def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
 
     """
-    Write dictionaries list to a CSV file
+    Written dictionaries list to a CSV file
 
     Args:
         data (List[dict]): Dictionaries list, where each dictionary represents row in CSV file
@@ -98,7 +98,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 def profiling(func: Callable = None, enable: bool = False) -> Callable:
 
     """
-    Decorator function for profiling PyTorch models using TensorBoard
+    Decorator function for profiling models using TensorBoard
 
     Args:
         func (Callable): Function to be decorated

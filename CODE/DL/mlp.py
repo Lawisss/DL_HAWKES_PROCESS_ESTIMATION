@@ -3,7 +3,7 @@
 
 """MLP module
 
-File containing MLP Aggregated/Binned Hawkes Process estimation.
+File containing MLP Aggregated/Binned Hawkes Process estimation
 
 """
 
@@ -143,7 +143,7 @@ class MLPTrainer(MLP):
     def evaluate(self, val_loader: DataLoader) -> float:
 
         """
-        Evaluate performance of model on validation set
+        Evaluated model performance on validation set
 
         Args:
             val_loader (DataLoader): Validation set
@@ -203,7 +203,7 @@ class MLPTrainer(MLP):
     def load_model(self) -> str:  
 
         """
-        Load best model from saved file
+        Loaded best model from saved file
 
         Returns:
             str: Message indicating that best model has been loaded
@@ -225,7 +225,7 @@ class MLPTrainer(MLP):
             dtype (torch.dtype): Type for tensor operations (default: torch.float32)
 
         Returns:
-            Tuple[torch.Tensor, float, float]: Estimations for validation set, branching ratio (eta), and baseline intensity (mu)
+            Tuple[torch.Tensor, float, float]: Estimations for branching ratio (eta), and baseline intensity (mu)
         """        
 
         val_y_pred = self.model(val_x)
@@ -242,7 +242,8 @@ class MLPTrainer(MLP):
     @profiling(enable=False)
     def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
-        """Trained and evaluated model, returned model, training/validation losses, and predictions
+        """
+        Trained and evaluated model
 
         Args:
             train_loader (DataLoader): Training data

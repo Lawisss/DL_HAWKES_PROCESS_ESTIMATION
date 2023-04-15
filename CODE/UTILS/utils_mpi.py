@@ -2,7 +2,7 @@
 
 """Utils MPI module
 
-File containing all MPI utils functions used in other modules (python files).
+File containing all MPI utils functions used in other modules (python files)
 
 """
 
@@ -20,7 +20,7 @@ import VARIABLES.preprocessing_var as prep
 def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
 
     """
-    Write dictionaries list to a CSV file in parallel using MPI
+    Written dictionaries list to CSV file in parallel using MPI
 
     Args:
         data (List[dict]): Dictionaries list, where each dictionary represents row in CSV file

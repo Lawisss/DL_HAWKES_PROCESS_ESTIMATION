@@ -3,7 +3,7 @@
 
 """Hawkes module
 
-File containing Hawkes process function (simulation/estimation).
+File containing Hawkes process function (simulation/estimation)
 
 """
 
@@ -84,7 +84,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
 def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
-    Estimated Hawkes process from event times and returns predicted process and performance metrics
+    Estimated Hawkes process from event times, returned predicted process and performance metrics
 
     Args:
         t (np.ndarray): Event times
