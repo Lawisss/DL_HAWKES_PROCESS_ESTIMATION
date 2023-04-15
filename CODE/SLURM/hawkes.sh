@@ -21,7 +21,7 @@
 ################################################# DOCUMENTATION ###################################################
 
 # Description: Hawkes process simulation task
-# Usage: sbatch "$HOME/$SLURM/hawkes.sh"
+# Usage: sbatch "$SLURM/hawkes.sh"
 # (In .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM")
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
@@ -40,4 +40,4 @@ if ! conda info --envs | grep -q "^hawkes "; then
 fi
 
 # Run python script (In .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
-python "$HOME/$HAWKES/hawkes.py"
+python "$HAWKES/hawkes.py"
