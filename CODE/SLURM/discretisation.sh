@@ -34,4 +34,4 @@ module load anaconda3/2022.10/gcc-11.2.0
 source activate hawkes
 
 # Run python script
-python discretisation.py
+python "$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES/discretisation.py"
