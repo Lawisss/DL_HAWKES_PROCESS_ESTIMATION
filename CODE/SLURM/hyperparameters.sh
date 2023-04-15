@@ -27,12 +27,17 @@
 
 ###################################################################################################################
 
-# Loaded necessary modules
-module purge
-module load anaconda3/2022.10/gcc-11.2.0 
+# Checked if necessary modules was loaded, if not, cleaned and did it
+if ! module list | grep -q anaconda3/2022.10/gcc-11.2.0; then
+  module purge
+  module load anaconda3/2022.10/gcc-11.2.0
+fi
 
-# Activated anaconda environment
-source activate hawkes
+# Checked if virtual environment is activated, if not, did it
+if ! conda info --envs | grep -q "^hawkes "; then
+  # Activated environment
+  source activate hawkes
+fi
 
 # Run python script (In .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
 python "$HOME/$HAWKES/hyperparameters.py"

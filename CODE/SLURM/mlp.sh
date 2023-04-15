@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=hyperparameters                          
+#SBATCH --job-name=mlp                         
 #SBATCH --partition=cpu_short                               
 #SBATCH --nodes=1                                 
 #SBATCH --ntasks=1                                          
@@ -27,13 +27,18 @@
 
 ###########################################################################################################################
 
-# Loaded necessary modules
-module purge
-module load anaconda3/2022.10/gcc-11.2.0
-module load cuda/12.0.0/gcc-11.2.0
+# Checked if necessary modules was loaded, if not, cleaned and did it
+if ! module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" || ! module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0"; then
+  module purge
+  module load anaconda3/2022.10/gcc-11.2.0
+  module load cuda/12.0.0/gcc-11.2.0
+fi
 
-# Activated anaconda environment
-source activate hawkes
+# Checked if virtual environment is activated, if not, did it
+if ! conda info --envs | grep -q "^hawkes "; then
+  # Activated environment
+  source activate hawkes
+fi
 
 # Run python script (In .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/DL")
 python "$HOME/$DL/mlp.py"
