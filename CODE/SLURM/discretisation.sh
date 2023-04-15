@@ -21,7 +21,8 @@
 ################################################# DOCUMENTATION ###################################################
 
 # Description: Hawkes process aggregation task
-# Usage: sbatch "$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM/discretisation.sh"
+# Usage: sbatch "$HOME/$SLURM/discretisation.sh" 
+# (In .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM")
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
 ###################################################################################################################
@@ -33,5 +34,5 @@ module load anaconda3/2022.10/gcc-11.2.0
 # Activated anaconda environment
 source activate hawkes
 
-# Run python script
-python "$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES/discretisation.py"
+# Run python script (In .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
+python "$HOME/$HAWKES/discretisation.py"
