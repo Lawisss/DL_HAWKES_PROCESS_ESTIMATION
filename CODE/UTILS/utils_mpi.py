@@ -19,8 +19,20 @@ import VARIABLES.preprocessing_var as prep
 
 def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
 
-    """_summary_
+    """
+    Write dictionaries list to a CSV file in parallel using MPI
 
+    Args:
+        data (List[dict]): Dictionaries list, where each dictionary represents row in CSV file
+        filename (str): Filename to write data to. If not specified, empty string is used
+        mode (str): Mode to open file in. Defaults to 'w' (write mode)
+        encoding (str): Encoding to use when writing to file. Defaults to 'utf-8'
+
+    Returns:
+        None: Function does not return anything
+
+    Raises:
+        IOError: If there is error writing to the file
     """
 
     # Initialized MPI
@@ -62,11 +74,17 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
 
-    """_summary_
+    """
+    Red CSV file in parallel using MPI
+
+    Args:
+        filename (str): CSV filename to read
+        delimiter (str, optional): Delimiter used in CSV file. Defaults to ','
+        mode (str, optional): Mode used to open CSV file. Defaults to 'r'
+        encoding (str, optional): Encoding used to read CSV file. Defaults to 'utf-8'
 
     Returns:
-        _type_: _description_
-        
+           pandas.DataFrame: DataFrame containing data from CSV file
     """
 
     # Initialized MPI

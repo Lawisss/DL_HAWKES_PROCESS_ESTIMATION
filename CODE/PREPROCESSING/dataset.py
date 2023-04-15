@@ -16,12 +16,6 @@ from torch.utils.data import DataLoader, TensorDataset
 import VARIABLES.preprocessing_var as prep
 
 
-# Input data
-
-# X = np.random.randn(prep.INPUT_SIZE, 1).astype(np.float32)
-# Y = np.random.randn(prep.INPUT_SIZE, prep.OUTPUT_SIZE).astype(np.float32)
-
-
 # Splitting function
 
 def split_data(x: np.ndarray, y: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:

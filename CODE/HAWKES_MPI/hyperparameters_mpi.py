@@ -19,11 +19,19 @@ from UTILS.utils import write_csv
 
 def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
-    """_summary_
+    """
+    Generated and saved Hawkes process hyperparameters
+
+    Args:
+        filename: Filename to save hyperparameters in CSV file
+        root (int): Rank of process to use as root for MPI communications. Default is 0
 
     Returns:
-        _type_: _description_
-
+        A tuple containing:
+        - Alpha, beta, and mu parameters for each process
+        - Alpha parameters for each process
+        - Beta parameters for each process
+        - Mu parameters for each process
     """
     
     # Initialized MPI

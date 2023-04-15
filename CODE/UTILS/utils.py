@@ -24,10 +24,22 @@ import VARIABLES.evaluation_var as eval
 
 def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
 
-    """_summary_
-
     """
-    
+    Write dictionaries list to a CSV file
+
+    Args:
+        data (List[dict]): Dictionaries list, where each dictionary represents row in CSV file
+        filename (str): Filename to write data to. If not specified, empty string is used
+        mode (str): Mode to open file in. Defaults to 'w' (write mode)
+        encoding (str): Encoding to use when writing to file. Defaults to 'utf-8'
+
+    Returns:
+        None: Function does not return anything
+
+    Raises:
+        IOError: If there is error writing to the file
+    """
+
     try:
         if not isinstance(data, list):
             data = [data]
@@ -53,11 +65,17 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
 
-    """_summary_
+    """
+    Red CSV file and loaded as a DataFrame
+
+    Args:
+        filename (str): Filename to read
+        delimiter (str, optional): Delimiter used to separate fields in the file. Defaults to ','
+        mode (str, optional): Mode in which file is opened. Defaults to 'r'
+        encoding (str, optional): Character encoding used to read file. Defaults to 'utf-8'
 
     Returns:
-        _type_: _description_
-
+        pd.DataFrame: DataFrame containing file contents
     """
 
     try:
@@ -79,11 +97,15 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 def profiling(func: Callable = None, enable: bool = False) -> Callable:
 
-    """_summary_
+    """
+    Decorator function for profiling PyTorch models using TensorBoard
+
+    Args:
+        func (Callable): Function to be decorated
+        enable (bool): Flag indicating whether profiling is enabled or not. Defaults to False.
 
     Returns:
-        _type_: _description_
-        
+        Callable: Decorated function
     """
     
     # Executed only when decorating function

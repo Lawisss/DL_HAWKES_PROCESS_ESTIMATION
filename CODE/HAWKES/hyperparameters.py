@@ -18,11 +18,18 @@ from UTILS.utils import write_csv
 
 def hyper_params_simulation(filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
-    """_summary_
+    """
+    Generated and saved Hawkes process hyperparameters
+
+    Args:
+        filename: Filename to save hyperparameters in CSV file
 
     Returns:
-        _type_: _description_
-
+        A tuple containing:
+        - Alpha, beta, and mu parameters for each process
+        - Alpha parameters for each process
+        - Beta parameters for each process
+        - Mu parameters for each process
     """
     
     # Generated random vectors of size PROCESS_NUM

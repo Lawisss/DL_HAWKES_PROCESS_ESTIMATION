@@ -48,11 +48,14 @@ class MLP(nn.Module):
     # Spread inputs through hidden layers, ReLU function and returns outputs
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-        """_summary_
+        """
+        Applied forward pass through NN layers and returned output tensor
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (batch_size, input_size)
 
         Returns:
-            _type_: _description_
-
+            torch.Tensor: Output tensor of shape (batch_size, output_size)
         """
 
         for layer in self.layers:
@@ -87,11 +90,11 @@ class MLPTrainer(MLP):
 
     def summary_model(self) -> str:
 
-        """_summary_
-
+        """
+        Return summary of model architecture
+        
         Returns:
-            _type_: _description_
-
+            str: Summary of model's architecture
         """
 
         summary(self.model, input_size=mlp.INPUT_SIZE, input_data=[mlp.BATCH_SIZE, mlp.INPUT_SIZE], batch_dim=mlp.BATCH_SIZE, 
@@ -105,11 +108,14 @@ class MLPTrainer(MLP):
     @torch.enable_grad()
     def run_epoch(self, train_loader: DataLoader) -> float:
 
-        """_summary_
+        """
+        Run one training epoch and returned average training loss
+
+        Args:
+            train_loader (DataLoader): Training set
 
         Returns:
-            _type_: _description_
-
+            float: Average training loss over one epoch
         """
         
         self.model.train()
@@ -136,11 +142,14 @@ class MLPTrainer(MLP):
     @torch.no_grad()
     def evaluate(self, val_loader: DataLoader) -> float:
 
-        """_summary_
+        """
+        Evaluate performance of model on validation set
+
+        Args:
+            val_loader (DataLoader): Validation set
 
         Returns:
-            _type_: _description_
-
+            float: Average validation loss over validation set
         """
 
         self.model.eval()
@@ -160,12 +169,16 @@ class MLPTrainer(MLP):
 
     def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0) -> bool:
         
-        """_summary_
+        """
+        Checked early stopping condition based on validation loss
+
+        Args:
+            best_loss (float or int, optional): Current best validation loss. Defaults to float('inf')
+            no_improve_count (int, optional): Number of epochs with no improvement in validation loss. Defaults to 0
 
         Returns:
-            _type_: _description_
-
-        """        
+            bool: True if early stopping condition is met, False otherwise
+        """    
         
         # Checked early stopping
         # Save model if val_loss has decreased
@@ -189,11 +202,11 @@ class MLPTrainer(MLP):
     # Loading model function (best model)
     def load_model(self) -> str:  
 
-        """_summary_
+        """
+        Load best model from saved file
 
         Returns:
-            _type_: _description_
-
+            str: Message indicating that best model has been loaded
         """     
 
         self.model.load_state_dict(torch.load(f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}"))
@@ -204,11 +217,15 @@ class MLPTrainer(MLP):
     @torch.no_grad()
     def predict(self, val_x: torch.Tensor, dtype: torch.dtype = torch.float32) -> Tuple[torch.Tensor, float, float]:
 
-        """_summary_
+        """
+        Estimated Hawkes parameters using validation dataset
+
+        Args:
+            val_x (torch.Tensor): Input tensor for validation dataset
+            dtype (torch.dtype): Type for tensor operations (default: torch.float32)
 
         Returns:
-            _type_: _description_
-
+            Tuple[torch.Tensor, float, float]: Estimations for validation set, branching ratio (eta), and baseline intensity (mu)
         """        
 
         val_y_pred = self.model(val_x)
@@ -225,11 +242,15 @@ class MLPTrainer(MLP):
     @profiling(enable=False)
     def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
-        """_summary_
+        """Trained and evaluated model, returned model, training/validation losses, and predictions
+
+        Args:
+            train_loader (DataLoader): Training data
+            val_loader (DataLoader): Validation data
+            val_x (torch.Tensor): Input features for validation data
 
         Returns:
-            _type_: _description_
-
+            Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]: Model, losses, predictions, eta/mu
         """
 
         # Initialized Tensorboard

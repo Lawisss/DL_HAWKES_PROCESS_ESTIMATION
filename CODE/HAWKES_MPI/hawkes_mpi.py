@@ -22,12 +22,17 @@ import VARIABLES.hawkes_var as hwk
 
 def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, root: int = 0) -> Tuple[hk.simulator, np.ndarray]:
 
-    """_summary_
+    """
+    Simulated parallelized Hawkes process with given parameters
+
+    Args:
+        params (TypedDict, optional): Parameters of Hawkes process. Default is {"mu": 0.1, "alpha": 0.5, "beta": 10.0}
+        root (int): Rank of process to use as root for MPI communications. Default is 0
 
     Returns:
-        _type_: _description_
-
+        Tuple[hk.simulator, np.ndarray]: Hawkes process simulator and the simulated times
     """
+    
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -50,11 +55,11 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
     T = hawkes_process.simulate([start_time, end_time])
 
     # Gathered results from all processes
-    T_processes = comm.gather(T, root=root)
+    t_processes = comm.gather(T, root=root)
 
     # Concatenated results
     if rank == 0:
-        T = np.concatenate(T_processes)
+        T = np.concatenate(t_processes)
 
     return hawkes_process, T
 
@@ -63,11 +68,18 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root: int = 0, filename: str='hawkes_simulations.csv') -> np.ndarray:
     
-    """_summary_
+    """
+    Simulated several parallelized Hawkes processes using parameters, and saved results to CSV file 
+
+    Args:
+        mu (np.ndarray): Base intensity of each Hawkes process
+        alpha (np.ndarray): Excitation matrix of each Hawkes process
+        beta (np.ndarray): Decay matrix of each Hawkes process
+        root (int): Rank of process to use as root for MPI communications. Default is 0
+        filename (str, optional): CSV filename to save results to. Defaults to 'hawkes_simulations.csv'
 
     Returns:
-        _type_: _description_
-
+        np.ndarray: Simulated event sequences of each Hawkes process
     """
     
     # Initialized MPI
@@ -110,15 +122,24 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
     return simulated_events_seqs
 
 
-# Estimated Hawkes process
+# Parallelized estimated Hawkes process
 
-def hawkes_estimation(T: np.ndarray, root: int = 0, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
-    """_summary_
+    """
+    Estimated parallelized Hawkes process from event times and returns predicted process and performance metrics
+
+    Args:
+        t (np.ndarray): Event times
+        root (int): Rank of process to use as root for MPI communications. Default is 0
+        filename (str, optional): CSV filename for performance metrics. Defaults to "hawkes_estimation.csv"
 
     Returns:
-        _type_: _description_
-
+        Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
+            - t_pred (np.ndarray): Predicted event times for estimated Hawkes process
+            - metrics (TypedDict): Performance metrics for the estimated Hawkes process
+            - t_transform (np.ndarray): Transformed event times such that the first observation is at 0 and the last at 1
+            - interval_transform (np.ndarray): Transformed inter-event intervals
     """
 
     # Initialized MPI
@@ -133,22 +154,22 @@ def hawkes_estimation(T: np.ndarray, root: int = 0, filename: str = "hawkes_esti
     params = comm.bcast([hwk.TIME_ITV_START, hwk.TIME_HORIZON, hwk.END_T, hwk.NUM_SEQ], root=root)
 
     # Distributed among processes
-    T_chunks = np.array_split(T, size)
-    T_chunk = comm.scatter(T_chunks, root=root)
+    t_chunks = np.array_split(t, size)
+    t_chunk = comm.scatter(t_chunks, root=root)
 
     # Fitted process on each chunk
-    hawkes_process.fit(T_chunk, params)
-    T_pred_chunk = hawkes_process.predict(params[2], params[3])
+    hawkes_process.fit(t_chunk, params)
+    t_pred_chunk = hawkes_process.predict(params[2], params[3])
 
     # Gathered all predicted chunks
-    T_pred_chunks = comm.gather(T_pred_chunk, root=root)
+    t_pred_chunks = comm.gather(t_pred_chunk, root=root)
 
     if rank == 0:
         # Concatenated predictions
-        T_pred = np.concatenate(T_pred_chunks)
+        t_pred = np.concatenate(t_pred_chunks)
 
         # Computed performance metrics for the estimated Hawkes process
-        metrics = {'Event(s)': len(T),
+        metrics = {'Event(s)': len(t),
                    'Parameters': {k: round(v, 3) for k, v in hawkes_process.para.items()},
                    'Branching Ratio': round(hawkes_process.br, 3),
                    'Log-Likelihood': round(hawkes_process.L, 3),
@@ -158,6 +179,6 @@ def hawkes_estimation(T: np.ndarray, root: int = 0, filename: str = "hawkes_esti
         write_csv(metrics, filename=filename)
 
         # Transformed times so that the first observation is at 0 and the last at 1
-        [T_transform, interval_transform] = hawkes_process.t_trans() 
+        [t_transform, interval_transform] = hawkes_process.t_trans() 
         
-        return T_pred, metrics, T_transform, interval_transform
+        return t_pred, metrics, t_transform, interval_transform

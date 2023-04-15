@@ -20,12 +20,17 @@ from UTILS.utils import write_csv
 
 def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_hawkes_simulations.csv') -> np.ndarray:
 
-    """AI is creating summary for 
+    """
+    Discretized parallelized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
+
+    Args:
+        jump_times (np.ndarray): Jump times for Hawkes process simulation
+        root (int): Rank of process to use as root for MPI communications. Default is 0
+        filename (str): Filename to write histogram data in CSV format. Default is "binned_hawkes_simulations.csv"
 
     Returns:
-        [type]: [description]
-
-    """    
+        np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
+    """  
 
     # Initialized MPI
     comm = MPI.COMM_WORLD
@@ -63,11 +68,13 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 
 def temp_func(jump_times: np.ndarray) -> float:
 
-    """AI is creating summary for 
+    """Calculated minimum step size between events in Hawkes process
+
+    Args:
+        jump_times (np.ndarray): Event times in Hawkes process
 
     Returns:
-        [type]: [description]
-        
+        float: Minimum step size between events in Hawkes process. If no events, step size is set to maximum time horizon
     """    
 
     # If no event has been recorded, step size = hwk.TIME_HORIZON
@@ -92,11 +99,15 @@ def temp_func(jump_times: np.ndarray) -> float:
 
 def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
 
-    """_summary_
+    """
+    Calculated parallelized minimum value of "temp_func(x, hwk.TIME_HORIZON)" for each element "x" in "jump_times"
+
+    Args:
+        jump_times (np.ndarray): Jump times
+        root (int): Rank of root process. Defaults to 0
 
     Returns:
-        _type_: _description_
-
+        float: Global minimum value of "temp_func(x, hwk.TIME_HORIZON)" for all elements "x" in "jump_times"
     """
 
     # Initialized MPI
@@ -125,11 +136,15 @@ def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
 
 def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
 
-    """_summary_
+    """
+    Computed parallelized point process jump times from events history and time horizon
+
+    Args:
+        h (np.ndarray): Event history of point process
+        root (int, optional): Rank of root process for gathering results. Defaults to 0
 
     Returns:
-        _type_: _description_
-        
+        np.ndarray: Jump times for point process
     """
 
     # Initialized MPI
