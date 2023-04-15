@@ -21,7 +21,7 @@
 ################################################# DOCUMENTATION ###################################################
 
 # Description: Hawkes process hyper-parameters generation task
-# Usage: sbatch hyperparameters.sh
+# Usage: sbatch "$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM/hyperparameters.sh"
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
 ###################################################################################################################
