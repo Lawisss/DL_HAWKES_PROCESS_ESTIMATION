@@ -23,6 +23,10 @@ import VARIABLES.evaluation_var as eval
 # CSV file writing function
 
 def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
+
+    """_summary_
+
+    """
     
     try:
         if not isinstance(data, list):
@@ -49,6 +53,13 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
 
+    """_summary_
+
+    Returns:
+        _type_: _description_
+
+    """
+
     try:
         with open(filepath=f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
 
@@ -67,6 +78,13 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 # Pytorch Tensorboard Profiling 
 
 def profiling(func: Callable = None, enable: bool = False) -> Callable:
+
+    """_summary_
+
+    Returns:
+        _type_: _description_
+        
+    """
     
     # Executed only when decorating function
     def prof_decorator(func: Callable) -> Callable:

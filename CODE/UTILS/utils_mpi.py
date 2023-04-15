@@ -19,6 +19,10 @@ import VARIABLES.preprocessing_var as prep
 
 def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
 
+    """_summary_
+
+    """
+
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -57,6 +61,13 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 # Parallelized CSV file reading function
 
 def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
+
+    """_summary_
+
+    Returns:
+        _type_: _description_
+        
+    """
 
     # Initialized MPI
     comm = MPI.COMM_WORLD

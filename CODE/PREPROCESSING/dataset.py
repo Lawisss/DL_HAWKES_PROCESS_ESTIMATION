@@ -24,32 +24,59 @@ import VARIABLES.preprocessing_var as prep
 
 # Splitting function
 
-def split_data(X: np.ndarray, Y: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def split_data(x: np.ndarray, y: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+
+    """
+    Splitted data into train, validation, and test sets
+
+    Args:
+        x (np.ndarray): Input features
+        y (np.ndarray): target values
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+            Training features, training targets, validation features, validation targets, test features, and test targets
+    """
 
     # Initialized sizing
-    val_size = int(len(X) * prep.VAL_RATIO)
-    test_size = int(len(X) * prep.TEST_RATIO)
-    train_size = len(X) - val_size - test_size
+    val_size = int(len(x) * prep.VAL_RATIO)
+    test_size = int(len(x) * prep.TEST_RATIO)
+    train_size = len(x) - val_size - test_size
 
     # Train/Val/Test split
-    train_X, val_X, test_X = torch.tensor(X[:train_size], dtype=torch.float32), torch.tensor(X[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(X[train_size+val_size:], dtype=torch.float32)
-    train_Y, val_Y, test_Y = torch.tensor(Y[:train_size], dtype=torch.float32), torch.tensor(Y[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(Y[train_size+val_size:], dtype=torch.float32)
+    train_x, val_x, test_x = torch.tensor(x[:train_size], dtype=torch.float32), torch.tensor(x[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(x[train_size+val_size:], dtype=torch.float32)
+    train_y, val_y, test_y = torch.tensor(y[:train_size], dtype=torch.float32), torch.tensor(y[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(y[train_size+val_size:], dtype=torch.float32)
 
     # Moved tensors to CPU/GPU
-    train_X, val_X, test_X = train_X.to(prep.DEVICE), val_X.to(prep.DEVICE), test_X.to(prep.DEVICE)
-    train_Y, val_Y, test_Y = train_Y.to(prep.DEVICE), val_Y.to(prep.DEVICE), test_Y.to(prep.DEVICE)
+    train_x, val_x, test_x = train_x.to(prep.DEVICE), val_x.to(prep.DEVICE), test_x.to(prep.DEVICE)
+    train_y, val_y, test_y = train_y.to(prep.DEVICE), val_y.to(prep.DEVICE), test_y.to(prep.DEVICE)
 
-    return train_X, train_Y, val_X, val_Y, test_X, test_Y
+    return train_x, train_y, val_x, val_y, test_x, test_y
 
 
 # Dataset creation function
 
-def create_datasets(train_X: torch.Tensor, train_Y: torch.Tensor, val_X: torch.Tensor, val_Y: torch.Tensor, test_X: torch.Tensor, test_Y: torch.Tensor) -> Tuple[TensorDataset, TensorDataset, TensorDataset]:
+def create_datasets(train_x: torch.Tensor, train_y: torch.Tensor, val_x: torch.Tensor, val_y: torch.Tensor, test_x: torch.Tensor, test_y: torch.Tensor) -> Tuple[TensorDataset, TensorDataset, TensorDataset]:
+
+    """
+    Created training, validation, and test sets from input tensors
+
+    Args:
+        train_x (torch.Tensor): Input tensor for training data
+        train_y (torch.Tensor): Target tensor for training data
+        val_x (torch.Tensor): Input tensor for validation data
+        val_y (torch.Tensor): Target tensor for validation data
+        test_x (torch.Tensor): Input tensor for test data
+        test_y (torch.Tensor): Target tensor for test data
+
+    Returns:
+        Tuple[TensorDataset, TensorDataset, TensorDataset]: training, validation, and test sets
+    """
 
     # Datasets creation 
-    train_dataset = TensorDataset(train_X, train_Y)
-    val_dataset = TensorDataset(val_X, val_Y)
-    test_dataset = TensorDataset(test_X, test_Y)
+    train_dataset = TensorDataset(train_x, train_y)
+    val_dataset = TensorDataset(val_x, val_y)
+    test_dataset = TensorDataset(test_x, test_y)
 
     return train_dataset, val_dataset, test_dataset
 
@@ -57,6 +84,17 @@ def create_datasets(train_X: torch.Tensor, train_Y: torch.Tensor, val_X: torch.T
 # Data Loaders creation function
 
 def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset, test_dataset: TensorDataset) -> Tuple[DataLoader, DataLoader, DataLoader]:
+    
+    """Created data loaders for training, validation, and testing sets
+
+    Args:
+        train_dataset (TensorDataset): Training dataset
+        val_dataset (TensorDataset): Validation dataset
+        test_dataset (TensorDataset): Testing dataset
+
+    Returns:
+        Tuple[DataLoader, DataLoader, DataLoader]: Data loaders for the training, validation, and testing sets
+    """
     
     # Data Loaders creation (speed up loading process with drop_last, num_workers, pin_memory)
     train_loader = DataLoader(train_dataset, batch_size=prep.BATCH_SIZE, shuffle=prep.SHUFFLE, drop_last=prep.DROP_LAST, num_workers=prep.NUM_WORKERS, pin_memory=prep.PIN_MEMORY)

@@ -92,6 +92,13 @@ def temp_func(jump_times: np.ndarray) -> float:
 
 def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
 
+    """_summary_
+
+    Returns:
+        _type_: _description_
+
+    """
+
     # Initialized MPI
     comm = MPI.COMM_WORLD
     _ = comm.Get_rank()
@@ -117,6 +124,13 @@ def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
 # Computed parallelized point process jump times from the events history and the time hwk.TIME_HORIZON
 
 def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
+
+    """_summary_
+
+    Returns:
+        _type_: _description_
+        
+    """
 
     # Initialized MPI
     comm = MPI.COMM_WORLD

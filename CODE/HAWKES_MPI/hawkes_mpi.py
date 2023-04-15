@@ -22,6 +22,12 @@ import VARIABLES.hawkes_var as hwk
 
 def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, root: int = 0) -> Tuple[hk.simulator, np.ndarray]:
 
+    """_summary_
+
+    Returns:
+        _type_: _description_
+
+    """
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
@@ -56,6 +62,13 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 # Parallelized simulated Hawkes processes
 
 def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root: int = 0, filename: str='hawkes_simulations.csv') -> np.ndarray:
+    
+    """_summary_
+
+    Returns:
+        _type_: _description_
+
+    """
     
     # Initialized MPI
     comm = MPI.COMM_WORLD
@@ -101,6 +114,13 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
 
 def hawkes_estimation(T: np.ndarray, root: int = 0, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
+    """_summary_
+
+    Returns:
+        _type_: _description_
+
+    """
+
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()

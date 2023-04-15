@@ -48,6 +48,13 @@ class MLP(nn.Module):
     # Spread inputs through hidden layers, ReLU function and returns outputs
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
+        """_summary_
+
+        Returns:
+            _type_: _description_
+
+        """
+
         for layer in self.layers:
             x = self.relu(layer(x))
         x = self.output_layer(x)
@@ -80,6 +87,13 @@ class MLPTrainer(MLP):
 
     def summary_model(self) -> str:
 
+        """_summary_
+
+        Returns:
+            _type_: _description_
+
+        """
+
         summary(self.model, input_size=mlp.INPUT_SIZE, input_data=[mlp.BATCH_SIZE, mlp.INPUT_SIZE], batch_dim=mlp.BATCH_SIZE, 
                 col_names=mlp.SUMMARY_COL_NAMES, device=mlp.DEVICE, mode=mlp.SUMMARY_MODE, verbose=mlp.SUMMARY_VERBOSE)
         
@@ -90,6 +104,13 @@ class MLPTrainer(MLP):
 
     @torch.enable_grad()
     def run_epoch(self, train_loader: DataLoader) -> float:
+
+        """_summary_
+
+        Returns:
+            _type_: _description_
+
+        """
         
         self.model.train()
 
@@ -115,6 +136,13 @@ class MLPTrainer(MLP):
     @torch.no_grad()
     def evaluate(self, val_loader: DataLoader) -> float:
 
+        """_summary_
+
+        Returns:
+            _type_: _description_
+
+        """
+
         self.model.eval()
         
         for x, y in val_loader:
@@ -131,7 +159,14 @@ class MLPTrainer(MLP):
     # Early stopping function (checkpoint)
 
     def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0) -> bool:
+        
+        """_summary_
 
+        Returns:
+            _type_: _description_
+
+        """        
+        
         # Checked early stopping
         # Save model if val_loss has decreased
         if self.val_loss < best_loss:
@@ -153,27 +188,49 @@ class MLPTrainer(MLP):
 
     # Loading model function (best model)
     def load_model(self) -> str:  
+
+        """_summary_
+
+        Returns:
+            _type_: _description_
+
+        """     
+
         self.model.load_state_dict(torch.load(f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}"))
         return f"Best model loading ({mlp.FILENAME_BEST_MODEL})..."
     
      
     # Prediction function (estimated Hawkes parameters)
     @torch.no_grad()
-    def predict(self, val_X: torch.Tensor, dtype: torch.dtype = torch.float32) -> Tuple[torch.Tensor, float, float]:
+    def predict(self, val_x: torch.Tensor, dtype: torch.dtype = torch.float32) -> Tuple[torch.Tensor, float, float]:
 
-        val_Y_pred = self.model(val_X)
-        val_eta = torch.mean(val_Y_pred[:, 0], dtype=dtype).item()
-        val_mu = torch.mean(val_Y_pred[:, 1], dtype=dtype).item()
+        """_summary_
+
+        Returns:
+            _type_: _description_
+
+        """        
+
+        val_y_pred = self.model(val_x)
+        val_eta = torch.mean(val_y_pred[:, 0], dtype=dtype).item()
+        val_mu = torch.mean(val_y_pred[:, 1], dtype=dtype).item()
 
         print(f"Validation set - Estimated branching ratio (η): {val_eta:.4f}, Estimated baseline intensity (µ): {val_mu:.4f}")
 
-        return val_Y_pred, val_eta, val_mu
+        return val_y_pred, val_eta, val_mu
 
 
     # Training fonction (PyTorch Profiler = disable)
 
     @profiling(enable=False)
-    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_X: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+
+        """_summary_
+
+        Returns:
+            _type_: _description_
+
+        """
 
         # Initialized Tensorboard
         writer = SummaryWriter(f"{os.path.join(eval.LOGDIRUN, eval.RUN_NAME)}")
@@ -205,16 +262,16 @@ class MLPTrainer(MLP):
                              {'Training': self.train_losses[epoch], 'Validation': self.val_losses[epoch]}, epoch)
             
         # Added model graph to TensorBoard
-        writer.add_graph(self.model, val_X)
+        writer.add_graph(self.model, val_x)
 
         # Loaded best model
         print(self.load_model())
 
         # Computed estimated parameters for validation set (After loaded best model)
-        val_Y_pred, val_eta, val_mu = self.predict(val_X)
+        val_y_pred, val_eta, val_mu = self.predict(val_x)
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
 
-        return self.model, self.train_losses, self.val_losses, val_Y_pred, val_eta, val_mu
+        return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta, val_mu

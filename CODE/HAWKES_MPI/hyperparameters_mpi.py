@@ -19,6 +19,13 @@ from UTILS.utils import write_csv
 
 def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
+    """_summary_
+
+    Returns:
+        _type_: _description_
+
+    """
+    
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
