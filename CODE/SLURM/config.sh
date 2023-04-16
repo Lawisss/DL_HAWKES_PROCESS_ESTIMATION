@@ -1,17 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=configuration                          
+#SBATCH --job-name=config                          
 #SBATCH --partition=cpu_short                               
-#SBATCH --nodes=1                                 
+#SBATCH --nodes=1                                
 #SBATCH --ntasks=1                                          
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
-#SBATCH --gres=gpu:1
 #SBATCH --time=00:10:00
-
-#SBATCH --output=slurm-%j.out
-#SBATCH --error=slurm-%j.out
 
 #SBATCH --mail-user=nicolas.girard@centralesupelec.fr   
 #SBATCH --mail-type=ALL
@@ -27,7 +23,14 @@
 
 ###########################################################################################################################
 
-# Setup conda env, ensured your .conda directory is located on your workir, and move it if not
+# Checked if folder existed, if not created it
+[ ! -d OUTPUT ] && mkdir OUTPUT
+
+# Set output/error files in folder
+#SBATCH --output=OUTPUT/%x_%j.out
+#SBATCH --error=OUTPUT/%x_%j.out
+
+# Setup conda environment, ensured .conda directory is located on workir, if not moved it
 [ -L ~/.conda ] && unlink ~/.conda
 [ -d ~/.conda ] && mv -v ~/.conda $WORKDIR
 [ ! -d $WORKDIR/.conda ] && mkdir $WORKDIR/.conda
@@ -35,24 +38,11 @@ ln -s $WORKDIR/.conda ~/.conda
 
 # Cleaned and loaded necessary modules
 module purge
-module load anaconda3/2022.10/gcc-11.2.0 
+module load anaconda3/2022.10/gcc-11.2.0
 
-# Created conda environment
-conda create --file=environment.yml --force
+# Checked if environment already exists
+if ! conda info --envs | grep -q "^hawkes "; then
+    # Created environment
+    conda create --name hawkes --file=environment.yml --force
+fi
 
-# Asked if you want to activate environment
-while true; do
-    read -p "Do you want to activate "hawkes" environment ? [y/n or Y/N]:" answer
-    case $answer in
-        [Yy]* )
-            # Activated environment
-            source activate hawkes
-            break;;
-        [Nn]* )
-            # Exit script
-            exit;;
-        * )
-            # Repeat question
-            echo "Answer "Y" or "N" (case-insensitive).";;
-    esac
-done

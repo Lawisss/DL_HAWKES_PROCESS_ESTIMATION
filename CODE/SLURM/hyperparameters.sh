@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=hyperparameters                          
+#SBATCH --job-name=hyperparams                          
 #SBATCH --partition=cpu_short                               
 #SBATCH --nodes=1                                 
 #SBATCH --ntasks=1                                          
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
-#SBATCH --gres=gpu:1
+##SBATCH --gres=gpu:1 (uncomment to use it)
 #SBATCH --time=00:10:00
 
 #SBATCH --output=slurm-%j.out
