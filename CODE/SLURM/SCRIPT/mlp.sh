@@ -1,12 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=config                          
+#SBATCH --job-name=mlp                         
 #SBATCH --partition=cpu_short                               
-#SBATCH --nodes=1                                
+#SBATCH --nodes=1                                 
 #SBATCH --ntasks=1                                          
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
+#SBATCH --gres=gpu:1
 #SBATCH --time=00:10:00
 
 #SBATCH --mail-user=nicolas.girard@centralesupelec.fr   
@@ -16,8 +17,8 @@
 
 ###################################################### DOCUMENTATION ######################################################
 
-# Description: Conda environment configuration task
-# Usage: sbatch "$SLURM/config.sh" 
+# Description: MLP Aggregated/Binned Hawkes Process estimation task
+# Usage: sbatch "$SLURM/mlp.sh" 
 # (In .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM")
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
@@ -30,19 +31,12 @@
 #SBATCH --output=OUTPUT/%x_%j.out
 #SBATCH --error=OUTPUT/%x_%j.out
 
-# Setup conda environment, ensured .conda directory is located on workir, if not moved it
-[ -L ~/.conda ] && unlink ~/.conda
-[ -d ~/.conda ] && mv -v ~/.conda $WORKDIR
-[ ! -d $WORKDIR/.conda ] && mkdir $WORKDIR/.conda
-ln -s $WORKDIR/.conda ~/.conda
+# Checked if necessary modules was loaded, if not, cleaned and did it
+{module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" && module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0";} || \
+{module purge && module load anaconda3/2022.10/gcc-11.2.0 && module load cuda/12.0.0/gcc-11.2.0;}
 
-# Cleaned and loaded necessary modules
-module purge
-module load anaconda3/2022.10/gcc-11.2.0
+# Activated conda environment if existed, else created and activated it
+{source activate hawkes 2>/dev/null;} || {conda create --name hawkes --file=environment.yml --force && source activate hawkes;}
 
-# Checked if environment already exists
-if ! conda info --envs | grep -q "^hawkes "; then
-    # Created environment
-    conda create --name hawkes --file=environment.yml --force
-fi
-
+# Run python script (In .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/DL")
+python "$DL/mlp.py"
