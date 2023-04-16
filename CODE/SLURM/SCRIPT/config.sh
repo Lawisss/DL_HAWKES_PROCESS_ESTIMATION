@@ -27,8 +27,8 @@
 [ ! -d ../OUTPUT ] && mkdir ../OUTPUT
 
 # Set output/error files in folder
-#SBATCH --output=OUTPUT/%x_%j.out
-#SBATCH --error=OUTPUT/%x_%j.out
+#SBATCH --output=../OUTPUT/%x_%j.out
+#SBATCH --error=../OUTPUT/%x_%j.out
 
 # Setup conda environment, ensured .conda directory is located on workir, if not moved it
 [ -L ~/.conda ] && unlink ~/.conda

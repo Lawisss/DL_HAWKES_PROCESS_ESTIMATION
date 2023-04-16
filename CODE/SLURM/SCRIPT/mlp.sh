@@ -28,8 +28,8 @@
 [ ! -d ../OUTPUT ] && mkdir ../OUTPUT
 
 # Set output/error files in folder
-#SBATCH --output=OUTPUT/%x_%j.out
-#SBATCH --error=OUTPUT/%x_%j.out
+#SBATCH --output=../OUTPUT/%x_%j.out
+#SBATCH --error=../OUTPUT/%x_%j.out
 
 # Checked if necessary modules was loaded, if not, cleaned and did it
 {module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" && module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0";} || \
