@@ -9,6 +9,9 @@
 #SBATCH --mem=4G
 #SBATCH --time=01:00:00
 
+#SBATCH --output=%x_%j.out
+#SBATCH --error=%x_%j.out
+
 #SBATCH --mail-user=nicolas.girard@centralesupelec.fr   
 #SBATCH --mail-type=ALL
 #SBATCH --export=NONE
@@ -26,9 +29,8 @@
 # Checked if folder existed, if not created it
 [ ! -d ../OUTPUT ] && mkdir ../OUTPUT
 
-# Set output/error files in folder
-#SBATCH --output=../OUTPUT/%x_%j.out
-#SBATCH --error=../OUTPUT/%x_%j.out
+# Moved output/error files in another folder
+mv *.out ../OUTPUT
 
 # Setup conda environment, ensured .conda directory is located on workir, if not moved it
 [ -L ~/.conda ] && unlink ~/.conda

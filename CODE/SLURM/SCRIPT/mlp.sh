@@ -8,7 +8,10 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
 #SBATCH --gres=gpu:1
-#SBATCH --time=00:10:00
+#SBATCH --time=01:00:00
+
+#SBATCH --output=%x_%j.out
+#SBATCH --error=%x_%j.out
 
 #SBATCH --mail-user=nicolas.girard@centralesupelec.fr   
 #SBATCH --mail-type=ALL
@@ -27,9 +30,8 @@
 # Checked if folder existed, if not created it
 [ ! -d ../OUTPUT ] && mkdir ../OUTPUT
 
-# Set output/error files in folder
-#SBATCH --output=../OUTPUT/%x_%j.out
-#SBATCH --error=../OUTPUT/%x_%j.out
+# Moved output/error files in another folder
+mv *.out ../OUTPUT
 
 # Checked if necessary modules was loaded, if not, cleaned and did it
 {module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" && module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0";} || \
