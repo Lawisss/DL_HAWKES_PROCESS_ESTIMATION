@@ -19,13 +19,13 @@
 
 # Description: MLP Aggregated/Binned Hawkes Process estimation task
 # Usage: sbatch "$SLURM/mlp.sh" 
-# (In .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM")
+# (Copy/Paste in .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM/SCRIPT")
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
 ###########################################################################################################################
 
 # Checked if folder existed, if not created it
-[ ! -d OUTPUT ] && mkdir OUTPUT
+[ ! -d ../OUTPUT ] && mkdir ../OUTPUT
 
 # Set output/error files in folder
 #SBATCH --output=OUTPUT/%x_%j.out
@@ -38,5 +38,5 @@
 # Activated conda environment if existed, else created and activated it
 {source activate hawkes 2>/dev/null;} || {conda create --name hawkes --file=environment.yml --force && source activate hawkes;}
 
-# Run python script (In .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/DL")
+# Run python script (Copy/Paste in .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/DL")
 python "$DL/mlp.py"

@@ -19,13 +19,13 @@
 
 # Description: Hawkes process hyper-parameters generation task
 # Usage: sbatch "$SLURM/hyperparameters.sh"
-# (In .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM")
+# (Copy/Paste in .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM/SCRIPT")
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
 ###################################################################################################################
 
 # Checked if folder existed, if not created it
-[ ! -d OUTPUT ] && mkdir OUTPUT
+[ ! -d ../OUTPUT ] && mkdir ../OUTPUT
 
 # Set output/error files in folder
 #SBATCH --output=OUTPUT/%x_%j.out
@@ -37,5 +37,5 @@
 # Activated conda environment if existed, else created and activated it
 {source activate hawkes 2>/dev/null;} || {conda create --name hawkes --file=environment.yml --force && source activate hawkes;}
 
-# Run python script (In .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
+# Run python script (Copy/Paste in .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
 python "$HAWKES/hyperparameters.py"
