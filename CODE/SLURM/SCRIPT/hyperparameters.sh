@@ -8,7 +8,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
 ##SBATCH --gres=gpu:1 (uncomment to use it)
-#SBATCH --time=01:00:00
+#SBATCH --time=168:00:00
 
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.out
@@ -33,12 +33,10 @@
 mv *.out ../OUTPUT
 
 # Checked if necessary modules was loaded, if not, cleaned and did it
-{module list 2>&1 | grep -q anaconda3/2022.10/gcc-11.2.0;} || {module purge && module load anaconda3/2022.10/gcc-11.2.0;}
+module list 2>&1 | grep -q anaconda3/2022.10/gcc-11.2.0 || module purge && module load anaconda3/2022.10/gcc-11.2.0
 
-# Activated conda environment if existed, else created and activated it
-# (Copy/Paste in .bashrc: export VENV="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/environment.yml")
-# {source activate hawkes 2>/dev/null;} || {conda env create --file=$VENV --force && source activate hawkes;}
-source activate hawkes
+# Checked if environment was activated, if not, activated it
+$CONDA_DEFAULT_ENV | grep -qw hawkes || source activate hawkes
 
 # Run python script (Copy/Paste in .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
-python "$HAWKES/hyperparameters.py"
+python $HAWKES/hyperparameters.py hyper_params_simulation "train_hawkes_hyperparams_ruche.csv"

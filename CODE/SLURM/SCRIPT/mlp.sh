@@ -36,10 +36,8 @@ mv *.out ../OUTPUT
 {module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" && module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0";} || \
 {module purge && module load anaconda3/2022.10/gcc-11.2.0 && module load cuda/12.0.0/gcc-11.2.0;}
 
-# Activated conda environment if existed, else created and activated it
-# (Copy/Paste in .bashrc: export VENV="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/environment.yml")
-# {source activate hawkes 2>/dev/null;} || {conda env create --file=$VENV --force && source activate hawkes;}
-source activate hawkes
+# Checked if environment was activated, if not, activated it
+$CONDA_DEFAULT_ENV | grep -qw hawkes || source activate hawkes
 
 # Run python script (Copy/Paste in .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/DL")
 python "$DL/mlp.py"
