@@ -21,8 +21,7 @@
 ###################################################### DOCUMENTATION ######################################################
 
 # Description: MLP Aggregated/Binned Hawkes Process estimation task
-# Usage: sbatch "$SLURM/mlp.sh" 
-# (Copy/Paste in .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM/SCRIPT")
+# Usage: sbatch mlp.sh
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
 ###########################################################################################################################
@@ -38,7 +37,7 @@ mv *.out ../OUTPUT
 {module purge && module load anaconda3/2022.10/gcc-11.2.0 && module load cuda/12.0.0/gcc-11.2.0;}
 
 # Activated conda environment if existed, else created and activated it
-{source activate hawkes 2>/dev/null;} || {conda create --name hawkes --file=environment.yml --force && source activate hawkes;}
+{source activate hawkes 2>/dev/null;} || {conda env create --file=$VENV --force && source activate hawkes;}
 
 # Run python script (Copy/Paste in .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/DL")
 python "$DL/mlp.py"

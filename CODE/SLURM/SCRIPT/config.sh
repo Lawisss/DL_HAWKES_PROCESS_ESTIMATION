@@ -20,8 +20,7 @@
 ###################################################### DOCUMENTATION ######################################################
 
 # Description: Conda environment configuration task
-# Usage: sbatch "$SLURM/config.sh" 
-# (Copy/Paste in .bashrc: export SLURM="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/SLURM/SCRIPT")
+# Usage: sbatch config.sh
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
 ###########################################################################################################################
