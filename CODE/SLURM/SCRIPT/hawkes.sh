@@ -36,7 +36,9 @@ mv *.out ../OUTPUT
 {module list 2>&1 | grep -q anaconda3/2022.10/gcc-11.2.0;} || {module purge && module load anaconda3/2022.10/gcc-11.2.0;}
 
 # Activated conda environment if existed, else created and activated it
-{source activate hawkes 2>/dev/null;} || {conda env create --file=$VENV --force && source activate hawkes;}
+# (Copy/Paste in .bashrc: export VENV="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/environment.yml")
+# {source activate hawkes 2>/dev/null;} || {conda env create --file=$VENV --force && source activate hawkes;}
+source activate hawkes
 
 # Run python script (Copy/Paste in .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
 python "$HAWKES/hawkes.py"

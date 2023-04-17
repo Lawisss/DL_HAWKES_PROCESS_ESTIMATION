@@ -42,4 +42,4 @@ module purge && module load anaconda3/2022.10/gcc-11.2.0
 
 # Checked if environment already existed, if not, created it
 # (Copy/Paste in .bashrc: export VENV="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/environment.yml")
-conda env list | grep -q "^hawkes " || conda env create --file=$VENV --force
+# conda env list | grep -q "^hawkes " || conda env create --file=$VENV --force
