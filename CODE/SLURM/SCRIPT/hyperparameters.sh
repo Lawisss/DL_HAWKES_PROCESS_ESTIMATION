@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=hyperparams                          
-#SBATCH --partition=cpu_short                               
+#SBATCH --partition=cpu_long                               
 #SBATCH --nodes=1                                 
 #SBATCH --ntasks=1                                          
 #SBATCH --ntasks-per-node=1

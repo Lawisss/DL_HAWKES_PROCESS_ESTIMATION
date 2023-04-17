@@ -45,7 +45,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data = [data]
 
         # Written and field names initialisation
-        with open(filepath=f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
