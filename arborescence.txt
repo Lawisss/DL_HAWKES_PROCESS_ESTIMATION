@@ -18,9 +18,12 @@
  ┃ ┣ 📜train_hawkes_hyperparams.csv
  ┃ ┗ 📜train_hawkes_simulations.csv
  ┣ 📂SLURM
- ┃ ┣ 📜discretisation.sh
- ┃ ┣ 📜hawkes.sh
- ┃ ┗ 📜hyperparameters.sh
+ ┃ ┗ 📂SCRIPT
+ ┃ ┃ ┣ 📜config.sh
+ ┃ ┃ ┣ 📜discretisation.sh
+ ┃ ┃ ┣ 📜hawkes.sh
+ ┃ ┃ ┣ 📜hyperparameters.sh
+ ┃ ┃ ┗ 📜mlp.sh
  ┣ 📂UTILS
  ┃ ┣ 📂__pycache__
  ┃ ┣ 📜utils.py
