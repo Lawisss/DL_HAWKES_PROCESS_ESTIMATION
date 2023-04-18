@@ -33,9 +33,9 @@ def split_data(x: np.ndarray, y: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor
     """
 
     # Initialized sizing
-    val_size = int(len(x) * prep.VAL_RATIO)
-    test_size = int(len(x) * prep.TEST_RATIO)
-    train_size = len(x) - val_size - test_size
+    val_size = int(np.size(x) * prep.VAL_RATIO)
+    test_size = int(np.size(x) * prep.TEST_RATIO)
+    train_size = np.size(x) - val_size - test_size
 
     # Train/Val/Test split
     train_x, val_x, test_x = torch.tensor(x[:train_size], dtype=torch.float32), torch.tensor(x[train_size:train_size+val_size], dtype=torch.float32), torch.tensor(x[train_size+val_size:], dtype=torch.float32)

@@ -34,14 +34,14 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
     num_bins = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)
 
     # Initialized an array with dimensions (number of processes, number of jumps per unit of time)
-    counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
+    counts = np.zeros((np.size(jump_times), num_bins), dtype=np.float32)
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
         counts[j], _ = np.histogram(h, bins=np.linspace(0, hwk.TIME_HORIZON, num_bins + 1))
 
     # Written parameters to Parquet file
-    write_parquet(counts, columns=list(map(str, range(hwk.TIME_HORIZON))), filename=filename)
+    write_parquet(counts, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
 
     # Created dictionaries list representing binned simulated event sequences
     # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
@@ -66,7 +66,7 @@ def temp_func(jump_times: np.ndarray) -> float:
     """    
 
     # If no event has been recorded, step size = hwk.TIME_HORIZON
-    if len(jump_times) == 0:
+    if np.size(jump_times) == 0:
         stepsize = hwk.TIME_HORIZON 
 
     else:
@@ -116,20 +116,20 @@ def jump_times(h: np.ndarray) -> np.ndarray:
     """
 
     # Size of each interval
-    stepsize = hwk.TIME_HORIZON / len(h)
+    stepsize = hwk.TIME_HORIZON / np.size(h)
 
     # Retrieval of intervals indices with single jump/multiple jumps
     idx_1 = np.nonzero(h == 1)[0]
     idx_2 = np.nonzero(h > 1)[0]
 
     # Initialized jump times list
-    times = np.zeros(len(idx_2) + len(idx_1), dtype=np.float32)
+    times = np.zeros(np.size(idx_2) + np.size(idx_1), dtype=np.float32)
 
     # Variable to track the index of the times list
     k = 0
 
     # Intervals with multiple jumps
-    if len(idx_2) > 0:
+    if np.size(idx_2) > 0:
         for i in idx_2:
             # Jumps number in i
             n_jumps = h[i]
@@ -145,7 +145,7 @@ def jump_times(h: np.ndarray) -> np.ndarray:
             k += n_jumps
 
     # Intervals with a single jump
-    if len(idx_1) > 0:
+    if np.size(idx_1) > 0:
         times[k:] = idx_1 * stepsize - 0.5 * stepsize
 
     # Lists concatenation and jump times sorted

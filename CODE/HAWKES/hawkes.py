@@ -67,11 +67,11 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
         _, t = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
         
         # Length clipping to not exceed time horizon
-        seq_len = np.minimum(len(t), hwk.TIME_HORIZON)
+        seq_len = np.minimum(np.size(t), hwk.TIME_HORIZON)
         simulated_events_seqs[k,:seq_len] = t[:seq_len]
     
     # Written parameters to Parquet file
-    write_parquet(simulated_events_seqs, columns=list(map(str, range(hwk.TIME_HORIZON))), filename=filename)
+    write_parquet(simulated_events_seqs, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
 
     # Created dictionaries list representing simulated event sequences
     # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
@@ -106,7 +106,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
     hawkes_process.fit(t, [hwk.TIME_ITV_START, hwk.TIME_HORIZON])
     
     # Computed performance metrics for estimated Hawkes process
-    metrics = {'Event(s)': len(t),
+    metrics = {'Event(s)': np.size(t),
                'Parameters': {k: round(v, 3) for k, v in hawkes_process.para.items()},
                'Branching Ratio': round(hawkes_process.br, 3),
                'Log-Likelihood': round(hawkes_process.L, 3),
