@@ -8,10 +8,11 @@ File containing all utils functions used in other modules (python files)
 
 import os 
 from functools import wraps
-from typing import List, Callable
+from typing import List, Callable, TypedDict, Optional
 
 import pandas as pd
 import numpy as np
+import fastparquet as fp
 from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
 from torch.profiler import profile, ProfilerActivity
@@ -28,16 +29,16 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
     Written dictionaries list to a CSV file
 
     Args:
-        data (List[dict]): Dictionaries list, where each dictionary represents row in CSV file
-        filename (str): Filename to write data to. If not specified, empty string is used
-        mode (str): Mode to open file in. Defaults to 'w' (write mode)
-        encoding (str): Encoding to use when writing to file. Defaults to 'utf-8'
+        data (List[dict]): Dictionaries list (dictionary = CSV row)
+        filename (str, optional): CSV filename
+        mode (str, optional): Mode to open file in. Defaults to 'w' (write mode)
+        encoding (str, optional): Encoding to use when writing to file. Defaults to 'utf-8'
 
     Returns:
         None: Function does not return anything
 
     Raises:
-        IOError: If there is error writing to the file
+        IOError: Error writing to file
     """
 
     try:
@@ -58,7 +59,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         file.close()
                     
     except IOError as e:
-        print(f"Cannot read the file: {e}.")
+        print(f"Cannot write CSV file: {e}.")
 
 
 # CSV file reading function
@@ -66,7 +67,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
 
     """
-    Red CSV file and loaded as a DataFrame
+    Red CSV file and loaded as DataFrame
 
     Args:
         filename (str): Filename to read
@@ -75,7 +76,10 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         encoding (str, optional): Character encoding used to read file. Defaults to 'utf-8'
 
     Returns:
-        pd.DataFrame: DataFrame containing file contents
+        pd.DataFrame: File contents dataFrame
+
+    Raises:
+        IOError: Error reading to file
     """
 
     try:
@@ -90,7 +94,61 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         return pd.DataFrame(rows, columns=headers, dtype=np.float32)
     
     except IOError as e:
-        print(f"Cannot read the file: {e}.")
+        print(f"Cannot read CSV file: {e}.")
+
+
+# Parquet file writing function
+
+def write_parquet(data: TypedDict, filename: str = '', write_index: bool = False, compression: Optional[str] = None) -> None:
+
+    """
+    Written dictionary to Parquet file
+
+    Args:
+        data (TypedDict): Saved dictionary
+        filename (str, optional): Parquet filename
+        write_index (bool, optional): Index column writing
+        compression (str, optional): column compression type
+
+    Returns:
+        None: Function does not return anything
+
+    Raises:
+        IOError: Error writing to file
+    """
+
+    try:
+        # Write parquet file from dataframe (index/compression checked)
+        fp.write(os.path.join(prep.FILEPATH, filename), pd.DataFrame(data), 
+                 write_index=write_index, compression=compression)
+
+    except IOError as e:
+        print(f"Cannot write Parquet file: {e}")
+
+
+# Parquet file reading function
+
+def read_parquet(filename: str) -> pd.DataFrame:
+
+    """
+    Red Parquet file and loaded as DataFrame
+
+    Args:
+        filename (str): Parquet filename
+
+    Returns:
+        Pandas dataframe: File contents dataFrame
+
+    Raises:
+        IOError: Error reading to file
+    """
+
+    try:
+        # Load the Parquet file using Fastparquet
+        return fp.ParquetFile(filename).to_pandas(columns="", dtype=np.float32)
+
+    except IOError as e:
+        print(f"Cannot read Parquet file: {e}.")
 
 
 # Pytorch Tensorboard Profiling 

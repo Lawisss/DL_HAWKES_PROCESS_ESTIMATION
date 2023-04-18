@@ -10,6 +10,7 @@ File containing MLP Aggregated/Binned Hawkes Process estimation
 import os 
 from typing import Tuple, Union
 
+import copy
 import torch
 import numpy as np
 import torch.nn as nn
@@ -184,7 +185,7 @@ class MLPTrainer(MLP):
         # Save model if val_loss has decreased
         if self.val_loss < best_loss:
             
-            torch.save(self.model.state_dict(), f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}")
+            torch.save(copy.deepcopy(self.model.state_dict()), f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}")
             best_loss = self.val_loss
             no_improve_count = 0
 

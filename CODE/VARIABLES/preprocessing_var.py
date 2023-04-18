@@ -25,6 +25,6 @@ PIN_MEMORY: bool = True                                                # Copy te
 DEVICE: torch.device = \
         torch.device("cuda" if torch.cuda.is_available() else "cpu")   # Check if GPU is available, otherwise use CPU
 
-# Global filepath to store results from modules (utils.py)
+# Writting/Reading parameters (utils.py)
 
 FILEPATH: str = os.path.abspath("RESULTS")                             # Absolute path to results directory  
