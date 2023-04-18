@@ -13,11 +13,11 @@ import numpy as np
 from mpi4py import MPI
 
 import VARIABLES.hawkes_var as hwk
-from UTILS.utils import write_csv
+from UTILS.utils import write_parquet
 
 # Parallelized generated Hawkes process hyper-parameters (alpha, beta, mu)
 
-def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.csv") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process hyperparameters
@@ -67,9 +67,12 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.c
     comm.Reduce(alpha, np.zeros(hwk.PROCESS_NUM, dtype=np.float32), op=MPI.SUM, root=root)
     comm.Reduce(mu, np.zeros(hwk.PROCESS_NUM, dtype=np.float32), op=MPI.SUM, root=root)
 
-    # Written CSV file on the root process
+    # Written parameters to Parquet file
     if rank == 0:
-        params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
-        write_csv(params, filename=filename)
+        write_parquet({"alpha": alpha, "beta": beta, "mu": mu}, filename=filename)
+        
+        # Written CSV file on the root process
+        # params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
+        # write_csv(params, filename=filename)
 
         return np.array([alpha, beta, mu], dtype=np.float32).T, alpha, beta, mu

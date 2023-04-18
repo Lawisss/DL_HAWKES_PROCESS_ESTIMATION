@@ -13,12 +13,12 @@ import numpy as np
 from mpi4py import MPI
 
 import VARIABLES.hawkes_var as hwk
-from UTILS.utils import write_csv
+from UTILS.utils import write_parquet
 
 
 # Parallelized jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_hawkes_simulations.csv') -> np.ndarray:
+def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_hawkes_simulations.parquet') -> np.ndarray:
 
     """
     Discretized parallelized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
@@ -26,7 +26,7 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
     Args:
         jump_times (np.ndarray): Jump times for Hawkes process simulation
         root (int): Rank of process to use as root for MPI communications. Default is 0
-        filename (str): Filename to write histogram data in CSV format. Default is "binned_hawkes_simulations.csv"
+        filename (str): Filename to write histogram data in Parquet format. Default is "binned_hawkes_simulations.parquet"
 
     Returns:
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
@@ -42,10 +42,10 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 
     # Initialized array with dimensions (number of processes, number of jumps per unit of time)
     if rank == 0:
-        counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
+        counts = np.zeros((np.size(jump_times), num_bins), dtype=np.float32)
 
     # Pre-allocated memory and scattered data to all processes
-    jumps_chunk = np.zeros(len(jump_times) // size, dtype=jump_times.dtype)
+    jumps_chunk = np.zeros(np.size(jump_times) // size, dtype=jump_times.dtype)
     comm.Scatter(jump_times, jumps_chunk, root=root)
 
     # Computed histogram for each process
@@ -54,12 +54,14 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
     # Gathered results from all processes
     comm.Gather(counts_chunk, counts, root=root)
 
+    # Written parameters to Parquet file
     if rank == 0:
-        # Created dictionaries list representing binned simulated event sequences
-        counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
+        write_parquet(counts, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
 
+        # Created dictionaries list representing binned simulated event sequences
+        # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
         # Written counts to CSV file
-        write_csv(counts_list, filename=filename)
+        # write_csv(counts_list, filename=filename)
 
     return counts
 
@@ -78,7 +80,7 @@ def temp_func(jump_times: np.ndarray) -> float:
     """    
 
     # If no event has been recorded, step size = hwk.TIME_HORIZON
-    if len(jump_times) == 0:
+    if np.size(jump_times) == 0:
         stepsize = hwk.TIME_HORIZON 
 
     else:
@@ -116,7 +118,7 @@ def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
     size = comm.Get_size()
 
     # Scattered data across processes
-    chunk = np.zeros(len(jump_times) // size, dtype=np.float32)
+    chunk = np.zeros(np.size(jump_times) // size, dtype=np.float32)
     comm.Scatter(jump_times, chunk, root=root)
 
     # Computed chunk minimum value
@@ -153,7 +155,7 @@ def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
     size = comm.Get_size()
 
     # Size of each interval
-    stepsize = hwk.TIME_HORIZON / len(h)
+    stepsize = hwk.TIME_HORIZON / np.size(h)
 
     # Retrieval of intervals indices with single jump/multiple jumps
     idx_1 = np.nonzero(h == 1)[0]
@@ -163,10 +165,10 @@ def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
     chunks = np.array_split(idx_2, size)
 
     # Initialized jump times list
-    times_chunk = np.zeros(len(idx_2) // size + len(idx_1), dtype=np.float32)
+    times_chunk = np.zeros(np.size(idx_2) // size + np.size(idx_1), dtype=np.float32)
 
     # Intervals with multiple jumps
-    if len(idx_2) > 0:
+    if np.size(idx_2) > 0:
         # Process chunks in parallel
         for i in chunks[rank]:
             # Jumps number in i
@@ -180,8 +182,8 @@ def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
             times_chunk[i:i+n_jumps] = np.random.uniform(t_start, t_end, size=(n_jumps,))
 
     # Intervals with a single jump
-    if len(idx_1) > 0:
-        times_chunk[len(idx_2) // size:] = idx_1 * stepsize - 0.5 * stepsize
+    if np.size(idx_1) > 0:
+        times_chunk[np.size(idx_2) // size:] = idx_1 * stepsize - 0.5 * stepsize
 
     # Gathered results from all processors
     jump_times = comm.gather(times_chunk, root=root)

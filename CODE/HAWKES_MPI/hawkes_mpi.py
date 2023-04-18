@@ -14,7 +14,7 @@ import numpy as np
 import Hawkes as hk
 from mpi4py import MPI
 
-from UTILS.utils import write_csv
+from UTILS.utils import write_parquet
 import VARIABLES.hawkes_var as hwk
 
 
@@ -66,17 +66,17 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Parallelized simulated Hawkes processes
 
-def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root: int = 0, filename: str='hawkes_simulations.csv') -> np.ndarray:
+def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root: int = 0, filename: str='hawkes_simulations.parquet') -> np.ndarray:
     
     """
-    Simulated several parallelized Hawkes processes using parameters, and saved results to CSV file 
+    Simulated several parallelized Hawkes processes using parameters, and saved results to Parquet file 
 
     Args:
         mu (np.ndarray): Base intensity of each Hawkes process
         alpha (np.ndarray): Excitation matrix of each Hawkes process
         beta (np.ndarray): Decay matrix of each Hawkes process
         root (int): Rank of process to use as root for MPI communications. Default is 0
-        filename (str, optional): CSV filename to save results to. Defaults to 'hawkes_simulations.csv'
+        filename (str, optional): Parquet filename to save results. Defaults to 'hawkes_simulations.parquet'
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process
@@ -101,10 +101,11 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
     for k in range(chunk_num):
         # Simulated Hawkes processes with current simulation parameters
         # The results are stored in the k-th row of the simulated_events_seqs
-        _, T = hawkes_simulation(params={"mu": chunk_mu[k], "alpha": chunk_alpha[k], "beta": chunk_beta[k]})
+        _, t = hawkes_simulation(params={"mu": chunk_mu[k], "alpha": chunk_alpha[k], "beta": chunk_beta[k]})
         
-        # Converted temporary list T to array and stored results in simulated_events_seqs
-        simulated_events_seqs[k,:] = np.asarray(T)[:hwk.TIME_HORIZON]
+        # Length clipping to not exceed time horizon
+        seq_len = np.minimum(np.size(t), hwk.TIME_HORIZON)
+        simulated_events_seqs[k,:seq_len] = t[:seq_len]
 
     # Gather simulated_events_seqs from all ranks to root
     simulated_events_seqs = comm.gather(simulated_events_seqs, root=root)
@@ -113,18 +114,20 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
         # Concatenated simulated_events_seqs
         simulated_events_seqs = np.concatenate(simulated_events_seqs)
 
-        # Created dictionaries list representing simulated event sequences
-        seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
+        # Written parameters to Parquet file
+        write_parquet(simulated_events_seqs, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
 
+        # Created dictionaries list representing simulated event sequences
+        # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
         # Written metrics to a CSV file
-        write_csv(seqs_list, filename=filename)
+        # write_csv(seqs_list, filename=filename)
 
     return simulated_events_seqs
 
 
 # Parallelized estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated parallelized Hawkes process from event times and returns predicted process and performance metrics
@@ -132,7 +135,7 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
     Args:
         t (np.ndarray): Event times
         root (int): Rank of process to use as root for MPI communications. Default is 0
-        filename (str, optional): CSV filename for performance metrics. Defaults to "hawkes_estimation.csv"
+        filename (str, optional): Parquet filename for performance metrics. Defaults to "hawkes_estimation.parquet"
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
@@ -169,16 +172,18 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
         t_pred = np.concatenate(t_pred_chunks)
 
         # Computed performance metrics for the estimated Hawkes process
-        metrics = {'Event(s)': len(t),
+        metrics = {'Event(s)': np.size(t),
                    'Parameters': {k: round(v, 3) for k, v in hawkes_process.para.items()},
                    'Branching Ratio': round(hawkes_process.br, 3),
                    'Log-Likelihood': round(hawkes_process.L, 3),
                    'AIC': round(hawkes_process.AIC, 3)}
         
-        # Written metrics to a CSV file
-        write_csv(metrics, filename=filename)
-
+        # Written parameters to Parquet file
+        write_parquet(metrics, filename=filename)
         # Transformed times so that the first observation is at 0 and the last at 1
         [t_transform, interval_transform] = hawkes_process.t_trans() 
-        
+
+        # Written metrics to a CSV file
+        # write_csv(metrics, filename=filename)
+
         return t_pred, metrics, t_transform, interval_transform
