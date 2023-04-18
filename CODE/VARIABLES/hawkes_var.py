@@ -14,7 +14,7 @@ MAX_ITV_BETA: float = 3.0                                              # Beta ma
 MIN_ITV_ETA: float = 0.05                                              # Eta minimum interval
 MAX_ITV_ETA: float = 0.8                                               # Eta maximum interval
 
-EXPECTED_ACTIVITY: int = 500                                           # Total number of expected events
+EXPECTED_ACTIVITY: int = 500                                           # Total number of expected events 
 STD: float = 50                                                        # Standard deviation for generating epsilon
 
 # Hawkes Process simulation/estimation parameters (hawkes.py, discretisation.py)
@@ -23,9 +23,9 @@ KERNEL: str = 'exp'                                                    # Type of
 BASELINE: str = 'const'                                                # Type of baseline function
 
 TIME_ITV_START: int = 0                                                # Start time interval for simulation
-TIME_HORIZON: int = 100                                                # Time horizon for simulation
+TIME_HORIZON: int = 5                                                  # Time horizon for simulation
 
-PROCESS_NUM: int = 160_000                                             # Number of processes to simulate
+PROCESS_NUM: int = 3                                                   # Number of processes to simulate
 
 END_T: int = 200                                                       # End time for estimation
 NUM_SEQ: int = 100                                                     # Number of sequences for estimation

@@ -83,7 +83,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     """
 
     try:
-        with open(filepath=f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
 
             # Extracted headers
             headers = next(file).strip().split(delimiter)
@@ -99,7 +99,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', write_index: bool = False, compression: Optional[str] = None) -> None:
+def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = None, compression: Optional[str] = None) -> None:
 
     """
     Written dictionary to Parquet file
@@ -119,9 +119,8 @@ def write_parquet(data: TypedDict, filename: str = '', write_index: bool = False
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        fp.write(os.path.join(prep.FILEPATH, filename), pd.DataFrame(data), 
-                 write_index=write_index, compression=compression)
-
+        fp.write(os.path.join(prep.FILEPATH, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
+        
     except IOError as e:
         print(f"Cannot write Parquet file: {e}")
 
@@ -144,8 +143,10 @@ def read_parquet(filename: str) -> pd.DataFrame:
     """
 
     try:
-        # Load the Parquet file using Fastparquet
-        return fp.ParquetFile(filename).to_pandas(columns="", dtype=np.float32)
+        # Load Parquet file using Fastparquet
+        pf = fp.ParquetFile(f"{os.path.join(prep.FILEPATH, filename)}")
+        # Converted it in dataframe
+        return pf.to_pandas(columns=pf.columns)
 
     except IOError as e:
         print(f"Cannot read Parquet file: {e}.")

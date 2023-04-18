@@ -12,19 +12,19 @@ from functools import partial
 import numpy as np
 
 import VARIABLES.hawkes_var as hwk
-from UTILS.utils import write_csv
+from UTILS.utils import write_parquet
 
 
 # Jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.csv') -> np.ndarray:
+def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.parquet') -> np.ndarray:
     
     """
     Discretized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
 
     Args:
         jump_times (np.ndarray): Jump times for Hawkes process simulation
-        filename (str): Filename to write histogram data in CSV format. Default is "binned_hawkes_simulations.csv"
+        filename (str): Filename to write histogram data in Parquet format. Default is "binned_hawkes_simulations.parquet"
 
     Returns:
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
@@ -40,12 +40,15 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
     for j, h in enumerate(jump_times):
         counts[j], _ = np.histogram(h, bins=np.linspace(0, hwk.TIME_HORIZON, num_bins + 1))
 
+    # Written parameters to Parquet file
+    write_parquet(counts, columns=list(map(str, range(hwk.TIME_HORIZON))), filename=filename)
+
     # Created dictionaries list representing binned simulated event sequences
-    counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
+    # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
 
     # Written counts to CSV file
-    write_csv(counts_list, filename=filename)
-
+    # write_csv(counts_list, filename=filename)
+    
     return counts
 
 

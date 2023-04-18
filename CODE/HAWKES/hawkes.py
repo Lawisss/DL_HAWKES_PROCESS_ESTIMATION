@@ -7,13 +7,12 @@ File containing Hawkes process function (simulation/estimation)
 
 """
 
-from functools import partial
 from typing import Tuple, TypedDict
 
 import numpy as np
 import Hawkes as hk
 
-from UTILS.utils import write_csv
+from UTILS.utils import write_parquet
 import VARIABLES.hawkes_var as hwk
 
 # Simulated Hawkes process 
@@ -44,16 +43,16 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.csv') -> np.ndarray:
+def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.parquet') -> np.ndarray:
     
     """
-    Simulated several Hawkes processes using parameters, and saved results to CSV file 
+    Simulated several Hawkes processes using parameters, and saved results to Parquet file 
 
     Args:
         mu (np.ndarray): Base intensity of each Hawkes process
         alpha (np.ndarray): Excitation matrix of each Hawkes process
         beta (np.ndarray): Decay matrix of each Hawkes process
-        filename (str, optional): CSV filename to save results to. Defaults to 'hawkes_simulations.csv'
+        filename (str, optional): Parquet filename to save results. Defaults to 'hawkes_simulations.parquet'
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process
@@ -67,28 +66,32 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, file
         # The results are stored in the k-th row of the simulated_events_seqs array
         _, t = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
         
-        # Converted temporary list t to array and stored results in simulated_events_seqs
-        simulated_events_seqs[k,:] = np.asarray(t)[:hwk.TIME_HORIZON]
+        # Length clipping to not exceed time horizon
+        seq_len = np.minimum(len(t), hwk.TIME_HORIZON)
+        simulated_events_seqs[k,:seq_len] = t[:seq_len]
     
+    # Written parameters to Parquet file
+    write_parquet(simulated_events_seqs, columns=list(map(str, range(hwk.TIME_HORIZON))), filename=filename)
+
     # Created dictionaries list representing simulated event sequences
-    seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
+    # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
 
     # Written metrics to a CSV file
-    write_csv(seqs_list, filename=filename)
+    # write_csv(seqs_list, filename=filename)
 
     return simulated_events_seqs
 
 
 # Estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.csv") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated Hawkes process from event times, returned predicted process and performance metrics
 
     Args:
         t (np.ndarray): Event times
-        filename (str, optional): CSV filename for performance metrics. Defaults to "hawkes_estimation.csv"
+        filename (str, optional): Parquet filename for performance metrics. Defaults to "hawkes_estimation.parquet"
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
@@ -108,14 +111,16 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.csv") ->
                'Branching Ratio': round(hawkes_process.br, 3),
                'Log-Likelihood': round(hawkes_process.L, 3),
                'AIC': round(hawkes_process.AIC, 3)}
-    
-    # Written metrics to a CSV file
-    write_csv(metrics, filename=filename)
 
+    # Written parameters to Parquet file
+    write_parquet(metrics, filename=filename)
     # Transformed times so that the first observation is at 0 and the last at 1
     [t_transform, interval_transform] = hawkes_process.t_trans() 
     # Predicted the Hawkes process 
     t_pred = hawkes_process.predict(hwk.END_T, hwk.NUM_SEQ) 
+
+    # Written metrics to a CSV file
+    # write_csv(metrics, filename=filename)
 
     # Plotted the empirical survival function of the estimated Hawkes process (don't work with many iteration)
     # hawkes_process.plot_KS()
