@@ -39,4 +39,4 @@ module list 2>&1 | grep -q anaconda3/2022.10/gcc-11.2.0 || module purge && modul
 $CONDA_DEFAULT_ENV | grep -qw hawkes || source activate hawkes
 
 # Run python script (Copy/Paste in .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
-python $HAWKES/hyperparameters.py hyper_params_simulation "train_hawkes_hyperparams_ruche.csv"
+python $HAWKES/hyperparameters.py hyper_params_simulation "hawkes_hyperparams_ruche.parquet"
