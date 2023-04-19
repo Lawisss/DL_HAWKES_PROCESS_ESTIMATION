@@ -52,7 +52,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
         alpha (np.ndarray): Excitation matrix of each Hawkes process
         beta (np.ndarray): Decay matrix of each Hawkes process
         mu (np.ndarray): Base intensity of each Hawkes process
-        filename (str, optional): Parquet filename to save results. Defaults to 'hawkes_simulations.parquet'
+        filename (str, optional): Parquet filename to save results. Defaults is "hawkes_simulations.parquet"
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process
@@ -67,7 +67,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
         _, t = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
         
         # Length clipping to not exceed time horizon
-        seq_len = np.minimum(np.size(t), hwk.TIME_HORIZON)
+        seq_len = np.minimum(len(t), hwk.TIME_HORIZON)
         simulated_events_seqs[k,:seq_len] = t[:seq_len]
     
     # Written parameters to Parquet file
@@ -91,7 +91,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
 
     Args:
         t (np.ndarray): Event times
-        filename (str, optional): Parquet filename for performance metrics. Defaults to "hawkes_estimation.parquet"
+        filename (str, optional): Parquet filename for performance metrics. Defaults is "hawkes_estimation.parquet"
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
@@ -106,7 +106,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
     hawkes_process.fit(t, [hwk.TIME_ITV_START, hwk.TIME_HORIZON])
     
     # Computed performance metrics for estimated Hawkes process
-    metrics = {'Event(s)': np.size(t),
+    metrics = {'Event(s)': len(t),
                'Parameters': {k: round(v, 3) for k, v in hawkes_process.para.items()},
                'Branching Ratio': round(hawkes_process.br, 3),
                'Log-Likelihood': round(hawkes_process.L, 3),

@@ -52,31 +52,31 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
     hawkes_process = hk.simulator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE).set_parameter(params)
 
     # Simulated a Hawkes process in time interval
-    T = hawkes_process.simulate([start_time, end_time])
+    t = hawkes_process.simulate([start_time, end_time])
 
     # Gathered results from all processes
-    t_processes = comm.gather(T, root=root)
+    t_processes = comm.gather(t, root=root)
 
     # Concatenated results
     if rank == 0:
-        T = np.concatenate(t_processes)
+        t = np.concatenate(t_processes)
 
-    return hawkes_process, T
+    return hawkes_process, t
 
 
 # Parallelized simulated Hawkes processes
 
-def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root: int = 0, filename: str='hawkes_simulations.parquet') -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root: int = 0, filename: str='hawkes_simulations_mpi.parquet') -> np.ndarray:
     
     """
     Simulated several parallelized Hawkes processes using parameters, and saved results to Parquet file 
 
     Args:
-        mu (np.ndarray): Base intensity of each Hawkes process
         alpha (np.ndarray): Excitation matrix of each Hawkes process
         beta (np.ndarray): Decay matrix of each Hawkes process
+        mu (np.ndarray): Base intensity of each Hawkes process
         root (int): Rank of process to use as root for MPI communications. Default is 0
-        filename (str, optional): Parquet filename to save results. Defaults to 'hawkes_simulations.parquet'
+        filename (str, optional): Parquet filename to save results. Defaults is 'hawkes_simulations_mpi.parquet'
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process
@@ -104,7 +104,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
         _, t = hawkes_simulation(params={"mu": chunk_mu[k], "alpha": chunk_alpha[k], "beta": chunk_beta[k]})
         
         # Length clipping to not exceed time horizon
-        seq_len = np.minimum(np.size(t), hwk.TIME_HORIZON)
+        seq_len = np.minimum(len(t), hwk.TIME_HORIZON)
         simulated_events_seqs[k,:seq_len] = t[:seq_len]
 
     # Gather simulated_events_seqs from all ranks to root
@@ -127,7 +127,7 @@ def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, root
 
 # Parallelized estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation_mpi.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated parallelized Hawkes process from event times and returns predicted process and performance metrics
@@ -135,7 +135,7 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
     Args:
         t (np.ndarray): Event times
         root (int): Rank of process to use as root for MPI communications. Default is 0
-        filename (str, optional): Parquet filename for performance metrics. Defaults to "hawkes_estimation.parquet"
+        filename (str, optional): Parquet filename for performance metrics. Defaults is "hawkes_estimation_mpi.parquet"
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
@@ -172,7 +172,7 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
         t_pred = np.concatenate(t_pred_chunks)
 
         # Computed performance metrics for the estimated Hawkes process
-        metrics = {'Event(s)': np.size(t),
+        metrics = {'Event(s)': len(t),
                    'Parameters': {k: round(v, 3) for k, v in hawkes_process.para.items()},
                    'Branching Ratio': round(hawkes_process.br, 3),
                    'Log-Likelihood': round(hawkes_process.L, 3),

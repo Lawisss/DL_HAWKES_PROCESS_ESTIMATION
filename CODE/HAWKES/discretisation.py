@@ -34,7 +34,7 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
     num_bins = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)
 
     # Initialized an array with dimensions (number of processes, number of jumps per unit of time)
-    counts = np.zeros((np.size(jump_times), num_bins), dtype=np.float32)
+    counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
@@ -66,7 +66,7 @@ def temp_func(jump_times: np.ndarray) -> float:
     """    
 
     # If no event has been recorded, step size = hwk.TIME_HORIZON
-    if np.size(jump_times) == 0:
+    if len(jump_times) == 0:
         stepsize = hwk.TIME_HORIZON 
 
     else:
@@ -116,20 +116,20 @@ def jump_times(h: np.ndarray) -> np.ndarray:
     """
 
     # Size of each interval
-    stepsize = hwk.TIME_HORIZON / np.size(h)
+    stepsize = hwk.TIME_HORIZON / len(h)
 
     # Retrieval of intervals indices with single jump/multiple jumps
     idx_1 = np.nonzero(h == 1)[0]
     idx_2 = np.nonzero(h > 1)[0]
 
     # Initialized jump times list
-    times = np.zeros(np.size(idx_2) + np.size(idx_1), dtype=np.float32)
+    times = np.zeros(len(idx_2) + len(idx_1), dtype=np.float32)
 
     # Variable to track the index of the times list
     k = 0
 
     # Intervals with multiple jumps
-    if np.size(idx_2) > 0:
+    if len(idx_2) > 0:
         for i in idx_2:
             # Jumps number in i
             n_jumps = h[i]
@@ -145,7 +145,7 @@ def jump_times(h: np.ndarray) -> np.ndarray:
             k += n_jumps
 
     # Intervals with a single jump
-    if np.size(idx_1) > 0:
+    if len(idx_1) > 0:
         times[k:] = idx_1 * stepsize - 0.5 * stepsize
 
     # Lists concatenation and jump times sorted
