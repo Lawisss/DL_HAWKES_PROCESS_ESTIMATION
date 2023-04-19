@@ -33,8 +33,8 @@
 mv *.out ../OUTPUT
 
 # Checked if necessary modules was loaded, if not, cleaned and did it
-{module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" && module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0";} || \
-{module purge && module load anaconda3/2022.10/gcc-11.2.0 && module load cuda/12.0.0/gcc-11.2.0;}
+module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" && module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0" || \
+module purge && module load anaconda3/2022.10/gcc-11.2.0 && module load cuda/12.0.0/gcc-11.2.0
 
 # Checked if environment was activated, if not, activated it
 $CONDA_DEFAULT_ENV | grep -qw hawkes || source activate hawkes
