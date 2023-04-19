@@ -87,8 +87,8 @@ python -m tutorial.ipynb
 
 ## Acknowledgment
 
-* Tom Keane - Imperial College London - ([Statistical Inference for Hawkes Processes with Deep Learning](https://tom-keane.github.io/project_1.pdf)).
-* Shlomovich et al. - Imperial College London - ([Parameter Estimation of Binned Hawkes Processes](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2050247)).
+* Tom Keane - Imperial College London - [Statistical Inference for Hawkes Processes with Deep Learning](https://tom-keane.github.io/project_1.pdf).
+* Shlomovich et al. - Imperial College London - [Parameter Estimation of Binned Hawkes Processes](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2050247).
 
 ## License
 
