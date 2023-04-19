@@ -33,15 +33,13 @@
 
 ### Prerequisites
 
-To download required packages:
+To download required packages (PIP/CONDA):
 
 ```sh
-# PIP
 pip install -r requirements.txt
 ```
 
 ```sh
-# CONDA
 conda env create -f environment.yml
 ```
 
