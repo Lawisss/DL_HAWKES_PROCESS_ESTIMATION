@@ -7,7 +7,8 @@ File containing all utils functions used in other modules (python files)
 """
 
 import os 
-from functools import wraps
+from functools import wraps, lru_cache
+from time import perf_counter, process_time
 from typing import List, Callable, TypedDict, Optional
 
 import pandas as pd
@@ -150,6 +151,81 @@ def read_parquet(filename: str) -> pd.DataFrame:
 
     except IOError as e:
         print(f"Cannot read Parquet file: {e}.")
+
+
+# Time measurement function
+
+def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: bool = False) -> Callable:
+
+    """
+    Decorator function for time measurement
+
+    Args:
+        func (Callable): Function to be decorated
+        n_iter (int): Iterations to perform. Defaults to 10
+        repeats (int): Times to repeat iterations. Defaults to 7
+        returned (bool): Flag indicating whether return function results or not. Defaults to False
+
+    Returns:
+        Callable: Decorated function
+    """
+
+    # Executed only when decorating function
+    def timer_decorator(func: Callable) -> Callable:
+
+        # Stored references to run functions
+        perf_timer = perf_counter
+        process_timer = process_time
+        func_name = func.__name__
+
+        # Decorated function information conservation
+        @wraps(func)
+
+        # Wrapper called when decorated function called and return decorated function result 
+        @lru_cache(maxsize=None)
+        def wrapper(*args, **kwargs):
+            
+            # Time initialization
+            total_time = 0
+            total_process_time = 0
+
+            for _ in range(repeats):
+
+                # Started time
+                start_process_time = process_timer()
+                start_time = perf_timer()
+
+                for _ in range(n_iter):
+                    # Call decorated function
+                    result = func(*args, **kwargs)
+
+                # Ended time
+                end_time = perf_timer()
+                end_process_time = process_timer()
+            
+                # Total performance/process time computation
+                total_time += round(end_time - start_time, 6)
+                total_process_time += round(end_process_time - start_process_time, 6)
+
+            # Total performance/process time
+            avg_time = total_time / repeats
+            avg_process_time = total_process_time / repeats
+
+            print(f"Execution time ({func_name}): {avg_time:.6f}s - CPU time: {avg_process_time:.6f}s (Repetition: {repeats} - Iteration: {n_iter})")
+
+            # Returned fonction results
+            if returned:
+                return result
+        
+        return wrapper
+    
+    # Decorator creator (profiling) return decorator
+    if func:
+        # Actual decorator call, ex: @cached_property
+        return timer_decorator(func)
+    else:
+        # Factory call, ex: @cached_property()
+        return timer_decorator
 
 
 # Pytorch Tensorboard Profiling 

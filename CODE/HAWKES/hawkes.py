@@ -43,15 +43,15 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(mu: np.ndarray, alpha: np.ndarray, beta: np.ndarray, filename: str='hawkes_simulations.parquet') -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: str='hawkes_simulations.parquet') -> np.ndarray:
     
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
 
     Args:
-        mu (np.ndarray): Base intensity of each Hawkes process
         alpha (np.ndarray): Excitation matrix of each Hawkes process
         beta (np.ndarray): Decay matrix of each Hawkes process
+        mu (np.ndarray): Base intensity of each Hawkes process
         filename (str, optional): Parquet filename to save results. Defaults to 'hawkes_simulations.parquet'
 
     Returns:
