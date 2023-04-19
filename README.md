@@ -36,10 +36,12 @@
 To download required packages:
 
 ```sh
+# PIP
 pip install -r requirements.txt
 ```
 
 ```sh
+# CONDA
 conda env create -f environment.yml
 ```
 
