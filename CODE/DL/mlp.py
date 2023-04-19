@@ -174,8 +174,8 @@ class MLPTrainer(MLP):
         Checked early stopping condition based on validation loss
 
         Args:
-            best_loss (float or int, optional): Current best validation loss. Defaults to float('inf')
-            no_improve_count (int, optional): Number of epochs with no improvement in validation loss. Defaults to 0
+            best_loss (float or int, optional): Current best validation loss (default: float('inf'))
+            no_improve_count (int, optional): Number of epochs with no improvement in validation loss (default: 0)
 
         Returns:
             bool: True if early stopping condition is met, False otherwise

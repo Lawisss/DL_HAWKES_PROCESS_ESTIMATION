@@ -24,9 +24,9 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
     Args:
         data (List[dict]): Dictionaries list, where each dictionary represents row in CSV file
-        filename (str): Filename to write data to. If not specified, empty string is used
-        mode (str): Mode to open file in. Defaults to 'w' (write mode)
-        encoding (str): Encoding to use when writing to file. Defaults to 'utf-8'
+        filename (str, optional): Filename to write data to. If not specified, empty string is used
+        mode (str, optional): Mode to open file in (default: 'w' (write mode))
+        encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
 
     Returns:
         None: Function does not return anything
@@ -79,9 +79,9 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
     Args:
         filename (str): CSV filename to read
-        delimiter (str, optional): Delimiter used in CSV file. Defaults to ','
-        mode (str, optional): Mode used to open CSV file. Defaults to 'r'
-        encoding (str, optional): Encoding used to read CSV file. Defaults to 'utf-8'
+        delimiter (str, optional): Delimiter used in CSV file (default: ',')
+        mode (str, optional): Mode used to open CSV file (default: 'r')
+        encoding (str, optional): Encoding used to read CSV file (default: 'utf-8')
 
     Returns:
            pandas.DataFrame: DataFrame containing data from CSV file

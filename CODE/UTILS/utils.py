@@ -32,8 +32,8 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
     Args:
         data (List[dict]): Dictionaries list (dictionary = CSV row)
         filename (str, optional): CSV filename
-        mode (str, optional): Mode to open file in. Defaults to 'w' (write mode)
-        encoding (str, optional): Encoding to use when writing to file. Defaults to 'utf-8'
+        mode (str, optional): Mode to open file in (default: 'w' (write mode))
+        encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
 
     Returns:
         None: Function does not return anything
@@ -72,9 +72,9 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
     Args:
         filename (str): Filename to read
-        delimiter (str, optional): Delimiter used to separate fields in the file. Defaults to ','
-        mode (str, optional): Mode in which file is opened. Defaults to 'r'
-        encoding (str, optional): Character encoding used to read file. Defaults to 'utf-8'
+        delimiter (str, optional): Delimiter used to separate fields in the file (default: ',')
+        mode (str, optional): Mode in which file is opened (default: 'r')
+        encoding (str, optional): Character encoding used to read file (default: 'utf-8')
 
     Returns:
         pd.DataFrame: File contents dataFrame
@@ -162,9 +162,9 @@ def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: b
 
     Args:
         func (Callable): Function to be decorated
-        n_iter (int): Iterations to perform. Defaults to 10
-        repeats (int): Times to repeat iterations. Defaults to 7
-        returned (bool): Flag indicating whether return function results or not. Defaults to False
+        n_iter (int, optional): Iterations to perform (default: 10)
+        repeats (int, optional): Times to repeat iterations. (default: 7)
+        returned (bool, optional): Flag indicating whether return function results or not (default: False)
 
     Returns:
         Callable: Decorated function
@@ -236,8 +236,8 @@ def profiling(func: Callable = None, enable: bool = False) -> Callable:
     Decorator function for profiling models using TensorBoard
 
     Args:
-        func (Callable): Function to be decorated
-        enable (bool): Flag indicating whether profiling is enabled or not. Defaults to False.
+        func (Callable, optional): Function to be decorated
+        enable (bool, optional): Flag indicating whether profiling is enabled or not (default: False)
 
     Returns:
         Callable: Decorated function

@@ -23,8 +23,8 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.p
     Generated and saved Hawkes process hyperparameters
 
     Args:
-        filename: Filename to save hyperparameters in CSV file. Default is "hawkes_hyperparams.parquet"
-        root (int): Rank of process to use as root for MPI communications. Default is 0
+        filename (str, optional): Filename to save hyperparameters in CSV file (default: "hawkes_hyperparams.parquet")
+        root (int, optional): Rank of process to use as root for MPI communications (default: 0)
 
     Returns:
         A tuple containing:

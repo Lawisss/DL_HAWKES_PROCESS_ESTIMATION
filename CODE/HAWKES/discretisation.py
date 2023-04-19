@@ -24,7 +24,7 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
 
     Args:
         jump_times (np.ndarray): Jump times for Hawkes process simulation
-        filename (str): Filename to write histogram data in Parquet format. Default is "binned_hawkes_simulations.parquet"
+        filename (str, optional): Filename to write histogram data in Parquet format (default: "binned_hawkes_simulations.parquet")
 
     Returns:
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times

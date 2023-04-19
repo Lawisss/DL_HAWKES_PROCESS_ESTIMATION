@@ -23,7 +23,7 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet") -> Tup
     Generated and saved Hawkes process hyperparameters
 
     Args:
-        filename: Filename to save hyperparameters in Parquet file. Defaults is "hawkes_hyperparams.parquet"
+        filename (str, optional): Filename to save hyperparameters in Parquet file (default: "hawkes_hyperparams.parquet")
 
     Returns:
         A tuple containing:

@@ -25,8 +25,8 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 
     Args:
         jump_times (np.ndarray): Jump times for Hawkes process simulation
-        root (int): Rank of process to use as root for MPI communications. Default is 0
-        filename (str): Filename to write histogram data in Parquet format. Default is "binned_hawkes_simulations_mpi.parquet"
+        root (int, optional): Rank of process to use as root for MPI communications. (default: 0)
+        filename (str, optional): Filename to write histogram data in Parquet format (default: "binned_hawkes_simulations_mpi.parquet")
 
     Returns:
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
@@ -106,7 +106,7 @@ def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
 
     Args:
         jump_times (np.ndarray): Jump times
-        root (int): Rank of root process. Defaults to 0
+        root (int, optional): Rank of root process (default: 0)
 
     Returns:
         float: Global minimum value of "temp_func(x, hwk.TIME_HORIZON)" for all elements "x" in "jump_times"
@@ -143,7 +143,7 @@ def jump_times(h: np.ndarray, root: int = 0) -> np.ndarray:
 
     Args:
         h (np.ndarray): Event history of point process
-        root (int, optional): Rank of root process for gathering results. Defaults to 0
+        root (int, optional): Rank of root process for gathering results (default: 0)
 
     Returns:
         np.ndarray: Jump times for point process
