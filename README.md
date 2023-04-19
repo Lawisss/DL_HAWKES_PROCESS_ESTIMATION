@@ -12,9 +12,9 @@
   - [Installation](#installation)
 - [Usage](#usage)
 - [Roadmap](#roadmap)
-- [Contacts](#contacts)
+- [Contact](#contact)
+- [Acknowledgment](#Acknowledgment)
 - [License](#license)
-- [Acknowledgments](#Acknowledgments)
 
 ## Description
 
@@ -81,7 +81,7 @@ python -m tutorial.ipynb
 * Described our dataset ([Large Movie Review Dataset](https://ai.stanford.edu/~amaas/data/sentiment/)) and our model. 
 * Evaluated our approach on a large dataset of informal movie reviews to compare it with published results.
 
-## Contacts
+## Contact
 
 * Nicolas Girard - nico.girard22@gmail.com.
 
