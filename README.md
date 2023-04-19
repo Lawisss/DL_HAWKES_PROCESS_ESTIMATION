@@ -33,7 +33,7 @@
 
 ### Prerequisites
 
-To download required packages (PIP/CONDA):
+To download required packages (pip/conda):
 
 ```sh
 pip install -r requirements.txt
