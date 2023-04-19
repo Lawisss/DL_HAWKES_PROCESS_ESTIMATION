@@ -39,6 +39,10 @@ To download required packages:
 pip install -r requirements.txt
 ```
 
+```sh
+conda env create -f environment.yml
+```
+
 To download dataset:
 
 ```sh
