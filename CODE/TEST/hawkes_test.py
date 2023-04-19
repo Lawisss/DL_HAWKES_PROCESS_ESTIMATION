@@ -14,6 +14,9 @@ from UTILS.utils import read_parquet
 from HAWKES.hyperparameters import hyper_params_simulation
 from HAWKES.hawkes import hawkes_simulation, hawkes_simulations, hawkes_estimation
 
+
+# Hawkes simulations test class
+
 class HawkesSimulationTests(unittest.TestCase):
 
     # Generated Hawkes process hyper-parameters test function
@@ -25,10 +28,8 @@ class HawkesSimulationTests(unittest.TestCase):
         params, alpha, beta, mu = hyper_params_simulation()
 
         # Checked outputs types/shapes 
-        self.assertTupleEqual(params.shape, (hwk.PROCESS_NUM, 3))
-        self.assertTupleEqual(alpha.shape, (hwk.PROCESS_NUM,))
-        self.assertTupleEqual(beta.shape, (hwk.PROCESS_NUM,))
-        self.assertTupleEqual(mu.shape, (hwk.PROCESS_NUM,))
+        self.assertTupleEqual((params.shape, alpha.shape, beta.shape, mu.shape), 
+                              ((hwk.PROCESS_NUM, 3), (hwk.PROCESS_NUM,), (hwk.PROCESS_NUM,), (hwk.PROCESS_NUM,)))
         self.assertCountEqual([type(x) for x in (params, alpha, beta, mu)], [np.ndarray] * 4)
 
         # Checked Parquet file exists
