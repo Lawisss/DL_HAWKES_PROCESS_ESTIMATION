@@ -27,7 +27,7 @@
 
 ## Getting Started
 
-* Leveraged document-level sentiment annotations abundant online (consumer reviews for movies or products). 
+* Simulated hyperparameters, binned hawkes processes according to parameters (horizon time, kernel function, baseline). 
 * Described our dataset ([Large Movie Review Dataset](https://ai.stanford.edu/~amaas/data/sentiment/)) and our model. 
 * Evaluated our approach on a large dataset of informal movie reviews to compare it with published results.
 
