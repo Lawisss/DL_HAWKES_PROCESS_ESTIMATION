@@ -29,7 +29,7 @@
 
 * Simulated hyperparameters and binned HP based on parameters (horizon time, kernel function, baseline). 
 * Estimated using MLP regressor the binned HP parameters {Branching ratio: $\eta$, Baseline intensity: $\mu$}. 
-* Inferred using Poisson VAE (dueling decoder) the joint distribution \{ $\eta$, $\mu$\} and the conditional intensity $\lambda$.
+* Inferred using Poisson VAE (dueling decoder) the joint distribution \{ $\eta$, $\mu$ \} and the conditional intensity $\lambda$.
 * Assessed and compared results according to parameters (Branching Ratio, Expected Activity, Discretisation step).
 
 ### Prerequisites
