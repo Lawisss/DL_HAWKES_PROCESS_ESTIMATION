@@ -7,6 +7,8 @@ File containing DL preprocessing test function
 
 """
 
+import unittest
+
 import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
@@ -129,3 +131,7 @@ def test_create_data_loaders(x: torch.Tensor = torch.randn((100, 10)), y: torch.
     assert train_loader.drop_last == val_loader.drop_last == test_loader.drop_last == True
     assert train_loader.num_workers == val_loader.num_workers == test_loader.num_workers == 4
     assert train_loader.pin_memory == val_loader.pin_memory == test_loader.pin_memory == True
+
+
+if __name__ == '__main__':
+    unittest.main()

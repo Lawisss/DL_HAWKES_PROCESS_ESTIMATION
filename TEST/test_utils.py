@@ -8,6 +8,7 @@ File containing all utils test functions
 """
 
 import os
+import unittest
 from typing import List, TypedDict
 from unittest.mock import patch
 
@@ -217,3 +218,7 @@ def test_profiling(enable: bool = True):
 
         # Asserted results
         assert output == expected_output
+
+
+if __name__ == '__main__':
+    unittest.main()

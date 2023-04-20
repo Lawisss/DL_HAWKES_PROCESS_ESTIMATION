@@ -7,6 +7,7 @@ File containing DL model test function
 
 """
 
+import unittest
 from typing import Callable, List
 from unittest.mock import patch, Mock
 
@@ -281,3 +282,7 @@ def test_train_model(x_train = torch.randn((100, 10)), y_train = torch.randn((10
 
     # Asserted types
     assert isinstance(MLPTrainer().model, torch.nn.Module) and isinstance(train_losses, np.ndarray) and isinstance(val_losses, np.ndarray) and isinstance(x_val, torch.Tensor)
+
+
+if __name__ == '__main__':
+    unittest.main()

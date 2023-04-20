@@ -7,6 +7,7 @@ File containing Hawkes process test function
 
 """
 
+import unittest
 from unittest.mock import Mock, patch, call
 
 import numpy as np
@@ -273,3 +274,7 @@ def test_jump_times(mock_uniform, h = np.array([0, 1, 2, 0, 3, 0, 0, 1, 0])) -> 
 
     # Asserted mock
     mock_uniform.assert_called_once_with(0.5, 0.6, size=(3,))
+
+
+if __name__ == '__main__':
+    unittest.main()
