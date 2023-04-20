@@ -125,6 +125,7 @@ def test_read_parquet(mock_read, data: pd.DataFrame = pd.DataFrame({'col1': [1, 
     Test function for Parquet file reading
     
     Args:
+        mock_read (MagicMock): Mock for read_parquet function
         data (TypedDict, optional): Test data contents (default: pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}))
         filename (str, optional): Filename for test file (default: 'read_test.parquet')
         
@@ -146,9 +147,26 @@ def test_read_parquet(mock_read, data: pd.DataFrame = pd.DataFrame({'col1': [1, 
     assert result.equals(data)
 
 
+# Timer decorator test function
+
 @patch('builtins.perf_counter', return_value=0.5)
 @patch('builtins.process_time', return_value=0.1)
 def test_timer(mock_perf_counter, mock_process_time, capsys):
+
+    """
+    Test function for timer decorator
+    
+    Args:
+        mock_perf_counter (MagicMock): Mock for perf_counter function
+        mock_process_time (MagicMock): Mock for process_time function
+        capsys (Object): Capture IO results
+        
+    Returns:
+        None: This function does not return anything
+        
+    Raises:
+        AssertionError: Unexpected results
+    """
 
     # Called decorator
     @timer
