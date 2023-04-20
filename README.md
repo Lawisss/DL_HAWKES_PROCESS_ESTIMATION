@@ -28,8 +28,8 @@
 ## Getting Started
 
 * Simulated hyperparameters, binned HP according to parameters (horizon time, kernel function, baseline). 
-* Statistical inference using MLP regressor on parameters {Branching ratio: $\eta$, baseline intensity: $\mu$}. 
-* Evaluated our approach on a large dataset of informal movie reviews to compare it with published results.
+* Estimated using MLP regressor binned Hawkes process parameters {Branching ratio: $\eta$, Baseline intensity: $\mu$}. 
+* Inferred using Poisson VAE with dueling decoder joint distribution of {$\eta$, $\mu$} and conditional intensity $\lambda$.
 
 ### Prerequisites
 
