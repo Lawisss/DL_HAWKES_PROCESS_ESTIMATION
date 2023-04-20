@@ -3,3 +3,4 @@ REPORT/
 RESEARCH/
 .vscode/
 DL_HAWKES_PROCESS_ESTIMATION.egg-info/
+__pycache__/
