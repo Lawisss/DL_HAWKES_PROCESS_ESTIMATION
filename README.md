@@ -28,7 +28,7 @@
 ## Getting Started
 
 * Simulated hyperparameters, binned HP according to parameters (horizon time, kernel function, baseline). 
-* Described our dataset ([Large Movie Review Dataset](https://ai.stanford.edu/~amaas/data/sentiment/)) and our model. 
+* Statistical inference using MLP regressor on parameters {Branching ratio: $eta$, baseline intensity: $mu$}. 
 * Evaluated our approach on a large dataset of informal movie reviews to compare it with published results.
 
 ### Prerequisites
