@@ -89,11 +89,11 @@ python -m tutorial.ipynb
 [Hawkes_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES_MPI/hawkes_mpi.py)   | .py                                   | HAWKES_MPI                    	     | ❌                                   | Simulated MPI HP	                  |
 [Discretisation_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES_MPI/discretisation_mpi.py)   | .py                                   | HAWKES_MPI                    	     | ❌                                   | Discretized MPI HP	                  |
 [Config](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/config.sh)   | .sh                                   | SLURM                    	     | ✔️                                   | Installed conda environment
-[Hyperparameters](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/hyperparameters.sh)   | .sh                                   | SLURM                    	     | ✔️                                   | Executed hyperparameters (supercomputer)
-[Hawkes](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/hawkes.sh)   | .sh                                   | SLURM                    	     | ✔️                                   | Executed HP (supercomputer)
-[Discretisation](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/discretisation.sh)   | .sh                                   | SLURM                    	     | ✔️                                   | Executed discretisation (supercomputer)
-[MLP](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/mlp.sh)   | .sh                                   | SLURM                    	     | ❌                                   | Executed MLP (supercomputer)
-[VAE](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/vae.sh)   | .sh                                   | SLURM                    	     | ❌                                   | Executed VAE (supercomputer)
+[Hyperparameters](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/hyperparameters.sh)   | .sh                                   | SLURM                    	     | ✔️                                   | Executed MPI hyperparameters
+[Hawkes](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/hawkes.sh)   | .sh                                   | SLURM                    	     | ✔️                                   | Executed MPI HP
+[Discretisation](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/discretisation.sh)   | .sh                                   | SLURM                    	     | ✔️                                   | Executed MPI discretisation
+[MLP](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/mlp.sh)   | .sh                                   | SLURM                    	     | ❌                                   | Executed MPI MLP
+[VAE](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/vae.sh)   | .sh                                   | SLURM                    	     | ❌                                   | Executed MPI VAE
 
 ## Roadmap
 
