@@ -15,7 +15,7 @@ import Hawkes as hk
 from typing import TypedDict
 from pytest import approx
 
-from CODE.VARIABLES import hawkes_var as hwk
+from VARIABLES import hawkes_var as hwk
 from CODE.HAWKES.hyperparameters import hyper_params_simulation
 from CODE.HAWKES.hawkes import hawkes_simulation, hawkes_simulations, hawkes_estimation
 from CODE.HAWKES.discretisation import discretise, temp_func, find_stepsize, jump_times
