@@ -88,7 +88,7 @@ def test_hawkes_simulation(expected_times: np.ndarray = np.array([1.0, 2.0, 3.0]
 
 # Hawkes simulations test function
 
-@patch('HAWKES.hawkes.hawkes_simulation')
+@patch("HAWKES.hawkes.hawkes_simulation")
 def test_hawkes_simulations(mock_hawkes_simulation, alpha: np.ndarray = np.array([[0.2, 0.3], [0.1, 0.2]]), beta: np.ndarray = np.array([[1.0, 0.5], [0.5, 0.8]]), mu: np.ndarray = np.array([0.1, 0.2])) -> None:
 
     """
@@ -122,7 +122,7 @@ def test_hawkes_simulations(mock_hawkes_simulation, alpha: np.ndarray = np.array
 
 # Hawkes estimation test function
 
-@patch('HAWKES.hawkes.hawkes_estimation')
+@patch("HAWKES.hawkes.hawkes_estimation")
 def test_hawkes_estimation(mock_hawkes_estimation) -> None:
 
     """
@@ -158,7 +158,7 @@ def test_hawkes_estimation(mock_hawkes_estimation) -> None:
 
 # Discretisation test function
 
-@patch('UTILS.utils.write_parquet')
+@patch("UTILS.utils.write_parquet")
 def test_discretise(mock_write_parquet, data: np.ndarray = np.random.rand(5, 1000)) -> None:
 
     """
@@ -212,7 +212,7 @@ def test_temp_func(jump_times: np.ndarray = np.array([1.2, 2.3, 4.5, 5.6])) -> N
 
 # temp_func(x, hwk.TIME_HORIZON) minimum test function
 
-@patch('HAWKES.discretisation.temp_func')
+@patch("HAWKES.discretisation.temp_func")
 def test_find_stepsize(mock_temp_func, jump_times: np.ndarray = np.array([1, 2, 3, 4, 5])) -> None:
 
     """
