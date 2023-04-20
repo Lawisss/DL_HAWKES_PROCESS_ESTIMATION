@@ -27,9 +27,9 @@
 
 ## Getting Started
 
-* Simulated hyperparameters, binned HP according to parameters (horizon time, kernel function, baseline). 
-* Estimated using MLP regressor binned Hawkes process parameters {Branching ratio: $\eta$, Baseline intensity: $\mu$}. 
-* Inferred using Poisson VAE with dueling decoder joint distribution of {$\eta$, $\mu$} and conditional intensity $\lambda$.
+* Simulated hyperparameters and binned HP based on parameters (horizon time, kernel function, baseline). 
+* Estimated using MLP regressor the binned HP parameters {Branching ratio: $\eta$, Baseline intensity: $\mu$}. 
+* Inferred using Poisson VAE (dueling decoder) the joint distribution of {$\eta$, $\mu$} and the conditional intensity $\lambda$.
 
 ### Prerequisites
 
