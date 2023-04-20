@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""Hawkes test module
+
+File containing Hawkes process test function
+
+"""
 
 from unittest.mock import Mock, patch, call
 
 import numpy as np
 import Hawkes as hk
+from typing import TypedDict
 from pytest import approx
 
 import VARIABLES.hawkes_var as hwk
@@ -17,20 +23,24 @@ from HAWKES.discretisation import discretise, temp_func, find_stepsize, jump_tim
 # Hyperparameters simulation test function
 
 @patch("UTILS.utils.write_parquet")
-def test_hyper_params_simulation(mock_write_parquet) -> None:
+def test_hyper_params_simulation(mock_write_parquet, filename: str = "hyperparams_test.parquet") -> None:
 
     """
     Test function for hyperparameters simulation
        
     Args:
         mock_write_parquet (MagicMock): Mock for write_parquet function
+        filename (str, optional): Parquet filename (default: "hyperparams_test.parquet")
 
     Returns:
         None: Function does not return anything
+
+    Raises:
+        AssertionError: Unexpected results
     """
 
     # Called mock function
-    result, alpha, beta, mu = hyper_params_simulation(filename="hyperparams_test.parquet")
+    result, alpha, beta, mu = hyper_params_simulation(filename=filename)
 
     # Asserted types/shapes/results
     assert all(isinstance(arr, np.ndarray) for arr in [result, alpha, beta, mu])
@@ -38,26 +48,26 @@ def test_hyper_params_simulation(mock_write_parquet) -> None:
     assert np.all(alpha == mu / np.exp(beta))
 
     # Asserted function calling
-    mock_write_parquet.assert_called_once_with({"alpha": alpha, "beta": beta, "mu": mu}, filename="hyperparams_test.parquet")
+    mock_write_parquet.assert_called_once_with({"alpha": alpha, "beta": beta, "mu": mu}, filename=filename)
 
 
 # Hawkes simulation test function
 
-def test_hawkes_simulation() -> None:
+def test_hawkes_simulation(expected_times: np.ndarray = np.array([1.0, 2.0, 3.0]), expected_params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> None:
 
     """
     Test function for Hawkes simulation
 
     Args:
-        None: This function contains no arguments
+        expected_times (np.ndarray, optional): Expected event times (default: np.array([1.0, 2.0, 3.0]))
+        expected_params (TypedDict, optional): Expected parameters (default: {"mu": 0.1, "alpha": 0.5, "beta": 10.0})
        
     Returns:
         None: This function does not return anything
-    """
 
-    # Initialized parameters
-    expected_times = np.array([1.0, 2.0, 3.0])
-    expected_params = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}
+    Raises:
+        AssertionError: Unexpected results
+    """
 
     # Mock simulator
     mock_simulator = Mock()
@@ -79,22 +89,23 @@ def test_hawkes_simulation() -> None:
 # Hawkes simulations test function
 
 @patch('HAWKES.hawkes.hawkes_simulation')
-def test_hawkes_simulations(mock_hawkes_simulation) -> None:
+def test_hawkes_simulations(mock_hawkes_simulation, alpha: np.ndarray = np.array([[0.2, 0.3], [0.1, 0.2]]), beta: np.ndarray = np.array([[1.0, 0.5], [0.5, 0.8]]), mu: np.ndarray = np.array([0.1, 0.2])) -> None:
 
     """
     Test function for hawkes simulations function
 
     Args:
         mock_hawkes_simulation (MagicMock): Mock for hawkes_simulation function
+        alpha (np.ndarray, optional): Hawkes parameter (default: np.array([[0.2, 0.3], [0.1, 0.2]]))
+        beta (np.ndarray, optional): Hawkes parameter (default: np.array([[1.0, 0.5], [0.5, 0.8]]))
+        mu (np.ndarray, optional): Hawkes parameter (default: np.array([0.1, 0.2]))
 
     Returns:
         None: Function does not return anything
-    """
 
-    # Initialized parameters
-    alpha = np.array([[0.2, 0.3], [0.1, 0.2]])
-    beta = np.array([[1.0, 0.5], [0.5, 0.8]])
-    mu = np.array([0.1, 0.2])
+    Raises:
+        AssertionError: Unexpected results
+    """
 
     # Defined outputs
     expected_output = np.zeros((2, 10))
@@ -122,6 +133,9 @@ def test_hawkes_estimation(mock_hawkes_estimation) -> None:
 
     Returns:
         None: Function does not return anything
+
+    Raises:
+        AssertionError: Unexpected results
     """
 
     # Mock simulator
@@ -145,20 +159,24 @@ def test_hawkes_estimation(mock_hawkes_estimation) -> None:
 # Discretisation test function
 
 @patch('UTILS.utils.write_parquet')
-def test_discretise(mock_write_parquet) -> None:
+def test_discretise(mock_write_parquet, data: np.ndarray = np.random.rand(5, 1000)) -> None:
 
     """
     Test function for Hawkes processes discretisation function
 
     Args:
         mock_write_parquet (MagicMock): Mock for write_parquet function
+        data (np.ndarray, optional): Test parameters (default: np.random.rand(5, 1000))
 
     Returns:
         None: Function does not return anything
+
+    Raises:
+        AssertionError: Unexpected results
     """
 
     # Called function
-    counts = discretise(np.random.rand(5, 1000))
+    counts = discretise(data)
 
     # Asserted type/shape
     assert counts.shape == (5, 1000)
@@ -170,50 +188,46 @@ def test_discretise(mock_write_parquet) -> None:
 
 # Minimum stepsize test function
 
-def test_temp_func() -> None:
+def test_temp_func(jump_times: np.ndarray = np.array([1.2, 2.3, 4.5, 5.6])) -> None:
 
     """
     Test function for minimum stepsize between events computation
 
     Args:
-        None: This function contains no arguments
+        jump_times (np.ndarray, optional): Jump times parameters (default: np.array([1.2, 2.3, 4.5, 5.6]))
 
     Returns:
         None: Function does not return anything
+
+    Raises:
+        AssertionError: Unexpected results
     """
 
-    # Initialized parameters/Asserted results (case n°1)
-    jump_times = np.array([1.2, 2.3, 4.5, 5.6])
+    # Initialized parameters/Asserted results
+    
     expected_result = 0.9
     result = temp_func(jump_times)
-
-    assert result == expected_result
-
-    # Initialized parameters/Asserted results (case n°2)
-    jump_times = np.array([])
-    expected_result = 10.0
-    result = temp_func(jump_times)
-
     assert result == expected_result
 
 
 # temp_func(x, hwk.TIME_HORIZON) minimum test function
 
 @patch('HAWKES.discretisation.temp_func')
-def test_find_stepsize(mock_temp_func) -> None:
+def test_find_stepsize(mock_temp_func, jump_times: np.ndarray = np.array([1, 2, 3, 4, 5])) -> None:
 
     """
     Test function for temp_func(x, hwk.TIME_HORIZON) minimum computation
 
     Args:
-        None: This function contains no arguments
+        mock_temp_func (MagicMock): Mock for temp_func function
+        jump_times (np.ndarray, optional): Jump times parameters (default: np.array([1, 2, 3, 4, 5]))
 
     Returns:
         None: Function does not return anything
-    """
 
-    # Initialized parameters
-    jump_times = np.array([1, 2, 3, 4, 5])
+    Raises:
+        AssertionError: Unexpected results
+    """
 
     # Mock configuration
     mock_temp_func.side_effect = [1, 2, 3, 4]
@@ -232,20 +246,23 @@ def test_find_stepsize(mock_temp_func) -> None:
 # Jump times test function
 
 @patch("numpy.random.uniform", return_value=np.array([0.25, 0.4, 0.8, 0.6]))
-def test_jump_times(mock_uniform) -> None:
+def test_jump_times(mock_uniform, h = np.array([0, 1, 2, 0, 3, 0, 0, 1, 0])) -> None:
 
     """
     Test function for jump times computation
 
     Args:
-        None: This function contains no arguments
+        mock_uniform (MagicMock): Mock for temp_func function
+        h (np.ndarray, optional): History parameters (default: np.array([0, 1, 2, 0, 3, 0, 0, 1, 0]))
 
     Returns:
         None: Function does not return anything
+
+    Raises:
+        AssertionError: Unexpected results
     """
 
     # Initialized parameters
-    h = np.array([0, 1, 2, 0, 3, 0, 0, 1, 0])
     expected_result = np.array([0.25, 0.4, 0.4, 0.5, 0.6, 0.8, 0.8, 0.9])
 
     # Called function

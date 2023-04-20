@@ -11,27 +11,26 @@ import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
 
-
 from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
 
 
 # Test data splitting function
 
-def test_split_data() -> None:
+def test_split_data(x: np.ndarray = np.random.rand(100, 10), y: np.ndarray = np.random.rand(100, 1)) -> None:
 
     """
     Test function for split data function
 
     Args:
-        None: This function contains no arguments
+        x (np.ndarray, optional): Input features (default: np.random.rand(100, 10))
+        y (np.ndarray, optional): Target values (default: np.random.rand(100, 10))
 
     Returns:
         None: Function does not return anything
-    """
 
-    # Initialized parameters
-    x = np.random.rand(100, 10)
-    y = np.random.rand(100, 1)
+    Raises:
+        AssertionError: Unexpected results
+    """
 
     # Called function
     train_x, train_y, val_x, val_y, test_x, test_y = split_data(x, y)
@@ -63,22 +62,25 @@ def test_split_data() -> None:
 
 # Test dataset creation function
 
-def test_create_datasets() -> None:
+def test_create_datasets(train_x: torch.Tensor = torch.randn(100, 5), train_y: torch.Tensor = torch.randint(0, 2, (100,)), val_x: torch.Tensor = torch.randn(20, 5), val_y: torch.Tensor = torch.randint(0, 2, (20,)), test_x: torch.Tensor = torch.randn(30, 5), test_y: torch.Tensor = torch.randint(0, 2, (30,))) -> None:
 
     """
     Test function for dataset creation
 
     Args:
-        None: This function contains no arguments
+        train_x (torch.Tensor, optional): Input tensor for training data (default: torch.randn(100, 5))
+        train_y (torch.Tensor, optional): Target tensor for training data (default: torch.randint(0, 2, (100,)))
+        val_x (torch.Tensor, optional): Input tensor for validation data (default: torch.randn(20, 5))
+        val_y (torch.Tensor, optional): Target tensor for validation data (default: torch.randint(0, 2, (20,)))
+        test_x (torch.Tensor, optional): Input tensor for test data (default: torch.randn(30, 5))
+        test_y (torch.Tensor, optional): Target tensor for test data (default: torch.randint(0, 2, (30,)))
 
     Returns:
         None: Function does not return anything
-    """
 
-    # Initialized parameters
-    train_x, train_y = torch.randn(100, 5), torch.randint(0, 2, (100,))
-    val_x, val_y = torch.randn(20, 5), torch.randint(0, 2, (20,))
-    test_x, test_y = torch.randn(30, 5), torch.randint(0, 2, (30,))
+    Raises:
+        AssertionError: Unexpected results
+    """
     
     # Called function
     train_dataset, val_dataset, test_dataset = create_datasets(train_x, train_y, val_x, val_y, test_x, test_y)
@@ -89,30 +91,30 @@ def test_create_datasets() -> None:
     assert all(torch.allclose(ds[i][0], x[i]) and ds[i][1] == y[i] for ds, x, y in [(train_dataset, train_x, train_y), (val_dataset, val_x, val_y), (test_dataset, test_x, test_y)] for i in range(len(ds)))
 
 
-
 # Test dataset creation function
 
-def test_create_data_loaders() -> None:
+def test_create_data_loaders(x: torch.Tensor = torch.randn((100, 10)), y: torch.Tensor = torch.randint(0, 2, (100,))) -> None:
 
     """
     Test function for data loaders creation
 
     Args:
-        None: This function contains no arguments
+        x (torch.Tensor, optional): Input features (default: torch.randn((100, 10)))
+        y (torch.Tensor, optional): Target values (default: torch.randint(0, 2, (100,)))
 
     Returns:
         None: Function does not return anything
+
+    Raises:
+        AssertionError: Unexpected results
     """
 
     # Initialized parameters
-    x = torch.randn((100, 10))
-    y = torch.randint(0, 2, (100,))
     dataset = TensorDataset(x, y)
-
     train_dataset, val_dataset, test_dataset = dataset, dataset, dataset
 
     # Called function
-    train_loader, val_loader, test_loader = create_data_loaders(dataset, dataset, dataset)
+    train_loader, val_loader, test_loader = create_data_loaders(train_dataset, val_dataset, test_dataset)
 
     # Asserted types/lengths/values
     assert isinstance(train_loader, DataLoader) and isinstance(val_loader, DataLoader) and isinstance(test_loader, DataLoader)
