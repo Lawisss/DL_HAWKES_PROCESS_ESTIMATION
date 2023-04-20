@@ -65,8 +65,9 @@ python -m tutorial.ipynb
 ## Usage
 
 * To run the code: [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb). This file allows you to load python files and results.
-* To get details about model architecture, training and the visualization, contacted the project author directly.
-* To leverage AHP/MLP/VAE models results, most of them are not available for confidentiality reasons.
+* To get details about model architecture, training and visualization, see [report](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/REPORT/report.pdf).
+* To leverage preprocessing, AHP/MLP/VAE parameters and results, use global [variable](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/CODE/VARIABLES) files.
+* To deepen incomplete pytest unit tests, check files in [test](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/TEST) folder.
 
 |                                         File                                                                       |               Extension               |               Folder                  |               Complete                |               Function                |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
