@@ -46,7 +46,7 @@ conda env create -f environment.yml
 To download dataset:
 
 ```sh
-tar -xf aclImdb_v1.tar.gz
+Error. Dataset not available.
 ```
 
 ### Installation
