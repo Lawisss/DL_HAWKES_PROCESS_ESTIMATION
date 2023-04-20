@@ -1,6 +1,37 @@
+# Project folders/files
 RESULTS/
 REPORT/
 RESEARCH/
-.vscode/
-DL_HAWKES_PROCESS_ESTIMATION.egg-info/
+
+# Environment folders/files
+.env
+.env.*
+
+# Cache folders/files
 __pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+
+# Saving folders/files
+*.bak
+*.swp
+*.~*
+
+# Log folders/files
+*.log
+log/
+logs/
+
+# Dependancies folders/files
+.vscode/
+venv/
+env/
+node_modules/
+
+# Build folders/files
+build/
+dist/
+target/
+out/
