@@ -77,6 +77,14 @@ python -m tutorial.ipynb
 | [Automl](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/automl.py)       | .py                                   | LIBRARY                         | ✔️                                   | Executed AutoML model                |
 | [Autodl](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/autodl.py)    | .py                                   | LIBRARY                        | ❌                                   | Executed AutoDL model               |
 | [Evaluation](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/evaluation.py)				  | .py                                 | LIBRARY                       	     | ✔️                                   | Executed/Monitored evaluation          |
+| [Preprocessing](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/preprocessing.py)     | .py                                   | LIBRARY                  	     | ✔️                                   | Preprocessed EUREX EGB metaorders	                  |
+| [Kyle](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/kyle.py)   | .py                                   | LIBRARY                    	     | ✔️                                   | Executed Kyle model	                  |
+| [Sqrt_root_law](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/sqrt_root_law.py)                     | .py                                   | LIBRARY                           | ✔️                                   | Executed Square Root Law model                       |
+| [Istar](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/istar.py)     | .py                                   | LIBRARY           		     | ❌                                   | Executed I-STAR model                   |
+| [Automl](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/automl.py)       | .py                                   | LIBRARY                         | ✔️                                   | Executed AutoML model                |
+| [Autodl](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/autodl.py)    | .py                                   | LIBRARY                        | ❌                                   | Executed AutoDL model               |
+| [Evaluation](https://github.com/Lawisss/EUREX_EGB_PRICE_IMPACT/blob/main/LIBRARY/evaluation.py)				  | .py                                 | LIBRARY                       	     | ✔️                                   | Executed/Monitored evaluation          |
+
 
 
 ## Roadmap
