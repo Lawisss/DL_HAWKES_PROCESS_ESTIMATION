@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import unittest
+"""Utils test module
 
-class UtilsTests(unittest.TestCase):
+File containing all utils test functions
+
+"""

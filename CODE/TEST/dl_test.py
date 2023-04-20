@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import unittest
+"""DL test module
 
-class DLTests(unittest.TestCase):
+File containing DL model test function
+
+"""
