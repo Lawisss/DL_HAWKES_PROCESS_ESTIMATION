@@ -153,6 +153,29 @@ def read_parquet(filename: str) -> pd.DataFrame:
         print(f"Cannot read Parquet file: {e}.")
 
 
+# Parquet to CSV function
+
+def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False):
+
+    """
+    Parquet to CSV conversion function
+
+    Args:
+        parquet_file (str, optional): Parquet filename (default: "test.parquet")
+        csv_file (str, optional): CSV filename (default: "test.csv")
+        index (bool, optional): Write row names (default: False)
+
+    Returns:
+        Pandas dataframe: File contents dataFrame
+
+    """
+
+    # Red Parquet file
+    df = pd.read_parquet(f"{os.path.join(prep.FILEPATH, parquet_file)}")
+    # Writtent CSV file
+    df.to_csv(f"{os.path.join(prep.FILEPATH, csv_file)}", index=index)
+
+
 # Time measurement function
 
 def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: bool = False) -> Callable:
