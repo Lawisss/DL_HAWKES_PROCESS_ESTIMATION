@@ -18,10 +18,10 @@
 
 ## Description
 
-* Mixed unsupervised-supervised model to leverage sentimental and non-sentimental information from corpus. 
-* Learned word vectors that capture document semantic and sentimental information. 
-* Evaluated on a movie reviews dataset from the Internet Movie Database (IMDB). 
-* Outperformed unsupervised vector sentiment classification approaches that usually fail to capture sentiments.
+* Estimated aggregated Hawkes processes using variational bayesian methods and deep learning in Python (Pytorch). 
+* Simulated and predicted branching ratio and baseline intensity parameters using MLP regressor (CUDA, MPI). 
+* Inferred observation distributions and conditional intensity leveraging Poisson-VAE in dueling decoder framework. 
+* Extended methods to Hawkes processes with more complex dimensions, excitation kernels and HPC architecture.
 
 <!--- Project features here --->
 
