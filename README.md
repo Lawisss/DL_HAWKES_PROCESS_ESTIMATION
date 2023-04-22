@@ -20,7 +20,7 @@
 
 * Estimated aggregated Hawkes processes using variational bayesian methods and deep learning in Python (Pytorch). 
 * Simulated and predicted branching ratio and baseline intensity parameters using MLP regressor (CUDA, MPI). 
-* Inferred observation distributions and conditional intensity leveraging Poisson-VAE in dueling decoder framework. 
+* Inferred observation distributions and conditional intensity leveraging unsupervised technique (generative model). 
 * Extended methods to Hawkes processes with more complex dimensions, excitation kernels and HPC architecture.
 
 <!--- Project features here --->
