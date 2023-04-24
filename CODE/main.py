@@ -7,7 +7,7 @@ File containing functions of all executive file
 
 """
 
-from DL.mlp import MLPTrainer
+from DL.mlp_model import MLPTrainer
 from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
 
 

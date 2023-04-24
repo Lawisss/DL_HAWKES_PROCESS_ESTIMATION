@@ -16,7 +16,7 @@ import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from torch.nn.utils import parameters_to_vector
 
-from DL.mlp import MLP, MLPTrainer
+from DL.mlp_model import MLP, MLPTrainer
 import VARIABLES.mlp_var as mlp
 import VARIABLES.preprocessing_var as prep
 

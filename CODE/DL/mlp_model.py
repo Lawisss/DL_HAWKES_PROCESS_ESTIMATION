@@ -30,7 +30,7 @@ import VARIABLES.preprocessing_var as prep
 
 
 # MLP creation
-@argparser(parse_args=False, arg_groups=['mlp_params'])
+
 class MLP(nn.Module):
     def __init__(self, args_parsed):
         super().__init__()
@@ -259,7 +259,7 @@ class MLPTrainer(MLP):
     # Training fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def train_model(self, args_parsed, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
         """
         Trained and evaluated model

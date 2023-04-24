@@ -216,7 +216,7 @@ def argparser(func: Callable = None, parse_args: bool = False, arg_groups: List[
                      group_args.add_argument(arg['name'], **kwargs)
 
             # If parse_args, parsed arguments from command line 
-            args_parsed = parser.parse_args() if parse_args else None
+            args_parsed, _ = parser.parse_known_args() if parse_args else None
 
             return func(args_parsed, *args, **kwargs)
         
