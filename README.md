@@ -19,8 +19,8 @@
 ## Description
 
 - Estimated aggregated Hawkes processes using variational bayesian methods and deep learning in Python (Pytorch).
-- Simulated and predicted baseline intensity, self-exciting and intensity decay rate using MLP regressor (CUDA, MPI).
-- Inferred observation distributions and conditional intensity leveraging unsupervised technique (generative model).
+- Simulated and predicted baseline intensity, self-exciting and intensity decay rate using MLP regressor (CUDA).
+- Inferred observation distributions and conditional intensity leveraging unsupervised technique (VAE).
 - Extended methods to Hawkes processes with more complex dimensions, excitation kernels and HPC architecture.
 
 <!--- Project features here --->
@@ -29,7 +29,7 @@
 
 - Simulated hyperparameters and binned HP based on parameters (horizon time, kernel function, baseline).
 - Estimated using MLP regressor the binned HP parameters (Branching ratio: $\eta$, Baseline intensity: $\mu$).
-- Inferred using Poisson VAE (dueling decoder) the joint distribution of ${{\eta,\mu}}$ and the conditional intensity $\lambda$.
+- Inferred using Poisson-VAE (dueling decoder) the joint distribution of ${{\eta,\mu}}$ and the conditional intensity $\lambda$.
 - Assessed and compared results according to parameters (Branching Ratio, Expected Activity, Discretisation step).
 
 ### Prerequisites
