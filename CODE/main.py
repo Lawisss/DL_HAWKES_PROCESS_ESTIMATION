@@ -8,7 +8,7 @@ File containing functions of all executive file
 """
 
 from DL.mlp import MLPTrainer
-from UTILS.parser_args import argparser
+from UTILS.utils import argparser
 from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
 
 
