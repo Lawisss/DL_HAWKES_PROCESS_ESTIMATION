@@ -242,13 +242,8 @@ def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: b
         
         return wrapper
     
-    # Decorator creator (profiling) return decorator
-    if func:
-        # Actual decorator call, ex: @cached_property
-        return timer_decorator(func)
-    else:
-        # Factory call, ex: @cached_property()
-        return timer_decorator
+    # Decorator call, ex: @argparser / Factory call, ex: @argparser()
+    return timer_decorator(func) if func else timer_decorator
 
 
 # Pytorch Tensorboard Profiling 
