@@ -14,7 +14,7 @@ import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 
 import VARIABLES.preprocessing_var as prep
-from UTILS.parser_args import argparser
+from UTILS.utils import argparser
 
 # Splitting function
 
