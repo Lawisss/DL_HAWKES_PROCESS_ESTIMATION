@@ -12,12 +12,13 @@ from functools import partial
 import numpy as np
 
 import VARIABLES.hawkes_var as hwk
-from UTILS.utils import write_parquet
+from UTILS.utils import argparser, write_parquet
 
 
 # Jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.parquet') -> np.ndarray:
+@argparser(parse_args=False, arg_groups=['hawkes_simulation_params', 'discretisation_params'])
+def discretise(args_parsed, jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.parquet') -> np.ndarray:
     
     """
     Discretized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
@@ -30,21 +31,24 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
     """  
 
+    # Parameters initialization
+    time_horizon, discretise_step = (args_parsed.time_horizon, args_parsed.discretise_step) if args_parsed else (hwk.TIME_HORIZON, hwk.DISCRETISE_STEP)
+
     # Computed bins number
-    num_bins = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)
+    num_bins = int(time_horizon // discretise_step)
 
     # Initialized an array with dimensions (number of processes, number of jumps per unit of time)
     counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
-        counts[j], _ = np.histogram(h, bins=np.linspace(0, hwk.TIME_HORIZON, num_bins + 1))
+        counts[j], _ = np.histogram(h, bins=np.linspace(0, time_horizon, num_bins + 1))
 
     # Written parameters to Parquet file
-    write_parquet(counts, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
+    write_parquet(counts, columns=np.arange(time_horizon, dtype=np.int32).astype(str), filename=filename)
 
     # Created dictionaries list representing binned simulated event sequences
-    # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
+    # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(time_horizon)), counts))
 
     # Written counts to CSV file
     # write_csv(counts_list, filename=filename)
@@ -54,7 +58,8 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
 
 # Calculated minimum stepsize between events in a given Hawkes process 
 
-def temp_func(jump_times: np.ndarray) -> float:
+@argparser(parse_args=False, arg_groups=['hawkes_simulation_params'])
+def temp_func(args_parsed, jump_times: np.ndarray) -> float:
 
     """Calculated minimum step size between events in Hawkes process
 
@@ -65,13 +70,16 @@ def temp_func(jump_times: np.ndarray) -> float:
         float: Minimum step size between events in Hawkes process. If no events, step size is set to maximum time horizon
     """    
 
+    # Parameters initialization
+    time_horizon = args_parsed.time_horizon if args_parsed else hwk.TIME_HORIZON
+
     # If no event has been recorded, step size = hwk.TIME_HORIZON
     if len(jump_times) == 0:
-        stepsize = hwk.TIME_HORIZON 
+        stepsize = time_horizon 
 
     else:
         # Added event times and boundaries
-        times = np.concatenate(([0], jump_times, [hwk.TIME_HORIZON]))  
+        times = np.concatenate(([0], jump_times, [time_horizon]))  
         # Calculated the differences between the times
         diff = np.diff(times)  
         # Removed negative differences
@@ -103,7 +111,8 @@ def find_stepsize(jump_times: np.ndarray) -> float:
 
 # Computed point process jump times from the events history and the time hwk.TIME_HORIZON
 
-def jump_times(h: np.ndarray) -> np.ndarray:
+@argparser(parse_args=False, arg_groups=['hawkes_simulation_params'])
+def jump_times(args_parsed, h: np.ndarray) -> np.ndarray:
     
     """
     Computed point process jump times from events history and time horizon
@@ -115,8 +124,11 @@ def jump_times(h: np.ndarray) -> np.ndarray:
         np.ndarray: Jump times for point process
     """
 
+    # Parameters initialization
+    time_horizon = args_parsed.time_horizon if args_parsed else hwk.TIME_HORIZON
+
     # Size of each interval
-    stepsize = hwk.TIME_HORIZON / len(h)
+    stepsize = time_horizon / len(h)
 
     # Retrieval of intervals indices with single jump/multiple jumps
     idx_1 = np.nonzero(h == 1)[0]

@@ -8,13 +8,10 @@ File containing functions of all executive file
 """
 
 from DL.mlp import MLPTrainer
-from UTILS.utils import argparser
 from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
 
 
 if __name__ == "__name__":
-
-    args = argparser()
 
     train_x, train_y, val_x, val_y, test_x, test_y = split_data(x, y)
     train_dataset, val_dataset, test_dataset = create_datasets(train_x, train_y, val_x, val_y, test_x, test_y)

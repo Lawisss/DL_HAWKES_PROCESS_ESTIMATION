@@ -8,18 +8,46 @@ File containing all parser arguments.
 
 from typing import List
 
-import VARIABLES.preprocessing_var as prep
+import VARIABLES.hawkes_var as hwk
 import VARIABLES.mlp_var as mlp
+import VARIABLES.preprocessing_var as prep
+
 
 
 # Parser parameters (parser_args.py)
 
 PROG: str  = "MAIN"                                                             # Program name for command-line usage
 USAGE: str  = "%(prog)s [options]"                                              # Message to display when invoking --help option
-DESCRIPTION: str  = "Training model"                                            # Brief description of the program's functionality
+DESCRIPTION: str  = "Arguments Parser"                                          # Brief description of the program's functionality
 
 ARG_GROUPS: List = [                                                            # List of groups containing command-line arguments
         
+    {'name': 'hawkes_params', 
+     'description': 'Hawkes process hyper-parameters generation parameters',
+     'args': [
+        {'name': '--min_itv_beta', 'type': float, 'default': hwk.MIN_ITV_BETA, 'help': 'Beta minimum interval'},
+        {'name': '--max_itv_beta', 'type': float, 'default': hwk.MAX_ITV_BETA, 'help': 'Beta maximum interval'},
+        {'name': '--min_itv_eta', 'type': float, 'default': hwk.MIN_ITV_ETA, 'help': 'Eta minimum interval'},
+        {'name': '--max_itv_eta', 'type': float, 'default': hwk.MAX_ITV_ETA, 'help': 'Eta maximum interval'},
+        {'name': '--expected_activity', 'type': int, 'default': hwk.EXPECTED_ACTIVITY, 'help': 'Total number of expected events'},
+        {'name': '--std', 'type': float, 'default': hwk.STD, 'help': 'Standard deviation for generating epsilon'}]},
+
+    {'name': 'hawkes_simulation_params', 
+     'description': 'Hawkes Process simulation/estimation parameters',
+     'args': [
+        {'name': '--kernel', 'type': str, 'default': hwk.KERNEL, 'help': 'Type of kernel function'},
+        {'name': '--baseline', 'type': str, 'default': hwk.BASELINE, 'help': 'Type of baseline function'},
+        {'name': '--time_itv_start', 'type': int, 'default': hwk.TIME_ITV_START, 'help': 'Start time interval for simulation'},
+        {'name': '--time_horizon', 'type': int, 'default': hwk.TIME_HORIZON, 'help': 'Time horizon for simulation'},
+        {'name': '--process_num', 'type': int, 'default': hwk.PROCESS_NUM, 'help': 'Number of processes to simulate'},
+        {'name': '--end_t', 'type': int, 'default': hwk.END_T, 'help': 'End time for estimation'},
+        {'name': '--num_seq', 'type': int, 'default': hwk.NUM_SEQ, 'help': 'Number of sequences for estimation'}]},
+
+    {'name': 'discretisation_params', 
+     'description': 'Discretisation parameters',
+     'args': [
+        {'name': '--discretise_step', 'type': float, 'default': hwk.DISCRETISE_STEP, 'help': 'Discretise step = Delta'}]},
+
     {'name': 'data_params', 
      'description': 'Dataset parameters', 
      'args': [
