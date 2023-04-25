@@ -12,13 +12,12 @@ from typing import Tuple, TypedDict
 import numpy as np
 import Hawkes as hk
 
-from UTILS.utils import argparser, write_parquet
+from UTILS.utils import write_parquet
 import VARIABLES.hawkes_var as hwk
 
 # Simulated Hawkes process 
 
-@argparser(parse_args=False, arg_groups=['hawkes_simulation_params'])
-def hawkes_simulation(args_parsed, params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> Tuple[hk.simulator, np.ndarray]:
+def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> Tuple[hk.simulator, np.ndarray]:
     
     """
     Simulated Hawkes process with given parameters
@@ -30,15 +29,10 @@ def hawkes_simulation(args_parsed, params: TypedDict = {"mu": 0.1, "alpha": 0.5,
         Tuple[hk.simulator, np.ndarray]: Hawkes process simulator and the simulated times
     """
 
-    # Parameters initialization
-    kernel, baseline, time_itv_start, time_horizon = \
-    (args_parsed.kernel, args_parsed.baseline, args_parsed.time_itv_start, args_parsed.time_horizon) \
-    if args_parsed else (hwk.KERNEL, hwk.BASELINE, hwk.TIME_ITV_START, hwk.TIME_HORIZON)
-
     # Created Hawkes process with a given kernel, baseline and parameters
-    hawkes_process = hk.simulator().set_kernel(kernel).set_baseline(baseline).set_parameter(params)
+    hawkes_process = hk.simulator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE).set_parameter(params)
     # Simulated Hawkes process in a given time interval
-    t = hawkes_process.simulate([time_itv_start, time_horizon])
+    t = hawkes_process.simulate([hwk.TIME_ITV_START, hwk.TIME_HORIZON])
     
     # Plotted the number of events and intensity over time (don't work with many iteration)
     # hawkes_process.plot_N()
@@ -49,8 +43,7 @@ def hawkes_simulation(args_parsed, params: TypedDict = {"mu": 0.1, "alpha": 0.5,
 
 # Simulated several Hawkes processes
 
-@argparser(parse_args=False, arg_groups=['hawkes_simulation_params'])
-def hawkes_simulations(args_parsed, alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: str='hawkes_simulations.parquet') -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: str='hawkes_simulations.parquet') -> np.ndarray:
     
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
@@ -65,23 +58,20 @@ def hawkes_simulations(args_parsed, alpha: np.ndarray, beta: np.ndarray, mu: np.
         np.ndarray: Simulated event sequences of each Hawkes process
     """
 
-    # Parameters initialization
-    process_num, time_horizon = (args_parsed.process_num, args_parsed.time_horizon) if args_parsed else (hwk.PROCESS_NUM, hwk.TIME_HORIZON)
-
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((process_num, time_horizon), dtype=np.float32)
+    simulated_events_seqs = np.zeros((hwk.PROCESS_NUM, hwk.TIME_HORIZON), dtype=np.float32)
 
-    for k in range(process_num):
+    for k in range(hwk.PROCESS_NUM):
         # Simulated Hawkes processes with the current simulation parameters
         # The results are stored in the k-th row of the simulated_events_seqs array
         _, t = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
         
         # Length clipping to not exceed time horizon
-        seq_len = np.minimum(len(t), time_horizon)
+        seq_len = np.minimum(len(t), hwk.TIME_HORIZON)
         simulated_events_seqs[k,:seq_len] = t[:seq_len]
     
     # Written parameters to Parquet file
-    write_parquet(simulated_events_seqs, columns=np.arange(time_horizon, dtype=np.int32).astype(str), filename=filename)
+    write_parquet(simulated_events_seqs, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
 
     # Created dictionaries list representing simulated event sequences
     # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(time_horizon)), simulated_events_seqs))
@@ -94,8 +84,7 @@ def hawkes_simulations(args_parsed, alpha: np.ndarray, beta: np.ndarray, mu: np.
 
 # Estimated Hawkes process
 
-@argparser(parse_args=False, arg_groups=['hawkes_simulation_params'])
-def hawkes_estimation(args_parsed, t: np.ndarray, filename: str = "hawkes_estimation.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated Hawkes process from event times, returned predicted process and performance metrics
@@ -112,14 +101,9 @@ def hawkes_estimation(args_parsed, t: np.ndarray, filename: str = "hawkes_estima
             - interval_transform (np.ndarray): Transformed inter-event intervals
     """
 
-    # Parameters initialization
-    kernel, baseline, time_itv_start, time_horizon, end_t, num_seq = \
-    (args_parsed.kernel, args_parsed.baseline, args_parsed.time_itv_start, args_parsed.time_horizon, args_parsed.end_t, args_parsed.num_seq) \
-    if args_parsed else (hwk.KERNEL, hwk.BASELINE, hwk.TIME_ITV_START, hwk.TIME_HORIZON, hwk.END_T, hwk.NUM_SEQ)
-
     # Estimated Hawkes process parameters with the given kernel, baseline and parameters
-    hawkes_process = hk.estimator().set_kernel(kernel).set_baseline(baseline)
-    hawkes_process.fit(t, [time_itv_start, time_horizon])
+    hawkes_process = hk.estimator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE)
+    hawkes_process.fit(t, [hwk.TIME_ITV_START, hwk.TIME_HORIZON])
     
     # Computed performance metrics for estimated Hawkes process
     metrics = {'Event(s)': len(t),
@@ -133,7 +117,7 @@ def hawkes_estimation(args_parsed, t: np.ndarray, filename: str = "hawkes_estima
     # Transformed times so that the first observation is at 0 and the last at 1
     [t_transform, interval_transform] = hawkes_process.t_trans() 
     # Predicted the Hawkes process 
-    t_pred = hawkes_process.predict(end_t, num_seq) 
+    t_pred = hawkes_process.predict(hwk.END_T, hwk.NUM_SEQ) 
 
     # Written metrics to a CSV file
     # write_csv(metrics, filename=filename)

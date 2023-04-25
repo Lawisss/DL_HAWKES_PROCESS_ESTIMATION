@@ -10,7 +10,7 @@ from typing import Tuple
 
 # MLP parameters (mlp.py)
 
-INPUT_SIZE: int = 100_000                                              # MLP input size
+INPUT_SIZE: int = 100                                                  # MLP input size
 HIDDEN_SIZE: int = 100                                                 # Number of neurons in hidden layers
 OUTPUT_SIZE: int = 2                                                   # MLP output size
 NUM_HIDDEN_LAYERS: int = 6                                             # MLP number of hidden layers

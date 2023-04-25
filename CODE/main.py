@@ -8,10 +8,14 @@ File containing functions of all executive file
 """
 
 from DL.mlp_model import MLPTrainer
+from UTILS.utils import read_parquet
 from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
 
 
 if __name__ == "__name__":
+
+    x = read_parquet("binned_hawkes_simulations.parquet")
+    y = read_parquet('hawkes_hyperparams.parquet')
 
     train_x, train_y, val_x, val_y, test_x, test_y = split_data(x, y)
     train_dataset, val_dataset, test_dataset = create_datasets(train_x, train_y, val_x, val_y, test_x, test_y)
