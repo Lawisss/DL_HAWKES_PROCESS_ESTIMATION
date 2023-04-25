@@ -94,8 +94,8 @@ class MLPTrainer(MLP):
             str: Summary of model's architecture
         """
 
-        summary(self.model, input_size=(prep.BATCH_SIZE, mlp.INPUT_SIZE), 
-                batch_dim=prep.BATCH_SIZE, col_names=mlp.SUMMARY_COL_NAMES, device=prep.DEVICE, mode=mlp.SUMMARY_MODE, verbose=mlp.SUMMARY_VERBOSE)
+        summary(self.model, input_size=(prep.BATCH_SIZE, mlp.INPUT_SIZE), col_names=mlp.SUMMARY_COL_NAMES, 
+                device=prep.DEVICE, mode=mlp.SUMMARY_MODE, verbose=mlp.SUMMARY_VERBOSE)
         
         return f"{mlp.SUMMARY_MODEL:^30} Summary"
     
@@ -260,27 +260,29 @@ class MLPTrainer(MLP):
         print(self.summary_model())
 
         # Start training
-        for epoch in tqdm(range(self.max_epochs), desc='Training Progress', colour='green'):
+        with tqdm(total=mlp.MAX_EPOCHS, desc='Training Progress', colour='green') as pbar:
+            
+            for epoch in range(mlp.MAX_EPOCHS):
 
-            # Converged (Fitted) to optimal parameters
-            self.train_losses[epoch] = self.run_epoch(train_loader)
+                # Converged (Fitted) to optimal parameters
+                self.train_losses[epoch] = self.run_epoch(train_loader)
 
-            # Evaluated on validation set
-            self.val_losses[epoch] = self.evaluate(val_loader)
+                # Evaluated on validation set
+                self.val_losses[epoch] = self.evaluate(val_loader)
 
-            # Checked early stopping
-            if self.early_stopping():
-                break
+                # Checked early stopping
+                if self.early_stopping():
+                    break
 
-            # Updated progress bar description
-            tqdm.set_description(f"Epoch {epoch + 1}/{self.max_epochs} - train_loss: {self.train_losses[epoch]:.4f}, val_loss: {self.val_losses[epoch]:.4f}")
+                # Updated progress bar description
+                pbar.set_description(f"Epoch {epoch + 1}/{mlp.MAX_EPOCHS} - train_loss: {self.train_losses[epoch]:.4f}, val_loss: {self.val_losses[epoch]:.4f}")
 
-            # Updated progress bar
-            tqdm.update(1)
+                # Updated progress bar
+                pbar.update(1)
 
-            # Added losses in TensorBoard at each epoch
-            writer.add_scalar("Training/Validation Loss", 
-                             {'Training': self.train_losses[epoch], 'Validation': self.val_losses[epoch]}, epoch)
+                # Added losses in TensorBoard at each epoch
+                writer.add_scalar("Training/Validation Loss", 
+                                {'Training': self.train_losses[epoch], 'Validation': self.val_losses[epoch]}, epoch)
             
         # Added model graph to TensorBoard
         writer.add_graph(self.model, val_x)
