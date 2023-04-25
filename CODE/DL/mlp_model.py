@@ -94,7 +94,7 @@ class MLPTrainer(MLP):
             str: Summary of model's architecture
         """
 
-        summary(self.model, input_size=(mlp.INPUT_SIZE,),
+        summary(self.model, input_size=(prep.BATCH_SIZE, mlp.INPUT_SIZE), 
                 batch_dim=prep.BATCH_SIZE, col_names=mlp.SUMMARY_COL_NAMES, device=prep.DEVICE, mode=mlp.SUMMARY_MODE, verbose=mlp.SUMMARY_VERBOSE)
         
         return f"{mlp.SUMMARY_MODEL:^30} Summary"
