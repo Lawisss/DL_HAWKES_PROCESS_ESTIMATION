@@ -281,8 +281,7 @@ class MLPTrainer(MLP):
                 pbar.update(1)
 
                 # Added losses in TensorBoard at each epoch
-                writer.add_scalar("Training/Validation Loss", 
-                                {'Training': self.train_losses[epoch], 'Validation': self.val_losses[epoch]}, epoch)
+                writer.add_scalars("Loss", {"Training": self.train_losses[epoch], "Validation": self.val_losses[epoch]}, epoch)
             
         # Added model graph to TensorBoard
         writer.add_graph(self.model, val_x)

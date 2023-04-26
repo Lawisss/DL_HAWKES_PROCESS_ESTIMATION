@@ -27,7 +27,7 @@ EARLY_STOP_DELTA: float = 0.01                                         # Minimum
 
 SUMMARY_MODEL: str = "MLP"                                             # Model name used for summary
 SUMMARY_MODE: str = "train"                                            # Summary modes: "train"/"eval"
-SUMMARY_VERBOSE: int = 2                                               # Level of verbosity in summary
+SUMMARY_VERBOSE: int = 1                                               # Level of verbosity in summary
 SUMMARY_COL_NAMES: Tuple[str, str, str, str, str, str, str] = \
                    ("input_size", "output_size", "num_params", 
                     "params_percent", "kernel_size", 

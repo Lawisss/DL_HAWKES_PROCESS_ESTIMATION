@@ -19,7 +19,9 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
 from torch.profiler import profile, ProfilerActivity
 
+import VARIABLES.hawkes_var as hwk
 import VARIABLES.parser_var as prs
+import VARIABLES.mlp_var as mlp
 import VARIABLES.evaluation_var as eval
 import VARIABLES.preprocessing_var as prep
 
@@ -176,6 +178,26 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
     df = pd.read_parquet(f"{os.path.join(prep.FILEPATH, parquet_file)}")
     # Writtent CSV file
     df.to_csv(f"{os.path.join(prep.FILEPATH, csv_file)}", index=index)
+
+
+def argparser():
+
+    # Created an argument parser
+    parser = argparse.ArgumentParser()
+                
+    # Iterated over filtered argument groups
+    for group in prs.ARG_GROUPS:
+        group_args = parser.add_argument_group(group['name'], group['description'])
+
+        # Iterated over each argument in group
+        for arg in group['args']:
+            group_args.add_argument(arg['name'], **{k: v for k, v in arg.items() if k in ('type', 'nargs', 'default', 'help')})
+
+    # Parsed arguments from command line 
+    args, _ = parser.parse_known_args()
+    
+    for arg, value in filter(lambda x: x[1] is not None, vars(args).items()):
+        setattr(hwk, arg.upper(), value)
 
 
 # Time measurement function
