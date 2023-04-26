@@ -8,11 +8,13 @@ File containing functions of all executive file
 """
 
 from DL.mlp_model import MLPTrainer
-from UTILS.utils import read_parquet
+from UTILS.utils import read_parquet, argparser
 from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
 
 
 if __name__ == "__name__":
+
+    args = argparser()
 
     x = read_parquet("binned_hawkes_simulations.parquet")
     y = read_parquet('hawkes_hyperparams.parquet')

@@ -10,6 +10,7 @@ from typing import List
 
 import VARIABLES.hawkes_var as hwk
 import VARIABLES.mlp_var as mlp
+import VARIABLES.evaluation_var as eval
 import VARIABLES.preprocessing_var as prep
 
 
@@ -69,7 +70,7 @@ ARG_GROUPS: List = [                                                            
 
     {'name': 'file_params', 
      'description': 'Writing/Loading parameters', 
-     'args': [{'name': '--dirpath', 'type': str, 'nargs': 1, 'default': prep.FILEPATH, 'help': 'Path directory where results are saved'}]},
+     'args': [{'name': '--dirpath', 'type': str, 'nargs': 1, 'default': prep.DIRPATH, 'help': 'Path directory where results are saved'}]},
 
     {'name': 'mlp_params', 
      'description': 'MLP parameters', 
@@ -91,5 +92,27 @@ ARG_GROUPS: List = [                                                            
         {'name': '--summary_model', 'type': str, 'nargs': 1, 'default': mlp.SUMMARY_MODEL, 'help': 'Model name used for summary'},
         {'name': '--summary_mode', 'type': str, 'nargs': 1, 'default': mlp.SUMMARY_MODE, 'help': 'Summary modes: train/eval'},
         {'name': '--summary_verbose', 'type': int, 'nargs': 1, 'default': mlp.SUMMARY_VERBOSE, 'help': 'Level of verbosity in summary'},
-        {'name': '--summary_col_names', 'type': str, 'nargs':'+', 'default': mlp.SUMMARY_COL_NAMES, 'help': 'Summary columns names'}]}
+        {'name': '--summary_col_names', 'type': str, 'nargs':'+', 'default': mlp.SUMMARY_COL_NAMES, 'help': 'Summary columns names'}]},
+
+    {'name': 'profile_params', 
+     'description': 'Profiling parameters', 
+     'args': [
+        {'name': '--logdirun', 'type': str, 'nargs': 1, 'default': eval.LOGDIRUN, 'help': "Tensorboard logs directory for each run"},
+        {'name': '--run_name', 'type': str, 'nargs': 1, 'default': eval.RUN_NAME, 'help': "Name for current run based on timestamp/hostname"},
+        {'name': '--logdiprof', 'type': str, 'nargs': 1, 'default': eval.LOGDIPROF, 'help': "Profiling results directory"},
+        {'name': '--activities', 'type': list, 'nargs': '+', 'default': eval.ACTIVITIES, 'help': "List of profiling activities to perform"},
+        {'name': '--wait', 'type': int, 'nargs': 1, 'default': eval.WAIT, 'help': "Time (in seconds) to wait before starting profiling"},
+        {'name': '--warmup', 'type': int, 'nargs': 1, 'default': eval.WARMUP, 'help': "Time (in seconds) for warming up before profiling"},
+        {'name': '--active', 'type': int, 'nargs': 1, 'default': eval.ACTIVE, 'help': "Time (in seconds) for profiling"},
+        {'name': '--repeat', 'type': int, 'nargs': 1, 'default': eval.REPEAT, 'help': "Number of times to repeat profiling"},
+        {'name': '--skip_first', 'type': int, 'nargs': 1, 'default': eval.SKIP_FIRST, 'help': "Number of first profiling results to discard"},
+        {'name': '--record_shapes', 'type': bool, 'nargs': 1, 'default': eval.RECORD_SHAPES, 'help': "Record tensor shapes in profiling output"},
+        {'name': '--profile_memory', 'type': bool, 'nargs': 1, 'default': eval.PROFILE_MEMORY, 'help': "Include memory profiling"},
+        {'name': '--with_stack', 'type': bool, 'nargs': 1, 'default': eval.WITH_STACK, 'help': "Include function call stack in profiling output"},
+        {'name': '--with_flops', 'type': bool, 'nargs': 1, 'default': eval.WITH_FLOPS, 'help': "Include FLOPS computation in profiling output"},
+        {'name': '--with_modules', 'type': bool, 'nargs': 1, 'default': eval.WITH_MODULES, 'help': "Include profiling of module operations"},
+        {'name': '--group_by_input_shape', 'type': bool, 'nargs': 1, 'default': eval.GROUP_BY_INPUT_SHAPE, 'help': "Group profiling output by tensor input shapes"},
+        {'name': '--group_by_stack_n', 'type': int, 'nargs': 1, 'default': eval.GROUP_BY_STACK_N, 'help': "Stack frames number to include in function call stack"},
+        {'name': '--sort_by', 'type': str, 'nargs': 1, 'default': eval.SORT_BY, 'help': "Sort profiling output by specified metric"},
+        {'name': '--row_limit', "type": int, 'nargs': 1, 'default': eval.ROW_LIMIT, 'help': "Maximum number of rows to display in profiling output"}]}
 ]

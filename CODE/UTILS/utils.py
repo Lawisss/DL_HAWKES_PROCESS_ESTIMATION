@@ -51,7 +51,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data = [data]
 
         # Written and field names initialisation
-        with open(f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(f"{os.path.join(prep.DIRPATH, filename)}", mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
@@ -88,7 +88,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     """
 
     try:
-        with open(f"{os.path.join(prep.FILEPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(f"{os.path.join(prep.DIRPATH, filename)}", mode=mode, encoding=encoding) as file:
 
             # Extracted headers
             headers = next(file).strip().split(delimiter)
@@ -124,7 +124,7 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        fp.write(os.path.join(prep.FILEPATH, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
+        fp.write(os.path.join(prep.DIRPATH, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
         
     except IOError as e:
         print(f"Cannot write Parquet file: {e}")
@@ -149,7 +149,7 @@ def read_parquet(filename: str) -> pd.DataFrame:
 
     try:
         # Load Parquet file using Fastparquet
-        pf = fp.ParquetFile(f"{os.path.join(prep.FILEPATH, filename)}")
+        pf = fp.ParquetFile(f"{os.path.join(prep.DIRPATH, filename)}")
         # Converted it in dataframe
         return pf.to_pandas(columns=pf.columns)
 
@@ -175,12 +175,25 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
     """
 
     # Red Parquet file
-    df = pd.read_parquet(f"{os.path.join(prep.FILEPATH, parquet_file)}")
+    df = pd.read_parquet(f"{os.path.join(prep.DIRPATH, parquet_file)}")
     # Writtent CSV file
-    df.to_csv(f"{os.path.join(prep.FILEPATH, csv_file)}", index=index)
+    df.to_csv(f"{os.path.join(prep.DIRPATH, csv_file)}", index=index)
 
+
+# Arguments parser function
 
 def argparser():
+
+    """
+    CLI arguments parser function
+
+    Args:
+        None: Function contain no arguments
+
+    Returns:
+        None: Function does not return anything
+
+    """
 
     # Created an argument parser
     parser = argparse.ArgumentParser()
@@ -196,8 +209,7 @@ def argparser():
     # Parsed arguments from command line 
     args, _ = parser.parse_known_args()
     
-    for arg, value in filter(lambda x: x[1] is not None, vars(args).items()):
-        setattr(hwk, arg.upper(), value)
+    return args
 
 
 # Time measurement function

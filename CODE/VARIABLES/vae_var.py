@@ -5,3 +5,5 @@
 File containing all VAE variables.
 
 """
+
+from main import args
