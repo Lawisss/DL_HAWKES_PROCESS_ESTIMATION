@@ -8,6 +8,7 @@ File containing aggregated Hawkes process functions (Hawkes process discrete con
 """
 
 from functools import partial
+from typing import Optional, Callable
 
 import numpy as np
 
@@ -17,7 +18,7 @@ from UTILS.utils import write_parquet
 
 # Jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.parquet') -> np.ndarray:
+def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Discretized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
@@ -25,23 +26,30 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
     Args:
         jump_times (np.ndarray): Jump times for Hawkes process simulation
         filename (str, optional): Filename to write histogram data in Parquet format (default: "binned_hawkes_simulations.parquet")
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
     """  
 
+    # Default parameters
+    default_params = {"time_horizon": hwk.TIME_HORIZON, "discretise_step": hwk.DISCRETISE_STEP}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Computed bins number
-    num_bins = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)
+    num_bins = int(dict_args['time_horizon'] // dict_args['discretise_step'])
 
     # Initialized an array with dimensions (number of processes, number of jumps per unit of time)
     counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
 
     # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
     for j, h in enumerate(jump_times):
-        counts[j], _ = np.histogram(h, bins=np.linspace(0, hwk.TIME_HORIZON, num_bins + 1))
+        counts[j], _ = np.histogram(h, bins=np.linspace(0, dict_args['time_horizon'], num_bins + 1))
 
     # Written parameters to Parquet file
-    write_parquet(counts, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
+    write_parquet(counts, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
 
     # Created dictionaries list representing binned simulated event sequences
     # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(time_horizon)), counts))
@@ -54,24 +62,31 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
 
 # Calculated minimum stepsize between events in a given Hawkes process 
 
-def temp_func(jump_times: np.ndarray) -> float:
+def temp_func(jump_times: np.ndarray, args: Optional[Callable] = None) -> float:
 
     """Calculated minimum step size between events in Hawkes process
 
     Args:
         jump_times (np.ndarray): Event times in Hawkes process
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         float: Minimum step size between events in Hawkes process. If no events, step size is set to maximum time horizon
     """    
 
+    # Default parameters
+    default_params = {"time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # If no event has been recorded, step size = hwk.TIME_HORIZON
     if len(jump_times) == 0:
-        stepsize = hwk.TIME_HORIZON 
+        stepsize = dict_args["time_horizon"] 
 
     else:
         # Added event times and boundaries
-        times = np.concatenate(([0], jump_times, [hwk.TIME_HORIZON]))  
+        times = np.concatenate(([0], jump_times, [dict_args["time_horizon"]]))  
         # Calculated the differences between the times
         diff = np.diff(times)  
         # Removed negative differences
@@ -103,20 +118,27 @@ def find_stepsize(jump_times: np.ndarray) -> float:
 
 # Computed point process jump times from the events history and the time hwk.TIME_HORIZON
 
-def jump_times(h: np.ndarray) -> np.ndarray:
+def jump_times(h: np.ndarray, args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Computed point process jump times from events history and time horizon
 
     Args:
         h (np.ndarray): Event history of point process
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Jump times for point process
     """
 
+    # Default parameters
+    default_params = {"time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+    
     # Size of each interval
-    stepsize = hwk.TIME_HORIZON / len(h)
+    stepsize = dict_args["time_horizon"] / len(h)
 
     # Retrieval of intervals indices with single jump/multiple jumps
     idx_1 = np.nonzero(h == 1)[0]

@@ -14,7 +14,6 @@ import VARIABLES.evaluation_var as eval
 import VARIABLES.preprocessing_var as prep
 
 
-
 # Parser parameters (parser_args.py)
 
 PROG: str  = "MAIN"                                                             # Program name for command-line usage

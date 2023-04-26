@@ -19,9 +19,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
 from torch.profiler import profile, ProfilerActivity
 
-import VARIABLES.hawkes_var as hwk
 import VARIABLES.parser_var as prs
-import VARIABLES.mlp_var as mlp
 import VARIABLES.evaluation_var as eval
 import VARIABLES.preprocessing_var as prep
 
@@ -159,7 +157,7 @@ def read_parquet(filename: str) -> pd.DataFrame:
 
 # Parquet to CSV function
 
-def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False):
+def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False) -> None:
 
     """
     Parquet to CSV conversion function
@@ -182,7 +180,7 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
 
 # Arguments parser function
 
-def argparser():
+def argparser() -> None:
 
     """
     CLI arguments parser function

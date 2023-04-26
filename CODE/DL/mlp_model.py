@@ -9,7 +9,7 @@ File containing MLP Aggregated/Binned Hawkes Process estimation
 
 import os 
 import copy
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional, Callable
 
 import torch
 import numpy as np
@@ -32,15 +32,20 @@ import VARIABLES.preprocessing_var as prep
 # MLP creation
 
 class MLP(nn.Module):
-    def __init__(self):
+    def __init__(self, input_size=None, hidden_size=None, num_hidden_layers=None, output_size=None):
         super().__init__()
+
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.num_hidden_layers = num_hidden_layers
+        self.output_size = output_size
 
         # Created linear layers (first layer = input_size / hidden layers = hidden_size neurons) 
         # * operator unpacked list comprehension into individual layers added to nn.ModuleList
-        self.layers = nn.ModuleList([nn.Linear(mlp.INPUT_SIZE, mlp.HIDDEN_SIZE), 
-                                     *(nn.Linear(mlp.HIDDEN_SIZE, mlp.HIDDEN_SIZE) for _ in range(mlp.NUM_HIDDEN_LAYERS - 1))])
+        self.layers = nn.ModuleList([nn.Linear(self.input_size, self.hidden_size), 
+                                     *(nn.Linear(self.hidden_size, self.hidden_size) for _ in range(self.num_hidden_layers - 1))])
         
-        self.output_layer = nn.Linear(mlp.HIDDEN_SIZE, mlp.OUTPUT_SIZE)
+        self.output_layer = nn.Linear(self.hidden_size, self.output_size)
         self.relu = nn.ReLU()
 
     # Spread inputs through hidden layers, ReLU function and returns outputs
@@ -65,22 +70,45 @@ class MLP(nn.Module):
 
 # MLP Training
 
-class MLPTrainer(MLP):
-    def __init__(self):
-        super().__init__()
+class MLPTrainer:
+    def __init__(self, args: Optional[Callable] = None):
+
+        # Initialized parameters
+        params = [('input_size', mlp.INPUT_SIZE),
+                  ('hidden_size', mlp.HIDDEN_SIZE),
+                  ('num_hidden_layers', mlp.NUM_HIDDEN_LAYERS),
+                  ('output_size', mlp.OUTPUT_SIZE),
+                  ('device', prep.DEVICE),
+                  ('learning_rate', mlp.LEARNING_RATE),
+                  ('max_epochs', mlp.MAX_EPOCHS),
+                  ('l2_reg', mlp.L2_REG),
+                  ('batch_size', prep.BATCH_SIZE),
+                  ('summary_col_names', mlp.SUMMARY_COL_NAMES),
+                  ('summary_mode', mlp.SUMMARY_MODE),
+                  ('summary_verbose', mlp.SUMMARY_VERBOSE),
+                  ('sumup_model', mlp.SUMMARY_MODEL),
+                  ('early_stop_delta', mlp.EARLY_STOP_DELTA),
+                  ('dirpath', prep.DIRPATH),
+                  ('filename_best_model', mlp.FILENAME_BEST_MODEL),
+                  ('early_stop_patience', mlp.EARLY_STOP_PATIENCE),
+                  ('logdirun', eval.LOGDIPROF),
+                  ('run_name', eval.RUN_NAME)]
+        
+        for attr, default_val in params:
+            setattr(self, attr, getattr(args, attr, default_val))
 
         # MLP parameters
-        self.model = MLP().to(prep.DEVICE)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=mlp.LEARNING_RATE)
-        self.criterion = nn.MSELoss().to(prep.DEVICE)
+        self.model = MLP(self.input_size, self.hidden_size, self.num_hidden_layers, self.output_size).to(self.device)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        self.criterion = nn.MSELoss().to(self.device)
 
         # One epoch train/val loss parameters
         self.train_loss = 0
         self.val_loss = 0
 
         # Training train/val losses parameters (Many epochs)
-        self.train_losses = np.zeros(mlp.MAX_EPOCHS, dtype=np.float32)
-        self.val_losses = np.zeros(mlp.MAX_EPOCHS, dtype=np.float32)
+        self.train_losses = np.zeros(self.max_epochs, dtype=np.float32)
+        self.val_losses = np.zeros(self.max_epochs, dtype=np.float32)
 
 
     # Sum-up model function
@@ -89,15 +117,15 @@ class MLPTrainer(MLP):
 
         """
         Return summary of model architecture
-        
+
         Returns:
             str: Summary of model's architecture
         """
 
-        summary(self.model, input_size=(prep.BATCH_SIZE, mlp.INPUT_SIZE), col_names=mlp.SUMMARY_COL_NAMES, 
-                device=prep.DEVICE, mode=mlp.SUMMARY_MODE, verbose=mlp.SUMMARY_VERBOSE)
+        summary(self.model, input_size=(self.batch_size, self.input_size), col_names=self.summary_col_names, 
+                device=self.device, mode=self.summary_mode, verbose=self.summary_verbose)
         
-        return f"{mlp.SUMMARY_MODEL:^30} Summary"
+        return f"{self.sumup_model:^30} Summary"
     
 
     # One run function (automatic gradients backpropagation)
@@ -122,7 +150,7 @@ class MLPTrainer(MLP):
             # Forward pass (Autograd)
             self.optimizer.zero_grad()
             output = self.model(x)
-            loss = self.criterion(output, y) + (mlp.L2_REG * norm(parameters_to_vector(self.model.parameters()), ord=2, dtype=torch.float32))
+            loss = self.criterion(output, y) + (self.l2_reg * norm(parameters_to_vector(self.model.parameters()), ord=2, dtype=torch.float32))
 
             # Backward pass (Autograd)
             loss.backward()
@@ -175,13 +203,13 @@ class MLPTrainer(MLP):
 
         Returns:
             bool: True if early stopping condition is met, False otherwise
-        """    
-        
+        """
+
         # Checked early stopping
         # Save model if val_loss has decreased
-        if (self.val_loss + mlp.EARLY_STOP_DELTA) < best_loss:
+        if (self.val_loss + self.early_stop_delta) < best_loss:
             
-            torch.save(copy.deepcopy(self.model.state_dict()), f"{os.path.join(prep.DIRPATH, mlp.FILENAME_BEST_MODEL)}")
+            torch.save(copy.deepcopy(self.model.state_dict()), f"{os.path.join(self.dirpath, self.filename_best_model)}")
             best_loss = self.val_loss
             no_improve_count = 0
 
@@ -189,8 +217,8 @@ class MLPTrainer(MLP):
             no_improve_count += 1
 
         # Early stopping condition
-        if no_improve_count >= mlp.EARLY_STOP_PATIENCE:
-            print(f"Early stopping, no val_loss improvement for {mlp.EARLY_STOP_PATIENCE} epochs")
+        if no_improve_count >= self.early_stop_patience:
+            print(f"Early stopping, no val_loss improvement for {self.early_stop_patience} epochs")
             return True
         else:
             return False
@@ -207,8 +235,8 @@ class MLPTrainer(MLP):
             str: Message indicating that best model has been loaded
         """     
 
-        self.model.load_state_dict(torch.load(f"{os.path.join(prep.FILEPATH, mlp.FILENAME_BEST_MODEL)}"))
-        return f"Best model loading ({mlp.FILENAME_BEST_MODEL})..."
+        self.model.load_state_dict(torch.load(f"{os.path.join(self.dirpath, self.filename_best_model)}"))
+        return f"Best model loading ({self.filename_best_model})..."
     
      
     # Prediction function (estimated Hawkes parameters)
@@ -254,15 +282,15 @@ class MLPTrainer(MLP):
         """
 
         # Initialized Tensorboard
-        writer = SummaryWriter(f"{os.path.join(eval.LOGDIRUN, eval.RUN_NAME)}")
+        writer = SummaryWriter(f"{os.path.join(self.logdirun, self.run_name)}")
 
         # Displayed model summary
         print(self.summary_model())
 
         # Start training
-        with tqdm(total=mlp.MAX_EPOCHS, desc='Training Progress', colour='green') as pbar:
+        with tqdm(total=self.max_epochs, desc='Training Progress', colour='green') as pbar:
             
-            for epoch in range(mlp.MAX_EPOCHS):
+            for epoch in range(self.max_epochs):
 
                 # Converged (Fitted) to optimal parameters
                 self.train_losses[epoch] = self.run_epoch(train_loader)
@@ -275,7 +303,7 @@ class MLPTrainer(MLP):
                     break
 
                 # Updated progress bar description
-                pbar.set_description(f"Epoch {epoch + 1}/{mlp.MAX_EPOCHS} - train_loss: {self.train_losses[epoch]:.4f}, val_loss: {self.val_losses[epoch]:.4f}")
+                pbar.set_description(f"Epoch {epoch + 1}/{self.max_epochs} - train_loss: {self.train_losses[epoch]:.4f}, val_loss: {self.val_losses[epoch]:.4f}")
 
                 # Updated progress bar
                 pbar.update(1)

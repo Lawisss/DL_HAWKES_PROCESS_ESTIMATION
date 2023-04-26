@@ -8,7 +8,7 @@ File containing parallelized Hawkes process function (simulation/estimation)
 """
 
 from functools import partial
-from typing import Tuple, TypedDict
+from typing import Tuple, TypedDict, Optional, Callable
 
 import numpy as np
 import Hawkes as hk
@@ -20,7 +20,7 @@ import VARIABLES.hawkes_var as hwk
 
 # Parallelized simulated Hawkes process 
 
-def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, root: int = 0) -> Tuple[hk.simulator, np.ndarray]:
+def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, root: int = 0, args: Optional[Callable] = None) -> Tuple[hk.simulator, np.ndarray]:
 
     """
     Simulated parallelized Hawkes process with given parameters
@@ -28,6 +28,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
     Args:
         params (TypedDict, optional): Parameters of Hawkes process (default: {"mu": 0.1, "alpha": 0.5, "beta": 10.0})
         root (int, optional): Rank of process to use as root for MPI communications (default: 0)
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         Tuple[hk.simulator, np.ndarray]: Hawkes process simulator and the simulated times
@@ -38,18 +39,27 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
     rank = comm.Get_rank()
     size = comm.Get_size()
 
+    # Default parameters
+    default_params = {"kernel": hwk.KERNEL, 
+                      "baseline": hwk.BASELINE, 
+                      "time_itv_start": hwk.TIME_ITV_START,
+                      "time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Broadcast parameters to all processes
     params = comm.bcast(params, root=root)
 
     # Divided time horizon into equal intervals for each process
-    time_intervals = np.linspace(hwk.TIME_ITV_START, hwk.TIME_HORIZON, size + 1)
+    time_intervals = np.linspace(dict_args['time_itv_start'], dict_args['time_horizon'], size + 1)
 
     # Determined the start / end time interval for current process
     start_time = time_intervals[rank]
     end_time = time_intervals[rank + 1]
 
     # Created Hawkes process with kernel, baseline and parameters
-    hawkes_process = hk.simulator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE).set_parameter(params)
+    hawkes_process = hk.simulator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline']).set_parameter(params)
 
     # Simulated a Hawkes process in time interval
     t = hawkes_process.simulate([start_time, end_time])
@@ -66,7 +76,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Parallelized simulated Hawkes processes
 
-def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root: int = 0, filename: str='hawkes_simulations_mpi.parquet') -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root: int = 0, filename: str='hawkes_simulations_mpi.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Simulated several parallelized Hawkes processes using parameters, and saved results to Parquet file 
@@ -77,6 +87,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
         mu (np.ndarray): Base intensity of each Hawkes process
         root (int, optional): Rank of process to use as root for MPI communications (default: 0)
         filename (str, optional): Parquet filename to save results (default: "hawkes_simulations_mpi.parquet")
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process
@@ -87,8 +98,14 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
     size = comm.Get_size()
     rank = comm.Get_rank()
 
+    # Default parameters
+    default_params = {"process_num": hwk.PROCESS_NUM, "time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Splitted process number evenly among MPI ranks
-    chunk_num = hwk.PROCESS_NUM // size
+    chunk_num = dict_args['process_num'] // size
 
     # Generated simulation parameters for each local process
     chunk_mu = mu[rank * chunk_num:(rank + 1) * chunk_num]
@@ -96,7 +113,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
     chunk_beta = beta[rank * chunk_num:(rank + 1) * chunk_num]
 
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((chunk_num, hwk.TIME_HORIZON), dtype=np.float32)
+    simulated_events_seqs = np.zeros((chunk_num, dict_args['time_horizon']), dtype=np.float32)
 
     for k in range(chunk_num):
         # Simulated Hawkes processes with current simulation parameters
@@ -104,7 +121,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
         _, t = hawkes_simulation(params={"mu": chunk_mu[k], "alpha": chunk_alpha[k], "beta": chunk_beta[k]})
         
         # Length clipping to not exceed time horizon
-        seq_len = np.minimum(len(t), hwk.TIME_HORIZON)
+        seq_len = np.minimum(len(t), dict_args['time_horizon'])
         simulated_events_seqs[k,:seq_len] = t[:seq_len]
 
     # Gather simulated_events_seqs from all ranks to root
@@ -115,7 +132,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
         simulated_events_seqs = np.concatenate(simulated_events_seqs)
 
         # Written parameters to Parquet file
-        write_parquet(simulated_events_seqs, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
+        write_parquet(simulated_events_seqs, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
 
         # Created dictionaries list representing simulated event sequences
         # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
@@ -127,7 +144,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
 
 # Parallelized estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation_mpi.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation_mpi.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated parallelized Hawkes process from event times and returns predicted process and performance metrics
@@ -136,6 +153,7 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
         t (np.ndarray): Event times
         root (int, optional): Rank of process to use as root for MPI communications. (default: 0)
         filename (str, optional): Parquet filename for performance metrics. (default: "hawkes_estimation_mpi.parquet")
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
@@ -150,11 +168,22 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
     rank = comm.Get_rank()
     size = comm.Get_size()
 
+    # Default parameters
+    default_params = {"kernel": hwk.KERNEL, 
+                      "baseline": hwk.BASELINE, 
+                      "time_itv_start": hwk.TIME_ITV_START,
+                      "time_horizon": hwk.TIME_HORIZON,
+                      "end_t": hwk.END_T,
+                      "num_seq": hwk.NUM_SEQ}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Estimated Hawkes process parameters with kernel, baseline and parameters
-    hawkes_process = hk.estimator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE)
+    hawkes_process = hk.estimator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline'])
 
     # Broadcast parameters
-    params = comm.bcast([hwk.TIME_ITV_START, hwk.TIME_HORIZON, hwk.END_T, hwk.NUM_SEQ], root=root)
+    params = comm.bcast([dict_args['time_itv_start'], dict_args['time_horizon'], dict_args['end_t'], dict_args['num_seq']], root=root)
 
     # Distributed among processes
     t_chunks = np.array_split(t, size)

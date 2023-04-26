@@ -7,7 +7,7 @@ File containing Hawkes process hyper-parameters generation functions (Default Pa
 
 """
 
-from typing import Tuple
+from typing import Tuple, Optional, Callable
 
 import numpy as np
 
@@ -18,13 +18,14 @@ from UTILS.utils import write_parquet
 
 # Generated Hawkes process hyper-parameters (alpha, beta, mu)
 
-def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process hyperparameters
 
     Args:
         filename (str, optional): Filename to save hyperparameters in Parquet file (default: "hawkes_hyperparams.parquet")
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         A tuple containing:
@@ -33,15 +34,28 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet") -> Tup
         - Beta parameters for each process
         - Mu parameters for each process
     """
-    
+
+    # Default parameters
+    default_params = {"expected_activity": hwk.EXPECTED_ACTIVITY,
+                      "std": hwk.STD,
+                      "process_num": hwk.PROCESS_NUM,
+                      "min_itv_eta": hwk.MIN_ITV_ETA,
+                      "max_itv_eta": hwk.MAX_ITV_ETA,
+                      "min_itv_beta": hwk.MIN_ITV_BETA,
+                      "max_itv_beta": hwk.MAX_ITV_BETA,
+                      "time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Generated random vectors of size PROCESS_NUM (epsilon = average of events)
-    epsilon = np.random.normal(hwk.EXPECTED_ACTIVITY, hwk.STD, hwk.PROCESS_NUM)
-    eta = np.random.uniform(hwk.MIN_ITV_ETA, hwk.MAX_ITV_ETA, hwk.PROCESS_NUM)
-    beta = np.random.uniform(hwk.MIN_ITV_BETA, hwk.MAX_ITV_BETA, hwk.PROCESS_NUM)
+    epsilon = np.random.normal(dict_args['expected_activity'], dict_args['std'], dict_args['process_num'])
+    eta = np.random.uniform(dict_args['min_itv_eta'], dict_args['max_itv_eta'], dict_args['process_num'])
+    beta = np.random.uniform(dict_args['min_itv_beta'], dict_args['max_itv_beta'], dict_args['process_num'])
 
     # Calculated alpha/mu vectors from beta/eta vectors (alpha = eta because of library exponential formula)
     alpha = eta
-    mu = (epsilon / hwk.TIME_HORIZON) * (1 - eta)
+    mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
 
     # Written parameters to Parquet file
     write_parquet({"alpha": alpha, "beta": beta, "mu": mu}, filename=filename)

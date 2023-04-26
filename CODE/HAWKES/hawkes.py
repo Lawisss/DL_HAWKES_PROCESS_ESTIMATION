@@ -7,7 +7,7 @@ File containing Hawkes process function (simulation/estimation)
 
 """
 
-from typing import Tuple, TypedDict
+from typing import Tuple, TypedDict, Optional, Callable
 
 import numpy as np
 import Hawkes as hk
@@ -17,22 +17,32 @@ import VARIABLES.hawkes_var as hwk
 
 # Simulated Hawkes process 
 
-def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}) -> Tuple[hk.simulator, np.ndarray]:
+def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, args: Optional[Callable] = None) -> Tuple[hk.simulator, np.ndarray]:
     
     """
     Simulated Hawkes process with given parameters
 
     Args:
         params (TypedDict, optional): Parameters of Hawkes process (default: {"mu": 0.1, "alpha": 0.5, "beta": 10.0})
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         Tuple[hk.simulator, np.ndarray]: Hawkes process simulator and the simulated times
     """
 
+    # Default parameters
+    default_params = {"kernel": hwk.KERNEL, 
+                      "baseline": hwk.BASELINE, 
+                      "time_itv_start": hwk.TIME_ITV_START,
+                      "time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Created Hawkes process with a given kernel, baseline and parameters
-    hawkes_process = hk.simulator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE).set_parameter(params)
+    hawkes_process = hk.simulator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline']).set_parameter(params)
     # Simulated Hawkes process in a given time interval
-    t = hawkes_process.simulate([hwk.TIME_ITV_START, hwk.TIME_HORIZON])
+    t = hawkes_process.simulate([dict_args['time_itv_start'], dict_args['time_horizon']])
     
     # Plotted the number of events and intensity over time (don't work with many iteration)
     # hawkes_process.plot_N()
@@ -43,7 +53,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: str='hawkes_simulations.parquet') -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: str='hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
@@ -53,25 +63,32 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
         beta (np.ndarray): Decay matrix of each Hawkes process
         mu (np.ndarray): Base intensity of each Hawkes process
         filename (str, optional): Parquet filename to save results (default: "hawkes_simulations.parquet")
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process
     """
 
-    # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((hwk.PROCESS_NUM, hwk.TIME_HORIZON), dtype=np.float32)
+    # Default parameters
+    default_params = {"process_num": hwk.PROCESS_NUM, "time_horizon": hwk.TIME_HORIZON}
 
-    for k in range(hwk.PROCESS_NUM):
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Initialized array to store Hawkes processes (Pre-allocate memory)
+    simulated_events_seqs = np.zeros((dict_args['process_num'], dict_args['process_num']), dtype=np.float32)
+
+    for k in range(dict_args['process_num']):
         # Simulated Hawkes processes with the current simulation parameters
         # The results are stored in the k-th row of the simulated_events_seqs array
         _, t = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
         
         # Length clipping to not exceed time horizon
-        seq_len = np.minimum(len(t), hwk.TIME_HORIZON)
+        seq_len = np.minimum(len(t), dict_args['time_horizon'])
         simulated_events_seqs[k,:seq_len] = t[:seq_len]
     
     # Written parameters to Parquet file
-    write_parquet(simulated_events_seqs, columns=np.arange(hwk.TIME_HORIZON, dtype=np.int32).astype(str), filename=filename)
+    write_parquet(simulated_events_seqs, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
 
     # Created dictionaries list representing simulated event sequences
     # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(time_horizon)), simulated_events_seqs))
@@ -84,7 +101,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
 
 # Estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet") -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated Hawkes process from event times, returned predicted process and performance metrics
@@ -92,6 +109,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
     Args:
         t (np.ndarray): Event times
         filename (str, optional): Parquet filename for performance metrics (default: "hawkes_estimation.parquet")
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
@@ -101,9 +119,20 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
             - interval_transform (np.ndarray): Transformed inter-event intervals
     """
 
+    # Default parameters
+    default_params = {"kernel": hwk.KERNEL, 
+                      "baseline": hwk.BASELINE, 
+                      "time_itv_start": hwk.TIME_ITV_START,
+                      "time_horizon": hwk.TIME_HORIZON,
+                      "end_t": hwk.END_T,
+                      "num_seq": hwk.NUM_SEQ}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Estimated Hawkes process parameters with the given kernel, baseline and parameters
-    hawkes_process = hk.estimator().set_kernel(hwk.KERNEL).set_baseline(hwk.BASELINE)
-    hawkes_process.fit(t, [hwk.TIME_ITV_START, hwk.TIME_HORIZON])
+    hawkes_process = hk.estimator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline'])
+    hawkes_process.fit(t, [dict_args['time_itv_start'], dict_args['time_horizon']])
     
     # Computed performance metrics for estimated Hawkes process
     metrics = {'Event(s)': len(t),
@@ -117,7 +146,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
     # Transformed times so that the first observation is at 0 and the last at 1
     [t_transform, interval_transform] = hawkes_process.t_trans() 
     # Predicted the Hawkes process 
-    t_pred = hawkes_process.predict(hwk.END_T, hwk.NUM_SEQ) 
+    t_pred = hawkes_process.predict(dict_args['end_t'], dict_args['num_seq']) 
 
     # Written metrics to a CSV file
     # write_csv(metrics, filename=filename)

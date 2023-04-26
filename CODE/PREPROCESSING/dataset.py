@@ -7,7 +7,7 @@ File containing DL preprocessing function
 
 """
 
-from typing import Tuple
+from typing import Tuple, Optional, Callable
 
 import torch
 import numpy as np
@@ -18,7 +18,7 @@ import VARIABLES.preprocessing_var as prep
 
 # Splitting function
 
-def split_data(x: np.ndarray, y: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def split_data(x: np.ndarray, y: np.ndarray, args: Optional[Callable] = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
 
     """
     Splitted data into train, validation, and test sets
@@ -26,19 +26,25 @@ def split_data(x: np.ndarray, y: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor
     Args:
         x (np.ndarray): Input features
         y (np.ndarray): target values
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
             Training features, training targets, validation features, validation targets, test features, and test targets
     """
 
+    # Default parameters
+    default_params = {"device": prep.DEVICE, "val_ratio": prep.VAL_RATIO, "test_ratio":  prep.TEST_RATIO}
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Converted data
-    if isinstance(x, pd.DataFrame): x = torch.tensor(x.values, dtype=torch.float32).to(prep.DEVICE)
-    if isinstance(y, pd.DataFrame): y = torch.tensor(y.values, dtype=torch.float32).to(prep.DEVICE)
+    if isinstance(x, pd.DataFrame): x = torch.tensor(x.values, dtype=torch.float32).to(dict_args['device'])
+    if isinstance(y, pd.DataFrame): y = torch.tensor(y.values, dtype=torch.float32).to(dict_args['device'])
 
     # Initialized sizing
-    val_size = int(len(x) * prep.VAL_RATIO)
-    test_size = int(len(x) * prep.TEST_RATIO)
+    val_size = int(len(x) * dict_args['val_ratio'])
+    test_size = int(len(x) * dict_args['test_ratio'])
     train_size = len(x) - val_size - test_size
 
     train_x, val_x, test_x = x[:train_size], x[train_size:train_size+val_size], x[train_size+val_size:]
@@ -76,7 +82,7 @@ def create_datasets(train_x: torch.Tensor, train_y: torch.Tensor, val_x: torch.T
 
 # Data Loaders creation function
 
-def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset, test_dataset: TensorDataset) -> Tuple[DataLoader, DataLoader, DataLoader]:
+def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset, test_dataset: TensorDataset, args: Optional[Callable] = None) -> Tuple[DataLoader, DataLoader, DataLoader]:
     
     """Created data loaders for training, validation, and testing sets
 
@@ -84,15 +90,26 @@ def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset
         train_dataset (TensorDataset): Training dataset
         val_dataset (TensorDataset): Validation dataset
         test_dataset (TensorDataset): Testing dataset
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
         Tuple[DataLoader, DataLoader, DataLoader]: Data loaders for the training, validation, and testing sets
     """
+
+    # Default parameters
+    default_params = {"batch_size": prep.BATCH_SIZE, 
+                      "shuffle": prep.SHUFFLE, 
+                      "drop_last":  prep.DROP_LAST,
+                      "num_workers": prep.NUM_WORKERS,
+                      "pin_memory": prep.PIN_MEMORY}
     
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Data Loaders creation (speed up loading process with drop_last, num_workers, pin_memory)
-    train_loader = DataLoader(train_dataset, batch_size=prep.BATCH_SIZE, shuffle=prep.SHUFFLE, drop_last=prep.DROP_LAST, num_workers=prep.NUM_WORKERS, pin_memory=prep.PIN_MEMORY)
-    val_loader = DataLoader(val_dataset, batch_size=prep.BATCH_SIZE, shuffle=prep.SHUFFLE, drop_last=prep.DROP_LAST, num_workers=prep.NUM_WORKERS, pin_memory=prep.PIN_MEMORY) 
-    test_loader = DataLoader(test_dataset, batch_size=prep.BATCH_SIZE, shuffle=prep.SHUFFLE, drop_last=prep.DROP_LAST, num_workers=prep.NUM_WORKERS, pin_memory=prep.PIN_MEMORY)
+    train_loader = DataLoader(train_dataset, batch_size=dict_args['batch_size'], shuffle=dict_args['shuffle'], drop_last=dict_args['drop_last'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory'])
+    val_loader = DataLoader(val_dataset, batch_size=dict_args['batch_size'], shuffle=dict_args['shuffle'], drop_last=dict_args['drop_last'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory']) 
+    test_loader = DataLoader(test_dataset, batch_size=dict_args['batch_size'], shuffle=dict_args['shuffle'], drop_last=dict_args['drop_last'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory'])
 
     return train_loader, val_loader, test_loader
 
