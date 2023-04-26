@@ -69,7 +69,7 @@ ARG_GROUPS: List = [                                                            
 
     {'name': 'file_params', 
      'description': 'Writing/Loading parameters', 
-     'args': [{'name': '--filepath', 'type': str, 'nargs': 1, 'default': prep.FILEPATH, 'help': 'Path directory where results are saved'}]},
+     'args': [{'name': '--dirpath', 'type': str, 'nargs': 1, 'default': prep.FILEPATH, 'help': 'Path directory where results are saved'}]},
 
     {'name': 'mlp_params', 
      'description': 'MLP parameters', 

@@ -17,7 +17,7 @@ if __name__ == "__name__":
     x = read_parquet("binned_hawkes_simulations.parquet")
     y = read_parquet('hawkes_hyperparams.parquet')
 
-    train_x, train_y, val_x, val_y, test_x, test_y = split_data(x, y)
+    train_x, train_y, val_x, val_y, test_x, test_y = split_data(x, y.iloc[:, [0, 2]])
     train_dataset, val_dataset, test_dataset = create_datasets(train_x, train_y, val_x, val_y, test_x, test_y)
     train_loader, val_loader, test_loader = create_data_loaders(train_dataset, val_dataset, test_dataset)
 
