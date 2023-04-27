@@ -3,7 +3,7 @@
 
 """MLP module
 
-File containing MLP Aggregated/Binned Hawkes Process estimation
+File containing MLP Aggregated/Binned Hawkes Process estimation (eta/mu)
 
 """
 
@@ -91,7 +91,7 @@ class MLPTrainer:
                   ('dirpath', prep.DIRPATH),
                   ('filename_best_model', mlp.FILENAME_BEST_MODEL),
                   ('early_stop_patience', mlp.EARLY_STOP_PATIENCE),
-                  ('logdirun', eval.LOGDIPROF),
+                  ('logdirun', eval.LOGDIRUN),
                   ('run_name', eval.RUN_NAME)]
         
         for attr, default_val in params:

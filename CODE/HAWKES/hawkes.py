@@ -76,7 +76,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((dict_args['process_num'], dict_args['process_num']), dtype=np.float32)
+    simulated_events_seqs = np.zeros((dict_args['process_num'], dict_args['time_horizon']), dtype=np.float32)
 
     for k in range(dict_args['process_num']):
         # Simulated Hawkes processes with the current simulation parameters
