@@ -30,5 +30,5 @@ if __name__ == "__main__":
     train_dataset, val_dataset, test_dataset = create_datasets(train_x, train_y, val_x, val_y, test_x, test_y)
     train_loader, val_loader, test_loader = create_data_loaders(train_dataset, val_dataset, test_dataset, args=args)
     
-    model, train_losses, val_losses, val_y_pred, val_eta, val_mu = MLPTrainer(args=args).train_model(train_loader, val_loader, val_x)
-    test_y_pred, test_loss, test_eta, test_mu = MLPTrainer().test_model(test_loader)
+    model, train_losses, val_losses, val_y_pred, val_eta, val_mu = MLPTrainer(args=args).train_model(train_loader, val_loader, val_x, val_y)
+    test_y_pred, test_loss, test_eta, test_mu = MLPTrainer(args=args).test_model(test_loader, test_y)

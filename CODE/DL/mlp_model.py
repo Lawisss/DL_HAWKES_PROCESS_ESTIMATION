@@ -23,7 +23,7 @@ from torch.nn.utils import parameters_to_vector
 from torch.utils.tensorboard import SummaryWriter
 
 import VARIABLES.mlp_var as mlp
-from UTILS.utils import profiling
+from UTILS.utils import profiling, write_parquet
 import VARIABLES.evaluation_var as eval
 import VARIABLES.preprocessing_var as prep
 
@@ -275,7 +275,7 @@ class MLPTrainer:
     # Training fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor, val_y: torch.Tensor, folder: str = 'TRAINING') -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
         """
         Trained and evaluated model
@@ -284,13 +284,15 @@ class MLPTrainer:
             train_loader (DataLoader): Training data
             val_loader (DataLoader): Validation data
             val_x (torch.Tensor): Input features for validation data
+            val_y (torch.Tensor): Label outputs for validation data
+            folder (str, optional): Sub-folder name in RUNS folder (default: 'TRAINING')
 
         Returns:
             Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]: Model, losses, predictions, eta/mu
         """
 
         # Initialized Tensorboard
-        writer = SummaryWriter(f"{os.path.join(self.logdirun, self.run_name)}")
+        writer = SummaryWriter(os.path.join(self.logdirun, folder, self.run_name))
 
         # Displayed model summary
         print(self.summary_model())
@@ -318,7 +320,7 @@ class MLPTrainer:
 
                 # Added losses in TensorBoard at each epoch
                 writer.add_scalars("Loss", {"Training": self.train_losses[epoch], "Validation": self.val_losses[epoch]}, epoch)
-            
+
         # Added model graph to TensorBoard
         writer.add_graph(self.model, val_x)
 
@@ -328,9 +330,26 @@ class MLPTrainer:
         # Computed estimated parameters for validation set (After loaded best model)
         val_y_pred, val_eta, val_mu = self.predict(val_x)
 
+        # Added results histograms to TensorBoard
+        writer.add_histogram("Baseline intensity Histogram", val_y_pred[:, 1], len(val_y), bins="auto")
+        writer.add_histogram("Branching ratio Histogram", val_y_pred[:, 0], len(val_y), bins="auto")
+        writer.add_histogram("Prediction Histogram", val_y_pred, len(val_y), bins="auto")
+        writer.add_histogram("Validation Histogram", val_y, len(val_y), bins="auto")
+
         # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
+        
+        # Written parameters to Parquet file
+        write_parquet({'train_losses': self.train_losses, 
+                       'val_losses': self.val_losses}, 
+                       filename=f"{self.run_name}_LOSSES.parquet", 
+                       folder=os.path.join(self.logdirun, folder, self.run_name))
+        
+        write_parquet({'eta_pred': val_y_pred[:, 0], 
+                       'mu_pred': val_y_pred[:, 1]}, 
+                       filename=f"{self.run_name}_PRED.parquet", 
+                       folder=os.path.join(self.logdirun, folder, self.run_name))
 
         return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta, val_mu
     
@@ -339,7 +358,20 @@ class MLPTrainer:
     
     @profiling(enable=False)
     @torch.no_grad()
-    def test_model(self, test_loader: DataLoader, dtype: torch.dtype = torch.float32):
+    def test_model(self, test_loader: DataLoader, test_y: torch.Tensor, dtype: torch.dtype = torch.float32, folder: str = 'TESTING') -> Tuple[np.ndarray, float, float, float]:
+
+        """
+        Tested and evaluated model
+
+        Args:
+            test_loader (DataLoader): Testing data
+            test_y (torch.Tensor): Label outputs for testing data
+            dtype (torch.dtype): Predictions datatype (default: torch.float32)
+            folder (str, optional): Sub-folder name in RUNS folder (default: 'TESTING')
+
+        Returns:
+            Tuple[np.ndarray, float, float, float]: predictions, loss average, eta average, mu average
+        """
         
         # Eval mode
         self.model.eval()
@@ -348,20 +380,33 @@ class MLPTrainer:
         index = 0
         test_y_pred = torch.empty((len(test_loader.dataset), 2), dtype=dtype)
         
+        # Initialized Tensorboard
+        writer = SummaryWriter(os.path.join(self.logdirun, folder, self.run_name))
+
         for x, y in test_loader:
             
             # Forward pass for predictions
-            output = self.model(x)
-            test_y_pred[index:index+len(x), :] = output
+            y_pred = self.model(x)
+            test_y_pred[index:index+len(x), :] = y_pred
             index += len(x)
 
             # Computed loss
-            loss = self.criterion(output, y)
+            loss = self.criterion(y_pred, y)
             self.test_loss += loss.item() * x.size(0)
 
             # Computed branching ratio and baseline intensity predictions
-            self.test_eta += torch.mean(output[:, 0], dtype=dtype).item() * x.size(0)
-            self.test_mu += torch.mean(output[:, 1], dtype=dtype).item() * x.size(0)
+            self.test_eta += torch.mean(y_pred[:, 0], dtype=dtype).item() * x.size(0)
+            self.test_mu += torch.mean(y_pred[:, 1], dtype=dtype).item() * x.size(0)
+
+            # Add losses, eta, mu values in TensorBoard
+            writer.add_scalars("Prediction", {"Branching ratio": self.test_eta, "Baseline intensity": self.test_mu}, index)
+            writer.add_scalars("Loss", {"Test Loss": self.test_loss}, index)
+
+            # Added results histograms to TensorBoard
+            writer.add_histogram("Baseline intensity Histogram", test_y_pred[:, 1][index], index, bins="auto")
+            writer.add_histogram("Branching ratio Histogram", test_y_pred[:, 0][index], index, bins="auto")
+            writer.add_histogram("Prediction Histogram", test_y_pred[index], index, bins="auto")
+            writer.add_histogram("Validation Histogram", test_y[index], index, bins="auto")
 
         # Computed average loss and predictions
         self.test_loss /= len(test_loader.dataset)
@@ -369,5 +414,15 @@ class MLPTrainer:
         self.test_mu /= len(test_loader.dataset)
 
         print(f"Test set - Test loss: {self.test_loss:.4f}, Estimated branching ratio (η): {self.test_eta:.4f}, Estimated baseline intensity (µ): {self.test_mu:.4f}")
+
+        # Stored on disk / Closed SummaryWriter
+        writer.flush()
+        writer.close()
+
+        # Written parameters to Parquet file
+        write_parquet({'eta_pred': test_y_pred[:, 0], 
+                       'mu_pred': test_y_pred[:, 1]}, 
+                       filename=f"{self.run_name}_PRED.parquet", 
+                       folder=os.path.join(self.logdirun, folder, self.run_name))
 
         return test_y_pred, self.test_loss, self.test_eta, self.test_mu

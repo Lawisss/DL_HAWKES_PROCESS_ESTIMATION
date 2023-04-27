@@ -8,24 +8,25 @@ File containing Linear Aggregated/Binned Hawkes Process estimation (alpha/beta)
 """
 
 import os
-from typing import Tuple, Any
+from typing import Tuple, Callable
 
 import numpy as np
 
+from DL.mlp_model import MLPTrainer
 from UTILS.utils import write_parquet
 
 # Linear Regression function (alpha/beta estimation)
 
-def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, step_size: float = 0.05, filename: str = "alpha_beta_linear_estimation.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def linear_model(train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, model: Callable = MLPTrainer(), step_size: float = 0.05, filename: str = "alpha_beta_linear_estimation.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Calculates predicted alpha/beta values using linear regression
 
-    Args:
-        model (Any): Trained model 
+    Args: 
         train_x (np.ndarray): Training data
         val_x (np.ndarray): Validation data
         params (np.ndarray): Parameter values
+        model (Callable, optional): Trained model
         step_size (float, optional): Step size for alpha values. (default: 0.05)
         filename (str, optional): Filename to save parameters in Parquet file (default: "alpha_beta_linear_estimation.parquet")
 
@@ -34,11 +35,7 @@ def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.
     """
 
     # Predicted validation set values
-    val_y_pred = model.predict(val_x)
-
-    #Calculated validation set eta and mu median
-    val_eta = np.median(val_y_pred[:, 0])
-    val_mu = np.median(val_y_pred[:, 1])
+    _, val_eta, val_mu = model.predict(val_x)
 
     # Defined min and max eta values for comparison
     min_eta = val_eta - 0.05
