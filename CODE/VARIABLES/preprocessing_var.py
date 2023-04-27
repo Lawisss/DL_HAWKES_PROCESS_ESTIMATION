@@ -12,8 +12,8 @@ import torch
 
 # Datasets parameters (dataset.py)
 
-VAL_RATIO: float = 0.25 # 0.03125                                     # Fraction of data used for validation
-TEST_RATIO: float = 0.125 # 0.34375                                   # Fraction of data used for testing
+VAL_RATIO: float = 0.05                                               # Fraction of data used for validation
+TEST_RATIO: float = 0.05                                              # Fraction of data used for testing
 BATCH_SIZE: int = 128                                                 # Number of samples used in each process iteration
 SHUFFLE: bool = True                                                  # Shuffle data in each epoch
 DROP_LAST: bool = True                                                # Drop last inchoate batch if batch size ∤ dataset size

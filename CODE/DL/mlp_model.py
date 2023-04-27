@@ -352,11 +352,6 @@ class MLPTrainer:
                        'val_mu_pred': val_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_PRED.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
-        
-        write_parquet({'val_eta_avg': val_eta_avg, 
-                       'val_mu_avg': val_mu_avg}, 
-                       filename=f"{self.run_name}_RESULTS.parquet", 
-                       folder=os.path.join(self.logdirun, folder, self.run_name))
 
         return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta_avg, val_mu_avg
     
@@ -406,7 +401,7 @@ class MLPTrainer:
             self.test_mu_avg += torch.mean(y_pred[:, 1], dtype=dtype).item() * x.size(0)
 
             # Add losses, eta, mu values in TensorBoard
-            writer.add_scalars("Prediction", {"Branching ratio": self.test_eta, "Baseline intensity": self.test_mu}, index)
+            writer.add_scalars("Prediction", {"Branching ratio": self.test_eta_avg, "Baseline intensity": self.test_mu_avg}, index)
             writer.add_scalars("Loss", {"Test Loss": self.test_loss}, index)
 
             # Added results histograms to TensorBoard
@@ -432,12 +427,6 @@ class MLPTrainer:
                        'test_eta_pred': test_y_pred[:, 0], 
                        'test_mu_pred': test_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_PRED.parquet", 
-                       folder=os.path.join(self.logdirun, folder, self.run_name))
-        
-        write_parquet({'test_loss': self.test_loss, 
-                       'test_eta_avg': self.test_eta_avg,
-                       'test_mu_avg': self.test_mu_avg}, 
-                       filename=f"{self.run_name}_RESULTS.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
 
         return test_y_pred, self.test_loss, self.test_eta_avg, self.test_mu_avg
