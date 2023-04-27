@@ -7,6 +7,7 @@ File containing parallelized Aggregated Hawkes process functions (Hawkes process
 
 """
 
+import os
 from functools import partial
 from typing import Optional, Callable
 
@@ -64,7 +65,7 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 
     # Written parameters to Parquet file
     if rank == 0:
-        write_parquet(counts, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
+        write_parquet(counts, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=os.path.join('SIMULATIONS', filename))
 
         # Created dictionaries list representing binned simulated event sequences
         # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))

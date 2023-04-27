@@ -7,6 +7,7 @@ File containing parallelized Hawkes process hyper-parameters generation function
 
 """
 
+import os
 from typing import Tuple, Optional, Callable
 
 import numpy as np
@@ -83,7 +84,7 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.p
 
     # Written parameters to Parquet file
     if rank == 0:
-        write_parquet({"alpha": alpha, "beta": beta, "mu": mu}, filename=filename)
+        write_parquet({"alpha": alpha, "beta": beta, "mu": mu}, filename=os.path.join('SIMULATIONS', filename))
         
         # Written CSV file on the root process
         # params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
