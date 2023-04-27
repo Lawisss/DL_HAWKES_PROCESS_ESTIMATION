@@ -108,8 +108,8 @@ class MLPTrainer:
 
         # Test loss/predictions parameters
         self.test_loss = 0
-        self.test_eta = 0
-        self.test_mu = 0
+        self.test_eta_avg = 0
+        self.test_mu_avg = 0
         
         # Training train/val losses parameters (Many epochs)
         self.train_losses = np.zeros(self.max_epochs, dtype=np.float32)
@@ -264,12 +264,12 @@ class MLPTrainer:
         """        
 
         val_y_pred = self.model(val_x)
-        val_eta = torch.mean(val_y_pred[:, 0], dtype=dtype).item()
-        val_mu = torch.mean(val_y_pred[:, 1], dtype=dtype).item()
+        val_eta_avg = torch.mean(val_y_pred[:, 0], dtype=dtype).item()
+        val_mu_avg = torch.mean(val_y_pred[:, 1], dtype=dtype).item()
 
-        print(f"Validation set - Estimated branching ratio (η): {val_eta:.4f}, Estimated baseline intensity (µ): {val_mu:.4f}")
+        print(f"Validation set - Estimated branching ratio (η): {val_eta_avg:.4f}, Estimated baseline intensity (µ): {val_mu_avg:.4f}")
 
-        return val_y_pred, val_eta, val_mu
+        return val_y_pred, val_eta_avg, val_mu_avg
 
 
     # Training fonction (PyTorch Profiler = disable)
@@ -328,7 +328,7 @@ class MLPTrainer:
         print(self.load_model())
 
         # Computed estimated parameters for validation set (After loaded best model)
-        val_y_pred, val_eta, val_mu = self.predict(val_x)
+        val_y_pred, val_eta_avg, val_mu_avg = self.predict(val_x)
 
         # Added results histograms to TensorBoard
         writer.add_histogram("Baseline intensity Histogram", val_y_pred[:, 1], len(val_y), bins="auto")
@@ -346,12 +346,19 @@ class MLPTrainer:
                        filename=f"{self.run_name}_LOSSES.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
         
-        write_parquet({'eta_pred': val_y_pred[:, 0], 
+        write_parquet({'eta_true': val_y[:, 0], 
+                       'mu_true': val_y[:, 1],
+                       'eta_pred': val_y_pred[:, 0], 
                        'mu_pred': val_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_PRED.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
+        
+        write_parquet({'val_eta_avg': val_eta_avg, 
+                       'val_mu_avg': val_mu_avg}, 
+                       filename=f"{self.run_name}_RESULTS.parquet", 
+                       folder=os.path.join(self.logdirun, folder, self.run_name))
 
-        return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta, val_mu
+        return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta_avg, val_mu_avg
     
 
     # Testing fonction (PyTorch Profiler = disable)
@@ -395,8 +402,8 @@ class MLPTrainer:
             self.test_loss += loss.item() * x.size(0)
 
             # Computed branching ratio and baseline intensity predictions
-            self.test_eta += torch.mean(y_pred[:, 0], dtype=dtype).item() * x.size(0)
-            self.test_mu += torch.mean(y_pred[:, 1], dtype=dtype).item() * x.size(0)
+            self.test_eta_avg += torch.mean(y_pred[:, 0], dtype=dtype).item() * x.size(0)
+            self.test_mu_avg += torch.mean(y_pred[:, 1], dtype=dtype).item() * x.size(0)
 
             # Add losses, eta, mu values in TensorBoard
             writer.add_scalars("Prediction", {"Branching ratio": self.test_eta, "Baseline intensity": self.test_mu}, index)
@@ -410,19 +417,27 @@ class MLPTrainer:
 
         # Computed average loss and predictions
         self.test_loss /= len(test_loader.dataset)
-        self.test_eta /= len(test_loader.dataset)
-        self.test_mu /= len(test_loader.dataset)
+        self.test_eta_avg /= len(test_loader.dataset)
+        self.test_mu_avg /= len(test_loader.dataset)
 
-        print(f"Test set - Test loss: {self.test_loss:.4f}, Estimated branching ratio (η): {self.test_eta:.4f}, Estimated baseline intensity (µ): {self.test_mu:.4f}")
+        print(f"Test set - Test loss: {self.test_loss:.4f}, Estimated branching ratio (η): {self.test_eta_avg:.4f}, Estimated baseline intensity (µ): {self.test_mu_avg:.4f}")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
 
         # Written parameters to Parquet file
-        write_parquet({'eta_pred': test_y_pred[:, 0], 
+        write_parquet({'eta_true': test_y[:, 0], 
+                       'mu_true': test_y[:, 1],
+                       'eta_pred': test_y_pred[:, 0], 
                        'mu_pred': test_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_PRED.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
+        
+        write_parquet({'test_loss': self.test_loss, 
+                       'test_eta_avg': self.test_eta_avg,
+                       'test_mu_avg': self.test_mu_avg}, 
+                       filename=f"{self.run_name}_RESULTS.parquet", 
+                       folder=os.path.join(self.logdirun, folder, self.run_name))
 
-        return test_y_pred, self.test_loss, self.test_eta, self.test_mu
+        return test_y_pred, self.test_loss, self.test_eta_avg, self.test_mu_avg

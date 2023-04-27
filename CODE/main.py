@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     args = argparser()
 
-    # params, alpha, beta, mu = hyper_params_simulation(filename="test.parquet", args=args)
+    # params, alpha, beta, mu = hyper_params_simulation(filename="hawkes_hyperparams.parquet", args=args)
     # simulated_events_seqs = hawkes_simulations(alpha, beta, mu, filename='hawkes_simulations.parquet', args=args)
     # discret_simulated_events_seqs = discretise(simulated_events_seqs, filename='binned_hawkes_simulations.parquet', args=args)
 
