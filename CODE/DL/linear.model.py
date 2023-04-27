@@ -7,11 +7,16 @@ File containing Linear Aggregated/Binned Hawkes Process estimation (alpha/beta)
 
 """
 
-from typing import Any, TypedDict
+import os
+from typing import Tuple, Any
 
 import numpy as np
 
-def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, step_size: float = 0.05) -> TypedDict:
+from UTILS.utils import write_parquet
+
+# Linear Regression function (alpha/beta estimation)
+
+def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, step_size: float = 0.05, filename: str = "alpha_beta_linear_estimation.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Calculates predicted alpha/beta values using linear regression
@@ -20,8 +25,9 @@ def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.
         model (Any): Trained model 
         train_x (np.ndarray): Training data
         val_x (np.ndarray): Validation data
-        params (np.ndarray): Parameter values.
+        params (np.ndarray): Parameter values
         step_size (float, optional): Step size for alpha values. (default: 0.05)
+        filename (str, optional): Filename to save hyperparameters in Parquet file (default: "alpha_beta_linear_estimation.parquet")
 
     Returns:
         dict: Predicted alpha/beta values, validation set mu and eta median
@@ -65,4 +71,7 @@ def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.
     stat = np.median(np.max(val_x, axis=1))
     alpha_pred, beta_pred = slope * stat + intercept, alpha_pred / val_eta
 
-    return {"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_mu": val_mu, "val_eta": val_eta}
+    # Written parameters to Parquet file
+    write_parquet({"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_mu": val_mu, "val_eta": val_eta}, filename=os.path.join('SIMULATIONS', filename))
+
+    return np.array([alpha_pred, beta_pred, val_mu, val_eta], dtype=np.float32).T, alpha_pred, beta_pred, val_mu, val_eta
