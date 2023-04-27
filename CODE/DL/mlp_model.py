@@ -213,7 +213,7 @@ class MLPTrainer:
         # Save model if val_loss has decreased
         if (self.val_loss + self.early_stop_delta) < best_loss:
             
-            torch.save(copy.deepcopy(self.model.state_dict()), f"{os.path.join(self.dirpath, self.filename_best_model)}")
+            torch.save(copy.deepcopy(self.model.state_dict()), f"{os.path.join(self.dirpath, 'BEST_MODEL', self.filename_best_model)}")
             best_loss = self.val_loss
             no_improve_count = 0
 
@@ -239,7 +239,7 @@ class MLPTrainer:
             str: Message indicating that best model has been loaded
         """     
 
-        self.model.load_state_dict(torch.load(f"{os.path.join(self.dirpath, self.filename_best_model)}"))
+        self.model.load_state_dict(torch.load(f"{os.path.join(self.dirpath, 'BEST_MODEL', self.filename_best_model)}"))
         return f"Best model loading ({self.filename_best_model})..."
     
      
