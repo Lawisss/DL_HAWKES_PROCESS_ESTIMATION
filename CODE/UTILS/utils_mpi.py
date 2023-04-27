@@ -17,7 +17,7 @@ import VARIABLES.preprocessing_var as prep
 
 # Parallelized CSV file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> None:
 
     """
     Written dictionaries list to CSV file in parallel using MPI
@@ -27,6 +27,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         filename (str, optional): Filename to write data to. If not specified, empty string is used
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
 
     Returns:
         None: Function does not return anything
@@ -49,7 +50,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data_chunk = [data_chunk]
 
         # Written and field names initialisation (only rank 0 writes headers)
-        with open(filepath=f"{os.path.join(prep.DIRPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(filepath=os.path.join(prep.DIRPATH, folder, filename), mode=mode, encoding=encoding) as file:
             if rank == 0:
                 file.write(','.join(data[0].keys()))
                 file.write('\n')
@@ -72,7 +73,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # Parallelized CSV file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> pd.DataFrame:
 
     """
     Red CSV file in parallel using MPI
@@ -82,6 +83,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         delimiter (str, optional): Delimiter used in CSV file (default: ',')
         mode (str, optional): Mode used to open CSV file (default: 'r')
         encoding (str, optional): Encoding used to read CSV file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
 
     Returns:
            pandas.DataFrame: DataFrame containing data from CSV file
@@ -93,7 +95,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     size = comm.Get_size()
 
     try:
-        with open(filepath=f"{os.path.join(prep.DIRPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{os.path.join(prep.DIRPATH, folder, filename)}", mode=mode, encoding=encoding) as file:
 
             # Determined processes sizes portion
             file_size = file.seek(0, 2)

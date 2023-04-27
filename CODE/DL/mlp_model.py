@@ -196,7 +196,7 @@ class MLPTrainer:
 
     # Early stopping function (checkpoint)
 
-    def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0) -> bool:
+    def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0, folder: str = 'BEST_MODEL') -> bool:
         
         """
         Checked early stopping condition based on validation loss
@@ -204,6 +204,7 @@ class MLPTrainer:
         Args:
             best_loss (float or int, optional): Current best validation loss (default: float('inf'))
             no_improve_count (int, optional): Number of epochs with no improvement in validation loss (default: 0)
+            folder (str, optional): Sub-folder name in RESULTS folder (default: 'BEST_MODEL')
 
         Returns:
             bool: True if early stopping condition is met, False otherwise
@@ -213,7 +214,7 @@ class MLPTrainer:
         # Save model if val_loss has decreased
         if (self.val_loss + self.early_stop_delta) < best_loss:
             
-            torch.save(copy.deepcopy(self.model.state_dict()), f"{os.path.join(self.dirpath, 'BEST_MODEL', self.filename_best_model)}")
+            torch.save(copy.deepcopy(self.model.state_dict()), os.path.join(self.dirpath, folder, self.filename_best_model))
             best_loss = self.val_loss
             no_improve_count = 0
 
@@ -230,16 +231,19 @@ class MLPTrainer:
 
     # Loading model function (best model)
 
-    def load_model(self) -> str:  
+    def load_model(self, folder: str = 'BEST_MODEL') -> str:  
 
         """
         Loaded best model from saved file
+
+        Args:
+            folder (str, optional): Sub-folder name in RESULTS folder (default: 'BEST_MODEL')
 
         Returns:
             str: Message indicating that best model has been loaded
         """     
 
-        self.model.load_state_dict(torch.load(f"{os.path.join(self.dirpath, 'BEST_MODEL', self.filename_best_model)}"))
+        self.model.load_state_dict(torch.load(os.path.join(self.dirpath, folder, self.filename_best_model)))
         return f"Best model loading ({self.filename_best_model})..."
     
      

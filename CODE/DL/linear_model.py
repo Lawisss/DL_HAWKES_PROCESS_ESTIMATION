@@ -27,7 +27,7 @@ def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.
         val_x (np.ndarray): Validation data
         params (np.ndarray): Parameter values
         step_size (float, optional): Step size for alpha values. (default: 0.05)
-        filename (str, optional): Filename to save hyperparameters in Parquet file (default: "alpha_beta_linear_estimation.parquet")
+        filename (str, optional): Filename to save parameters in Parquet file (default: "alpha_beta_linear_estimation.parquet")
 
     Returns:
         dict: Predicted alpha/beta values, validation set mu and eta median
@@ -72,6 +72,6 @@ def linear_model(model: Any, train_x: np.ndarray, val_x: np.ndarray, params: np.
     alpha_pred, beta_pred = slope * stat + intercept, alpha_pred / val_eta
 
     # Written parameters to Parquet file
-    write_parquet({"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_mu": val_mu, "val_eta": val_eta}, filename=os.path.join('SIMULATIONS', filename))
+    write_parquet({"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_mu": val_mu, "val_eta": val_eta}, filename=filename)
 
     return np.array([alpha_pred, beta_pred, val_mu, val_eta], dtype=np.float32).T, alpha_pred, beta_pred, val_mu, val_eta

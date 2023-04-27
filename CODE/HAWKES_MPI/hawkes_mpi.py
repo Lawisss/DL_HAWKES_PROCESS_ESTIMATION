@@ -133,7 +133,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
         simulated_events_seqs = np.concatenate(simulated_events_seqs)
 
         # Written parameters to Parquet file
-        write_parquet(simulated_events_seqs, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=os.path.join('SIMULATIONS', filename))
+        write_parquet(simulated_events_seqs, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
 
         # Created dictionaries list representing simulated event sequences
         # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))

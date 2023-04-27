@@ -26,7 +26,7 @@ import VARIABLES.preprocessing_var as prep
 
 # CSV file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> None:
 
     """
     Written dictionaries list to a CSV file
@@ -36,6 +36,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         filename (str, optional): CSV filename
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
 
     Returns:
         None: Function does not return anything
@@ -49,7 +50,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data = [data]
 
         # Written and field names initialisation
-        with open(f"{os.path.join(prep.DIRPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(os.path.join(prep.DIRPATH, folder, filename), mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
@@ -67,7 +68,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # CSV file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> pd.DataFrame:
 
     """
     Red CSV file and loaded as DataFrame
@@ -77,6 +78,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         delimiter (str, optional): Delimiter used to separate fields in the file (default: ',')
         mode (str, optional): Mode in which file is opened (default: 'r')
         encoding (str, optional): Character encoding used to read file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
 
     Returns:
         pd.DataFrame: File contents dataFrame
@@ -86,7 +88,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     """
 
     try:
-        with open(f"{os.path.join(prep.DIRPATH, filename)}", mode=mode, encoding=encoding) as file:
+        with open(os.path.join(prep.DIRPATH, folder, filename), mode=mode, encoding=encoding) as file:
 
             # Extracted headers
             headers = next(file).strip().split(delimiter)
@@ -102,16 +104,17 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = None, compression: Optional[str] = None) -> None:
+def write_parquet(data: TypedDict, filename: str = '', folder: str = 'SIMULATIONS', columns: Optional[str] = None, compression: Optional[str] = None) -> None:
 
     """
     Written dictionary to Parquet file
 
     Args:
         data (TypedDict): Saved dictionary
-        filename (str, optional): Parquet filename
-        write_index (bool, optional): Index column writing
-        compression (str, optional): column compression type
+        filename (str, optional): Parquet filename (default: '')
+        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        columns (bool, optional): Index column writing (default: None)
+        compression (str, optional): column compression type (default: None)
 
     Returns:
         None: Function does not return anything
@@ -122,7 +125,7 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        fp.write(os.path.join(prep.DIRPATH, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
+        fp.write(os.path.join(prep.DIRPATH, folder, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
         
     except IOError as e:
         print(f"Cannot write Parquet file: {e}")
@@ -130,13 +133,14 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
 
 # Parquet file reading function
 
-def read_parquet(filename: str) -> pd.DataFrame:
+def read_parquet(filename: str, folder: str = 'SIMULATIONS') -> pd.DataFrame:
 
     """
     Red Parquet file and loaded as DataFrame
 
     Args:
         filename (str): Parquet filename
+        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
 
     Returns:
         Pandas dataframe: File contents dataFrame
@@ -147,7 +151,7 @@ def read_parquet(filename: str) -> pd.DataFrame:
 
     try:
         # Load Parquet file using Fastparquet
-        pf = fp.ParquetFile(f"{os.path.join(prep.DIRPATH, filename)}")
+        pf = fp.ParquetFile(os.path.join(prep.DIRPATH, folder, filename))
         # Converted it in dataframe
         return pf.to_pandas(columns=pf.columns)
 
@@ -157,7 +161,7 @@ def read_parquet(filename: str) -> pd.DataFrame:
 
 # Parquet to CSV function
 
-def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False) -> None:
+def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False, folder: str = 'SIMULATIONS') -> None:
 
     """
     Parquet to CSV conversion function
@@ -166,6 +170,7 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
         parquet_file (str, optional): Parquet filename (default: "test.parquet")
         csv_file (str, optional): CSV filename (default: "test.csv")
         index (bool, optional): Write row names (default: False)
+        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
 
     Returns:
         Pandas dataframe: File contents dataFrame
@@ -173,9 +178,9 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
     """
 
     # Red Parquet file
-    df = pd.read_parquet(f"{os.path.join(prep.DIRPATH, parquet_file)}")
+    df = pd.read_parquet(os.path.join(prep.DIRPATH, folder, parquet_file))
     # Writtent CSV file
-    df.to_csv(f"{os.path.join(prep.DIRPATH, csv_file)}", index=index)
+    df.to_csv(os.path.join(prep.DIRPATH, folder, csv_file), index=index)
 
 
 # Arguments parser function
@@ -305,7 +310,7 @@ def profiling(func: Callable = None, enable: bool = False) -> Callable:
         def wrapper(*args, **kwargs):
 
             # Initialized Tensorboard
-            writer = SummaryWriter(f"{os.path.join(eval.LOGDIPROF, eval.RUN_NAME)}")
+            writer = SummaryWriter(os.path.join(eval.LOGDIPROF, eval.RUN_NAME))
 
             # Activated profiling
             if enable:
