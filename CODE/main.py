@@ -31,3 +31,4 @@ if __name__ == "__main__":
     train_loader, val_loader, test_loader = create_data_loaders(train_dataset, val_dataset, test_dataset, args=args)
     
     model, train_losses, val_losses, val_y_pred, val_eta, val_mu = MLPTrainer(args=args).train_model(train_loader, val_loader, val_x)
+    test_y_pred, test_loss, test_eta, test_mu = MLPTrainer().test_model(test_loader)

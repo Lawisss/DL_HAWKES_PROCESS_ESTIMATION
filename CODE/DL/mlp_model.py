@@ -106,10 +106,14 @@ class MLPTrainer:
         self.train_loss = 0
         self.val_loss = 0
 
+        # Test loss/predictions parameters
+        self.test_loss = 0
+        self.test_eta = 0
+        self.test_mu = 0
+        
         # Training train/val losses parameters (Many epochs)
         self.train_losses = np.zeros(self.max_epochs, dtype=np.float32)
         self.val_losses = np.zeros(self.max_epochs, dtype=np.float32)
-
 
     # Sum-up model function
 
@@ -325,3 +329,41 @@ class MLPTrainer:
         writer.close()
 
         return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta, val_mu
+    
+
+    # Testing fonction (PyTorch Profiler = disable)
+    
+    @profiling(enable=False)
+    @torch.no_grad()
+    def test_model(self, test_loader: DataLoader, dtype: torch.dtype = torch.float32):
+        
+        # Eval mode
+        self.model.eval()
+
+        # Initialized parameters
+        index = 0
+        test_y_pred = torch.empty((len(test_loader.dataset), 2), dtype=dtype)
+        
+        for x, y in test_loader:
+            
+            # Forward pass for predictions
+            output = self.model(x)
+            test_y_pred[index:index+len(x), :] = output
+            index += len(x)
+
+            # Computed loss
+            loss = self.criterion(output, y)
+            self.test_loss += loss.item() * x.size(0)
+
+            # Computed branching ratio and baseline intensity predictions
+            self.test_eta += torch.mean(output[:, 0], dtype=dtype).item() * x.size(0)
+            self.test_mu += torch.mean(output[:, 1], dtype=dtype).item() * x.size(0)
+
+        # Computed average loss and predictions
+        self.test_loss /= len(test_loader.dataset)
+        self.test_eta /= len(test_loader.dataset)
+        self.test_mu /= len(test_loader.dataset)
+
+        print(f"Test set - Test loss: {self.test_loss:.4f}, Estimated branching ratio (η): {self.test_eta:.4f}, Estimated baseline intensity (µ): {self.test_mu:.4f}")
+
+        return test_y_pred, self.test_loss, self.test_eta, self.test_mu
