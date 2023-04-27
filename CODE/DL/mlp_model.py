@@ -346,10 +346,10 @@ class MLPTrainer:
                        filename=f"{self.run_name}_LOSSES.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
         
-        write_parquet({'eta_true': val_y[:, 0], 
-                       'mu_true': val_y[:, 1],
-                       'eta_pred': val_y_pred[:, 0], 
-                       'mu_pred': val_y_pred[:, 1]}, 
+        write_parquet({'val_eta_true': val_y[:, 0], 
+                       'val_mu_true': val_y[:, 1],
+                       'val_eta_pred': val_y_pred[:, 0], 
+                       'val_mu_pred': val_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_PRED.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
         
@@ -427,10 +427,10 @@ class MLPTrainer:
         writer.close()
 
         # Written parameters to Parquet file
-        write_parquet({'eta_true': test_y[:, 0], 
-                       'mu_true': test_y[:, 1],
-                       'eta_pred': test_y_pred[:, 0], 
-                       'mu_pred': test_y_pred[:, 1]}, 
+        write_parquet({'test_eta_true': test_y[:, 0], 
+                       'test_mu_true': test_y[:, 1],
+                       'test_eta_pred': test_y_pred[:, 0], 
+                       'test_mu_pred': test_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_PRED.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
         

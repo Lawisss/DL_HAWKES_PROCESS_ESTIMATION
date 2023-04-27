@@ -8,44 +8,46 @@ File containing Linear Aggregated/Binned Hawkes Process estimation (alpha/beta)
 """
 
 import os
-from typing import Tuple, Callable
+from typing import Tuple, Optional, Callable
 
 import numpy as np
 
-from DL.mlp_model import MLPTrainer
+import VARIABLES.evaluation_var as eval
 from UTILS.utils import write_parquet
 
 # Linear Regression function (alpha/beta estimation)
 
-def linear_model(train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, model: Callable = MLPTrainer(), step_size: float = 0.05, filename: str = "alpha_beta_linear_estimation.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def linear_model(val_y_pred: np.ndarray, train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, step_size: float = 0.05, folder: str = "TESTING", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Calculates predicted alpha/beta values using linear regression
 
     Args: 
+        val_y_pred (np.ndarray): Eta/mu predictions
         train_x (np.ndarray): Training data
         val_x (np.ndarray): Validation data
         params (np.ndarray): Parameter values
-        model (Callable, optional): Trained model
         step_size (float, optional): Step size for alpha values. (default: 0.05)
-        filename (str, optional): Filename to save parameters in Parquet file (default: "alpha_beta_linear_estimation.parquet")
+        folder (str, optional): Sub-folder name in RUNS folder (default: 'TESTING')
+        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
-        dict: Predicted alpha/beta values, validation set mu and eta median
+        dict: Predicted alpha/beta values
     """
 
     # Predicted validation set values
-    _, val_eta, val_mu = model.predict(val_x)
+    val_eta_pred = val_y_pred[:, 0]
+    val_mu_pred = val_y_pred[:, 1]
 
     # Defined min and max eta values for comparison
-    min_eta = val_eta - 0.05
-    max_eta = val_eta + 0.05
+    min_eta = val_eta_pred - 0.05
+    max_eta = val_eta_pred + 0.05
     eta = params[:, 0] / params[:, 1]
 
     #Extracted similar eta values from training data using mask
     similar_eta = train_x[(eta > min_eta) & (eta < max_eta), :]
     similar_eta_alpha = params[(eta > min_eta) & (eta < max_eta), 0]
-    similar_eta_mu = params[(eta > min_eta) & (eta < max_eta), 2]
+    _ = params[(eta > min_eta) & (eta < max_eta), 2]
 
     # Calculated max alpha and created step values
     max_alpha = int(np.ceil(np.max(params[:, 0])))
@@ -66,9 +68,15 @@ def linear_model(train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, mod
 
     # Calculated predicted alpha/beta values using linear regression
     stat = np.median(np.max(val_x, axis=1))
-    alpha_pred, beta_pred = slope * stat + intercept, alpha_pred / val_eta
+    alpha_pred, beta_pred = slope * stat + intercept, alpha_pred / val_eta_pred
+
+    # Default parameters
+    default_params = {"logdirun": eval.LOGDIRUN, "run_name": eval.RUN_NAME}
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Written parameters to Parquet file
-    write_parquet({"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_mu": val_mu, "val_eta": val_eta}, filename=filename)
+    write_parquet({"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}, 
+                  filename=f"{dict_args['run_name']}_PRED.parquet", folder=os.path.join(dict_args['logdirun'], folder, dict_args['run_name'])
 
-    return np.array([alpha_pred, beta_pred, val_mu, val_eta], dtype=np.float32).T, alpha_pred, beta_pred, val_mu, val_eta
+    return np.array([alpha_pred, beta_pred, val_eta_pred, val_mu_pred], dtype=np.float32).T, alpha_pred, beta_pred 
