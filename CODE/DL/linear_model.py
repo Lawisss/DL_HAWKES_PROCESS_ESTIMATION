@@ -77,6 +77,6 @@ def linear_model(val_y_pred: np.ndarray, train_x: np.ndarray, val_x: np.ndarray,
 
     # Written parameters to Parquet file
     write_parquet({"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}, 
-                  filename=f"{dict_args['run_name']}_PRED.parquet", folder=os.path.join(dict_args['logdirun'], folder, dict_args['run_name'])
+                  filename=f"{dict_args['run_name']}_PRED.parquet", folder=os.path.join(dict_args['logdirun'], folder, dict_args['run_name']))
 
     return np.array([alpha_pred, beta_pred, val_eta_pred, val_mu_pred], dtype=np.float32).T, alpha_pred, beta_pred 
