@@ -11,23 +11,24 @@ import os
 from typing import Tuple, Optional, Callable
 
 import numpy as np
+from sklearn.linear_model import LinearRegression
 
+from DL.mlp_model import MLPTrainer
 import VARIABLES.evaluation_var as eval
 from UTILS.utils import write_parquet
 
 # Linear Regression function (alpha/beta estimation)
 
-def linear_model(val_y_pred: np.ndarray, train_x: np.ndarray, val_x: np.ndarray, params: np.ndarray, step_size: float = 0.05, folder: str = "TESTING", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, step_size: float = 0.05, folder: str = "TESTING", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Calculates predicted alpha/beta values using linear regression
 
     Args: 
-        val_y_pred (np.ndarray): Eta/mu predictions
-        train_x (np.ndarray): Training data
-        val_x (np.ndarray): Validation data
-        params (np.ndarray): Parameter values
-        step_size (float, optional): Step size for alpha values. (default: 0.05)
+        train_x (np.ndarray): Inputs training data
+        train_y (np.ndarray): Labels training data
+        val_x (np.ndarray): Inputs validation data
+        step_size (float, optional): Step size for alpha values (default: 0.05)
         folder (str, optional): Sub-folder name in RUNS folder (default: 'TESTING')
         args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
@@ -35,53 +36,62 @@ def linear_model(val_y_pred: np.ndarray, train_x: np.ndarray, val_x: np.ndarray,
         dict: Predicted alpha/beta values
     """
 
-    # Arrays conversion
-    val_y_pred = val_y_pred.numpy() if not isinstance(val_y_pred, np.ndarray) else val_y_pred
-    train_x = train_x.numpy() if not isinstance(train_x, np.ndarray) else train_x
-    val_x = val_x.numpy() if not isinstance(val_x, np.ndarray) else val_x
+    # Loaded model and predictions
+    model = MLPTrainer()
+    print(model.load_model())
+    val_y_pred, val_eta_pred, val_mu_pred = model.predict(val_x)
 
-    # Predicted validation set values
-    val_eta_pred = val_y_pred[:, 0]
-    val_mu_pred = val_y_pred[:, 1]
+    # Arrays conversion
+    val_y_pred, val_x, train_x, train_y = map(lambda x: x.numpy().astype(np.float32), (val_y_pred, val_x, train_x, train_y))
+    val_eta_pred, val_mu_pred = map(lambda x: np.array([x], dtype=np.float32), (val_eta_pred, val_mu_pred))
 
     # Defined min and max eta values for comparison
     min_eta = val_eta_pred - 0.05
     max_eta = val_eta_pred + 0.05
-    eta = params[:, 0] / params[:, 1]
 
-    #Extracted similar eta values from training data using mask
-    similar_eta = train_x[(eta > min_eta) & (eta < max_eta), :]
-    similar_eta_alpha = params[(eta > min_eta) & (eta < max_eta), 0]
-    _ = params[(eta > min_eta) & (eta < max_eta), 2]
+    # Kernel in hawkes librairie (alpha = eta)
+    eta = train_y[:, 0] # train_y[:, 0] / train_y[:, 1]
+
+    # Extracted similar eta values from training data using mask
+    similar_eta_processes = train_x[(eta > min_eta) & (eta < max_eta), :]
+    similar_eta_alpha = train_y[(eta > min_eta) & (eta < max_eta), 0]
 
     # Calculated max alpha and created step values
-    max_alpha = int(np.ceil(np.max(params[:, 0])))
-    min_v = np.arange(0, max_alpha, step_size, dtype=np.float32)
-    max_v = np.arange(step_size, (max_alpha + step_size), step_size, dtype=np.float32)
+    max_alpha = int(np.ceil(np.max(train_y[:, 0])))
+    stat_data = np.empty((max_alpha*20), dtype=np.float32)
+   
+    # Computed intervals
+    min_v = np.arange(0, max_alpha - step_size, step_size)
+    max_v = np.arange(step_size, max_alpha, step_size)
 
-    # Created mask and calculated statistics
-    mask = np.logical_or.reduce([(similar_eta_alpha >= min_v) & (similar_eta_alpha < max_v) for min_v, max_v in zip(min_v, max_v)])
-    stats = np.mean(np.max(similar_eta[mask], axis=1), axis=0)
+    # Computed statistics
+    for i in range(max_alpha*20):
+        mask = (similar_eta_alpha >= min_v[i-1]) & (similar_eta_alpha < max_v[i-1])
+        stat_data[i-1] = np.mean(np.max(similar_eta_processes[mask], axis=1), dtype=np.float32) if np.any(mask) else np.nan
+        
+    # Linear regression preparation
+    x = np.vstack([stat_data[~np.isnan(stat_data)], np.ones(len(stat_data[~np.isnan(stat_data)]))]).T
+    y = np.arange(step_size / 2, max_alpha * 20 * step_size, step_size)[~np.isnan(stat_data)]
 
-    # Created array for alpha values
-    x = np.arange((step_size / 2), (max_alpha * step_size), step_size, dtype=np.float32)[:len(stats)]
-    a = np.vstack([x, np.ones(len(x), dtype=np.float32)]).T
+    # Applied linear algebra formula about linear regression
+    coefs = np.dot(np.linalg.inv(np.dot(x.T, x)), np.dot(x.T, y.reshape(-1, 1)))
+    slope, intercept = coefs
 
-    # Calculated coefficients
-    coefs = np.dot(np.linalg.inv(np.dot(a.T, a)), np.dot(a.T, stats))
-    slope, intercept = coefs[0], coefs[1]
-
-    # Calculated predicted alpha/beta values using linear regression
+    # Predicted and printed results
     stat = np.median(np.max(val_x, axis=1))
-    alpha_pred, beta_pred = slope * stat + intercept, alpha_pred / val_eta_pred
+    alpha_pred = (slope * stat) + intercept
+    beta_pred = 1 / val_eta_pred # alpha_pred / val_eta_pred
+    print(f"Linear Regression (Slope: {slope[0]:.4f}, Intercept: {intercept[0]:.4f}) - Estimated self-exciting rate (α): {alpha_pred[0]:.4f}, Estimated decay rate (β): {beta_pred[0]:.4f}")
+
 
     # Default parameters
     default_params = {"logdirun": eval.LOGDIRUN, "run_name": eval.RUN_NAME}
+
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Written parameters to Parquet file
-    write_parquet({"alpha_pred": alpha_pred, "beta_pred": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}, 
-                  filename=f"{dict_args['run_name']}_PRED.parquet", folder=os.path.join(dict_args['logdirun'], folder, dict_args['run_name']))
+    write_parquet({"alpha_pred_avg": alpha_pred, "beta_pred_avg": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}, 
+                  filename=f"{dict_args['run_name']}_LINEAR_PRED.parquet", folder=os.path.join(dict_args['logdirun'], folder, dict_args['run_name']))
 
     return np.array([alpha_pred, beta_pred, val_eta_pred, val_mu_pred], dtype=np.float32).T, alpha_pred, beta_pred 

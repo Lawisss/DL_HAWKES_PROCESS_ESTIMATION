@@ -3,7 +3,7 @@
 
 """Expected Activity effect module
 
-File containing Expected Activity effect function
+File containing expected activity effect function
 
 """
 
