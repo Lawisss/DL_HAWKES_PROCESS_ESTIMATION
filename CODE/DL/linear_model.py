@@ -35,6 +35,11 @@ def linear_model(val_y_pred: np.ndarray, train_x: np.ndarray, val_x: np.ndarray,
         dict: Predicted alpha/beta values
     """
 
+    # Arrays conversion
+    val_y_pred = val_y_pred.numpy() if not isinstance(val_y_pred, np.ndarray) else val_y_pred
+    train_x = train_x.numpy() if not isinstance(train_x, np.ndarray) else train_x
+    val_x = val_x.numpy() if not isinstance(val_x, np.ndarray) else val_x
+
     # Predicted validation set values
     val_eta_pred = val_y_pred[:, 0]
     val_mu_pred = val_y_pred[:, 1]
