@@ -26,6 +26,5 @@ setup(
                  'Operating System :: Microsoft :: Windows',
                  'Programming Language :: Python :: 3.11',
                  'Topic :: Office/Business :: Financial :: Investment',
-                 'Topic :: Scientific/Engineering :: Artificial Intelligence'
-                ],
+                 'Topic :: Scientific/Engineering :: Artificial Intelligence']
 )
