@@ -3,7 +3,7 @@
 
 """Main module
 
-File containing functions of all executive file
+File containing executive function
 
 """
 
@@ -15,10 +15,7 @@ from HAWKES.discretisation import discretise
 from HAWKES.hyperparameters import hyper_params_simulation
 from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
 
-
-if __name__ == "__main__":
-
-    args = argparser()
+def main(args=None):
 
     # params, alpha, beta, mu = hyper_params_simulation(filename="hawkes_hyperparams.parquet", args=args)
     # simulated_events_seqs = hawkes_simulations(alpha, beta, mu, filename='hawkes_simulations.parquet', args=args)
@@ -29,9 +26,16 @@ if __name__ == "__main__":
 
     train_x, train_y, val_x, val_y, test_x, test_y = split_data(x, y.iloc[:, [0, 2]], args=args)
     train_dataset, val_dataset, test_dataset = create_datasets(train_x, train_y, val_x, val_y, test_x, test_y)
-    train_loader, val_loader, test_loader = create_data_loaders(train_dataset, val_dataset, test_dataset, args=args)
-    
+    train_loader, val_loader, test_loader = create_data_loaders(train_dataset, val_dataset, test_dataset)
+
     model, train_losses, val_losses, val_y_pred, val_eta, val_mu = MLPTrainer(args=args).train_model(train_loader, val_loader, val_x, val_y)
     test_y_pred, test_loss, test_eta, test_mu = MLPTrainer(args=args).test_model(test_loader, test_y)
 
     param_pred, alpha_pred, beta_pred = linear_model(train_x, train_y, val_x, args=args)
+    
+    
+
+
+    
+
+    
