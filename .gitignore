@@ -1,7 +1,7 @@
 # Project folders/files
-RESULTS/
-REPORT/
-RESEARCH/
+results/
+report/
+research/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

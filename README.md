@@ -58,7 +58,7 @@ Error. Dataset not available.
 git clone https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION.git
 ```
 
-2. Open [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb) in your browser.
+2. Open [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/tutorial.ipynb) in your browser.
 
 ```sh
 python -m tutorial.ipynb
@@ -66,36 +66,42 @@ python -m tutorial.ipynb
 
 ## Usage
 
-- To run the code: [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb). This file allows you to load python files and results.
-- To get details about model architecture, training and visualization, see [report](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/REPORT/report.pdf).
-- To leverage preprocessing, AHP/MLP/VAE parameters and results, use global [variable](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/CODE/VARIABLES) files.
-- To deepen incomplete pytest unit tests, check files in [test](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/TEST) folder.
+- To run the code: [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/tutorial.ipynb). This file allows you to load python files and results.
+- To get details about model architecture, training and visualization, see [report](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/report/report.pdf).
+- To leverage preprocessing, AHP/MLP/VAE parameters and results, use global [variable](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/src/variables) files.
+- To deepen incomplete pytest unit tests, check files in [test](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/test) folder.
 
 |                                         File                                                                       |               Extension               |               Folder                  |               Complete                |               Function                |
 | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
-| [Tutorial](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/tutorial.ipynb)     | .ipynb                                   | CODE                        | ✔️                                   | Executed project sections
-| [Hyperparameters](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES/hyperparameters.py)     | .py                                   | HAWKES                        | ✔️                                   | Computed HP hyperparameters
-| [Hawkes](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES/hawkes.py)   | .py                                   | HAWKES                          | ✔️                                   | Simulated HP
-| [Discretisation](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES/discretisation.py)                     | .py                                   | HAWKES                           | ✔️                                   | Discretized HP                       |
-| [Dataset](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/PREPROCESSING/dataset.py)     | .py                                   | PREPROCESSING               | ✔️                                   | Preprocessed HP
-| [MLP](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/DL/mlp.py)       | .py                                   | DL                         | ✔️                                   | Executed MLP model                |
-| [VAE](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/DL/vae.py)    | .py                                   | DL                        | ✔️                                   | Executed VAE model               |
-| [Hawkes_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/VARIABLES/hawkes_var.py)     | .py                                 | VARIABLES                           | ✔️                                   | Monitored HP variables          |
-| [Preprocessing_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/VARIABLES/preprocessing_var.py)     | .py                                   | VARIABLES                     | ✔️                                   | Monitored preprocessing variables                   |
-| [MLP_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/VARIABLES/mlp_var.py)   | .py                                   | VARIABLES                        | ✔️                                   | Monitored MLP variables                   |
-[VAE_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/VARIABLES/vae_var.py)   | .py                                   | VARIABLES                        | ✔️                                   | Monitored VAE variables                   |
-[Evaluation_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/VARIABLES/evaluation_var.py)   | .py                                   | VARIABLES                     | ✔️                                   | Monitored evaluation variables               |
-[Utils](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/UTILS/utils.py)   | .py                                   | UTILS                        | ✔️                                   | Executed saving/loading                  |
-[Utils_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/UTILS/utils_mpi.py)   | .py                                   | UTILS                        | ❌                                  | Executed MPI saving/loading                   |
-[Hyperparameters_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES_MPI/hyperparameters_mpi.py)   | .py                                   | HAWKES_MPI                      | ❌                                   | Computed MPI HP hyperparameters       |
-[Hawkes_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES_MPI/hawkes_mpi.py)   | .py                                   | HAWKES_MPI                      | ❌                                   | Simulated MPI HP                   |
-[Discretisation_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/HAWKES_MPI/discretisation_mpi.py)   | .py                                   | HAWKES_MPI                       | ❌                                   | Discretized MPI HP                   |
-[Config](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/config.sh)   | .sh                                   | SLURM                        | ✔️                                   | Installed conda environment
-[Hyperparameters](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/hyperparameters.sh)   | .sh                                   | SLURM                        | ✔️                                   | Executed MPI hyperparameters
-[Hawkes](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/hawkes.sh)   | .sh                                   | SLURM                       | ✔️                                   | Executed MPI HP
-[Discretisation](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/discretisation.sh)   | .sh                                   | SLURM                       | ✔️                                   | Executed MPI discretisation
-[MLP](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/mlp.sh)   | .sh                                   | SLURM                       | ❌                                   | Executed MPI MLP
-[VAE](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/CODE/SLURM/vae.sh)   | .sh                                   | SLURM                       | ❌                                   | Executed MPI VAE
+| [tutorial](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/tutorial.ipynb)     | .ipynb                                   | src                        | ✔️                                   | Project demonstration
+| [app](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/app.py)     | .ipynb                                   | src                        | ✔️                                   | Gathered project sections
+| [run](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/run.py)     | .ipynb                                   | src                        | ✔️                                   | Executed CLI app
+| [hyperparameters](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/hawkes/hyperparameters.py)     | .py                                   | hawkes                        | ✔️                                   | Computed HP hyperparameters
+| [hawkes](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/hawkes/simulation.py)   | .py                                   | hawkes                          | ✔️                                   | Simulated HP
+| [discretisation](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/hawkes/discretisation.py)                     | .py                                   | hawkes                           | ✔️                                   | Discretized HP                       |
+| [dataset](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/preprocessing/dataset.py)     | .py                                   | preprocessing               | ✔️                                   | Preprocessed HP
+| [linear_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/linear_model.py)    | .py                                   | dl                        | ✔️                                   | Executed Linear model               |
+| [mlp_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/mlp_model.py)       | .py                                   | DL                         | ✔️                                   | Executed MLP model                |
+| [vae_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/vae_model.py)    | .py                                   | dl                        | ✔️                                   | Executed VAE model               |
+[activity_effect](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/visualization/activity_effect.py)   | .py                                   | visualization                     | ✔️                                   | Monitored evaluation variables               |
+[br_effect](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/visualization/br_effect.py)   | .py                                   | visualization                     | ✔️                                   | Monitored evaluation variables               |
+[discret_effect](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/visualization/discret_effect.py)   | .py                                   | visualization                     | ✔️                                   | Monitored evaluation variables               |
+| [hawkes_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/hawkes_var.py)     | .py                                 | variables                           | ✔️                                   | Monitored HP variables          |
+| [prep_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/prep_var.py)     | .py                                   | variables                     | ✔️                                   | Monitored preprocessing variables                   |
+| [mlp_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/mlp_var.py)   | .py                                   | variables                        | ✔️                                   | Monitored MLP variables                   |
+[vae_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/vae_var.py)   | .py                                   | variables                        | ✔️                                   | Monitored VAE variables                   |
+[eval_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/eval_var.py)   | .py                                   | variables                     | ✔️                                   | Monitored evaluation variables               |
+[utils](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/utils/utils.py)   | .py                                   | utils                        | ✔️                                   | Executed saving/loading                  |
+[utils_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/utils/utils_mpi.py)   | .py                                   | utils                        | ❌                                  | Executed MPI saving/loading                   |
+[hyperparameters_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/hawkes_mpi/hyperparameters_mpi.py)   | .py                                   | hawkes_mpi                      | ❌                                   | Computed MPI HP hyperparameters       |
+[hawkes_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/hawkes_mpi/simulation_mpi.py)   | .py                                   | hawkes_mpi                      | ❌                                   | Simulated MPI HP                   |
+[discretisation_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/hawkes_mpi/discretisation_mpi.py)   | .py                                   | hawkes_mpi                       | ❌                                   | Discretized MPI HP                   |
+[config](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/slurm/script/config.sh)   | .sh                                   | slurm                        | ✔️                                   | Installed conda environment
+[hyperparameters](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/slurm/script/hyperparameters.sh)   | .sh                                   | slurm                        | ✔️                                   | Executed MPI hyperparameters
+[hawkes](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/slurm/script/hawkes.sh)   | .sh                                   | slurm                       | ✔️                                   | Executed MPI HP
+[discretisation](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/slurm/script/discretisation.sh)   | .sh                                   | slurm                       | ✔️                                   | Executed MPI discretisation
+[mlp](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/slurm/script/mlp.sh)   | .sh                                   | slurm                       | ❌                                   | Executed MPI MLP
+[vae](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/slurm/script/vae.sh)   | .sh                                   | slurm                       | ❌                                   | Executed MPI VAE
 
 ## Roadmap
 
