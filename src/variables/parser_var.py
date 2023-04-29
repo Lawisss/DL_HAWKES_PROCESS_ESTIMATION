@@ -71,7 +71,6 @@ ARG_GROUPS: List = [                                                            
      'description': 'Writing/Loading parameters', 
      'args': [
          {'name': '--dirpath', 'type': str, 'nargs': 1, 'default': prep.DIRPATH, 'help': 'Path directory where results are saved'},
-         {'name': '--default_dir', 'type': str, 'nargs': 1, 'default': prep.DEFAULT_DIR, 'help': "Default parquet file folder"},
          {'name': '--logdirun', 'type': str, 'nargs': 1, 'default': eval.LOGDIRUN, 'help': "Tensorboard logs directory for each run"},
          {'name': '--train_dir', 'type': str, 'nargs': 1, 'default': eval.TRAIN_DIR, 'help': "Training parquet file folder"},
          {'name': '--test_dir', 'type': str, 'nargs': 1, 'default': eval.TEST_DIR, 'help': "Testing parquet file folder"},

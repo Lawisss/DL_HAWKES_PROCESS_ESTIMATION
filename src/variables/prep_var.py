@@ -28,4 +28,3 @@ DEVICE: torch.device = \
 # Writing/Reading parameters (utils.py)
 
 DIRPATH: str = os.path.abspath("results")                             # Absolute path to results directory
-DEFAULT_DIR: str = "simulations"                                      # Default parquet file folder  

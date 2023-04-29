@@ -24,7 +24,7 @@ import variables.prep_var as prep
 
 # csv file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', args: Optional[Callable] = None) -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> None:
 
     """
     Written dictionaries list to a csv file
@@ -34,6 +34,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         filename (str, optional): csv filename
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
@@ -44,7 +45,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
     """
 
     # Default parameters
-    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+    default_params = {"dirpath": prep.DIRPATH}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
@@ -54,7 +55,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data = [data]
 
         # Written and field names initialisation
-        with open(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename), mode=mode, encoding=encoding) as file:
+        with open(os.path.join(dict_args['dirpath'], folder, filename), mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
@@ -72,7 +73,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # csv file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', args: Optional[Callable] = None) -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> pd.DataFrame:
 
     """
     Red csv file and loaded as DataFrame
@@ -82,6 +83,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         delimiter (str, optional): Delimiter used to separate fields in the file (default: ',')
         mode (str, optional): Mode in which file is opened (default: 'r')
         encoding (str, optional): Character encoding used to read file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
@@ -92,13 +94,13 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     """
 
     # Default parameters
-    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+    default_params = {"dirpath": prep.DIRPATH}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     try:
-        with open(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename), mode=mode, encoding=encoding) as file:
+        with open(os.path.join(dict_args['dirpath'], folder, filename), mode=mode, encoding=encoding) as file:
 
             # Extracted headers
             headers = next(file).strip().split(delimiter)
@@ -114,7 +116,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
+def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulations", columns: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
 
     """
     Written dictionary to parquet file
@@ -135,14 +137,14 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
     """
 
     # Default parameters
-    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+    default_params = {"dirpath": prep.DIRPATH}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        fp.write(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
+        fp.write(os.path.join(dict_args['dirpath'], folder, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
         
     except IOError as e:
         print(f"Cannot write parquet file: {e}")
@@ -150,13 +152,14 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
 
 # Parquet file reading function
 
-def read_parquet(filename: str, args: Optional[Callable] = None) -> pd.DataFrame:
+def read_parquet(filename: str, folder: str = "simulations", args: Optional[Callable] = None) -> pd.DataFrame:
 
     """
     Red Parquet file and loaded as DataFrame
 
     Args:
         filename (str): Parquet filename
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
@@ -167,14 +170,14 @@ def read_parquet(filename: str, args: Optional[Callable] = None) -> pd.DataFrame
     """
 
     # Default parameters
-    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+    default_params = {"dirpath": prep.DIRPATH}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     try:
         # Load Parquet file using fastparquet
-        pf = fp.ParquetFile(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename))
+        pf = fp.ParquetFile(os.path.join(dict_args['dirpath'], folder, filename))
         # Converted it in dataframe
         return pf.to_pandas(columns=pf.columns)
 
@@ -184,7 +187,7 @@ def read_parquet(filename: str, args: Optional[Callable] = None) -> pd.DataFrame
 
 # Parquet to csv function
 
-def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False, args: Optional[Callable] = None) -> None:
+def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", folder: str = "simulations", index: bool = False, args: Optional[Callable] = None) -> None:
 
     """
     Parquet to CSV conversion function
@@ -192,6 +195,7 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
     Args:
         parquet_file (str, optional): Parquet filename (default: "test.parquet")
         csv_file (str, optional): csv filename (default: "test.csv")
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         index (bool, optional): Write row names (default: False)
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
@@ -201,15 +205,15 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
     """
 
     # Default parameters
-    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+    default_params = {"dirpath": prep.DIRPATH}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Red parquet file
-    df = pd.read_parquet(os.path.join(dict_args['dirpath'], dict_args['default_dir'], parquet_file))
+    df = pd.read_parquet(os.path.join(dict_args['dirpath'], folder, parquet_file))
     # Writtent csv file
-    df.to_csv(os.path.join(dict_args['dirpath'], dict_args['default_dir'], csv_file), index=index)
+    df.to_csv(os.path.join(dict_args['dirpath'], folder, csv_file), index=index)
 
 
 # Time measurement function

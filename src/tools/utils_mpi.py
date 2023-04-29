@@ -17,7 +17,7 @@ import variables.prep_var as prep
 
 # Parallelized csv file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', args: Optional[Callable] = None) -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> None:
 
     """
     Written dictionaries list to csv file in parallel using MPI
@@ -27,6 +27,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         filename (str, optional): Filename to write data to. If not specified, empty string is used
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
@@ -37,7 +38,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
     """
 
     # Default parameters
-    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+    default_params = {"dirpath": prep.DIRPATH}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
@@ -56,7 +57,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             data_chunk = [data_chunk]
 
         # Written and field names initialisation (only rank 0 writes headers)
-        with open(filepath=os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename), mode=mode, encoding=encoding) as file:
+        with open(filepath=os.path.join(dict_args['dirpath'], folder, filename), mode=mode, encoding=encoding) as file:
             if rank == 0:
                 file.write(','.join(data[0].keys()))
                 file.write('\n')
@@ -79,7 +80,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # Parallelized csv file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', args: Optional[Callable] = None) -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> pd.DataFrame:
 
     """
     Red csv file in parallel using MPI
@@ -89,6 +90,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         delimiter (str, optional): Delimiter used in csv file (default: ',')
         mode (str, optional): Mode used to open csv file (default: 'r')
         encoding (str, optional): Encoding used to read csv file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
@@ -96,7 +98,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     """
 
     # Default parameters
-    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+    default_params = {"dirpath": prep.DIRPATH}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
@@ -107,7 +109,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     size = comm.Get_size()
 
     try:
-        with open(filepath=f"{os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename)}", mode=mode, encoding=encoding) as file:
+        with open(filepath=f"{os.path.join(dict_args['dirpath'], folder, filename)}", mode=mode, encoding=encoding) as file:
 
             # Determined processes sizes portion
             file_size = file.seek(0, 2)

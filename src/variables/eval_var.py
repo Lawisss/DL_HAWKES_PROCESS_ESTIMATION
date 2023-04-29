@@ -21,7 +21,7 @@ TEST_DIR: str = "testing"                                       # Testing parque
 BEST_MODEL_DIR: str = "best_model"                              # Best model folder
 
 RUN_NAME: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") \
-                + "_" + socket.gethostname()                    # Name for current run based on timestamp/hostname
+                + "_" + socket.gethostname().upper()            # Name for current run based on timestamp/hostname
 
 # Tensorboard (Fonction profiling - utils.py)
 
