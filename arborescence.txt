@@ -44,7 +44,6 @@
  ┃ ┃ ┣ 📜br_effect.py
  ┃ ┃ ┣ 📜discret_effect.py
  ┃ ┃ ┗ 📜__init__.py
- ┃ ┣ 📂__pycache__
  ┃ ┣ 📜app.py
  ┃ ┣ 📜run.py
  ┃ ┣ 📜tutorial.ipynb
