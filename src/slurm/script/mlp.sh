@@ -27,10 +27,10 @@
 ###########################################################################################################################
 
 # Checked if folder existed, if not created it
-[ ! -d ../OUTPUT ] && mkdir ../OUTPUT
+[ ! -d ../output ] && mkdir ../output
 
 # Moved output/error files in another folder
-mv *.out ../OUTPUT
+mv *.out ../output
 
 # Checked if necessary modules was loaded, if not, cleaned and did it
 module list 2>&1 | grep -q "anaconda3/2022.10/gcc-11.2.0" && module list 2>&1 | grep -q "cuda/12.0.0/gcc-11.2.0" || \
@@ -39,5 +39,5 @@ module purge && module load anaconda3/2022.10/gcc-11.2.0 && module load cuda/12.
 # Checked if environment was activated, if not, activated it
 $CONDA_DEFAULT_ENV | grep -qw hawkes || source activate hawkes
 
-# Run python script (Copy/Paste in .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/DL")
+# Run python script (Copy/Paste in .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/src/dl")
 python "$DL/mlp.py"

@@ -7,15 +7,14 @@ File containing parallelized Aggregated Hawkes process functions (Hawkes process
 
 """
 
-import os
 from functools import partial
 from typing import Optional, Callable
 
 import numpy as np
 from mpi4py import MPI
 
-import VARIABLES.hawkes_var as hwk
-from UTILS.utils import write_parquet
+import variables.hawkes_var as hwk
+from tools.utils import write_parquet
 
 
 # Parallelized jump times histogram for each process (counted number of events which occurred over each interval)
@@ -28,8 +27,8 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
     Args:
         jump_times (np.ndarray): Jump times for Hawkes process simulation
         root (int, optional): Rank of process to use as root for MPI communications. (default: 0)
-        filename (str, optional): Filename to write histogram data in Parquet format (default: "binned_hawkes_simulations_mpi.parquet")
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        filename (str, optional): Filename to write histogram data in parquet format (default: "binned_hawkes_simulations_mpi.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
@@ -63,7 +62,7 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
     # Gathered results from all processes
     comm.Gather(counts_chunk, counts, root=root)
 
-    # Written parameters to Parquet file
+    # Written parameters to parquet file
     if rank == 0:
         write_parquet(counts, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
 
@@ -83,7 +82,7 @@ def temp_func(jump_times: np.ndarray, args: Optional[Callable] = None) -> float:
 
     Args:
         jump_times (np.ndarray): Event times in Hawkes process
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         float: Minimum step size between events in Hawkes process. If no events, step size is set to maximum time horizon
@@ -160,7 +159,7 @@ def jump_times(h: np.ndarray, root: int = 0, args: Optional[Callable] = None) ->
     Args:
         h (np.ndarray): Event history of point process
         root (int, optional): Rank of root process for gathering results (default: 0)
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Jump times for point process

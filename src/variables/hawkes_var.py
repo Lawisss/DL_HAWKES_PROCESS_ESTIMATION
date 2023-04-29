@@ -17,7 +17,7 @@ MAX_ITV_ETA: float = 0.8                  # Eta maximum interval
 EXPECTED_ACTIVITY: int = 500              # Total number of expected events 
 STD: float = 50                           # Standard deviation for generating epsilon
 
-# Hawkes Process simulation/estimation parameters (hawkes.py, discretisation.py)
+# Hawkes Process simulation/estimation parameters (simulation.py, discretisation.py)
 
 KERNEL: str = 'exp'                       # Type of kernel function
 BASELINE: str = 'const'                   # Type of baseline function

@@ -22,11 +22,10 @@ from torch.utils.data import DataLoader
 from torch.nn.utils import parameters_to_vector
 from torch.utils.tensorboard import SummaryWriter
 
-import VARIABLES.mlp_var as mlp
-from UTILS.utils import profiling, write_parquet
-import VARIABLES.evaluation_var as eval
-import VARIABLES.preprocessing_var as prep
-
+import variables.mlp_var as mlp
+from tools.utils import profiling, write_parquet
+import variables.eval_var as eval
+import variables.prep_var as prep
 
 
 # MLP creation
@@ -196,7 +195,7 @@ class MLPTrainer:
 
     # Early stopping function (checkpoint)
 
-    def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0, folder: str = 'BEST_MODEL') -> bool:
+    def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0, folder: str = 'best_model') -> bool:
         
         """
         Checked early stopping condition based on validation loss
@@ -204,7 +203,7 @@ class MLPTrainer:
         Args:
             best_loss (float or int, optional): Current best validation loss (default: float('inf'))
             no_improve_count (int, optional): Number of epochs with no improvement in validation loss (default: 0)
-            folder (str, optional): Sub-folder name in RESULTS folder (default: 'BEST_MODEL')
+            folder (str, optional): Sub-folder name in results folder (default: 'best_model')
 
         Returns:
             bool: True if early stopping condition is met, False otherwise
@@ -231,13 +230,13 @@ class MLPTrainer:
 
     # Loading model function (best model)
 
-    def load_model(self, folder: str = 'BEST_MODEL') -> str:  
+    def load_model(self, folder: str = 'best_model') -> str:  
 
         """
         Loaded best model from saved file
 
         Args:
-            folder (str, optional): Sub-folder name in RESULTS folder (default: 'BEST_MODEL')
+            folder (str, optional): Sub-folder name in results folder (default: 'best_model')
 
         Returns:
             str: Message indicating that best model has been loaded
@@ -275,7 +274,7 @@ class MLPTrainer:
     # Training fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor, val_y: torch.Tensor, folder: str = 'TRAINING') -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor, val_y: torch.Tensor, folder: str = 'training') -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
         """
         Trained and evaluated model
@@ -285,7 +284,7 @@ class MLPTrainer:
             val_loader (DataLoader): Validation data
             val_x (torch.Tensor): Input features for validation data
             val_y (torch.Tensor): Label outputs for validation data
-            folder (str, optional): Sub-folder name in RUNS folder (default: 'TRAINING')
+            folder (str, optional): Sub-folder name in runs folder (default: 'training')
 
         Returns:
             Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]: Model, losses, predictions, eta/mu
@@ -343,14 +342,14 @@ class MLPTrainer:
         # Written parameters to Parquet file
         write_parquet({'train_losses': self.train_losses, 
                        'val_losses': self.val_losses}, 
-                       filename=f"{self.run_name}_LOSSES.parquet", 
+                       filename=f"{self.run_name}_losses.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
         
         write_parquet({'val_eta_true': val_y[:, 0], 
                        'val_mu_true': val_y[:, 1],
                        'val_eta_pred': val_y_pred[:, 0], 
                        'val_mu_pred': val_y_pred[:, 1]}, 
-                       filename=f"{self.run_name}_PRED.parquet", 
+                       filename=f"{self.run_name}_predictions.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
 
         return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta_pred, val_mu_pred
@@ -360,7 +359,7 @@ class MLPTrainer:
     
     @profiling(enable=False)
     @torch.no_grad()
-    def test_model(self, test_loader: DataLoader, test_y: torch.Tensor, dtype: torch.dtype = torch.float32, folder: str = 'TESTING') -> Tuple[np.ndarray, float, float, float]:
+    def test_model(self, test_loader: DataLoader, test_y: torch.Tensor, dtype: torch.dtype = torch.float32, folder: str = 'testing') -> Tuple[np.ndarray, float, float, float]:
 
         """
         Tested and evaluated model
@@ -369,7 +368,7 @@ class MLPTrainer:
             test_loader (DataLoader): Testing data
             test_y (torch.Tensor): Label outputs for testing data
             dtype (torch.dtype): Predictions datatype (default: torch.float32)
-            folder (str, optional): Sub-folder name in RUNS folder (default: 'TESTING')
+            folder (str, optional): Sub-folder name in runs folder (default: 'testing')
 
         Returns:
             Tuple[np.ndarray, float, float, float]: predictions, loss average, eta average, mu average
@@ -421,12 +420,12 @@ class MLPTrainer:
         writer.flush()
         writer.close()
 
-        # Written parameters to Parquet file
+        # Written parameters to parquet file
         write_parquet({'test_eta_true': test_y[:, 0], 
                        'test_mu_true': test_y[:, 1],
                        'test_eta_pred': test_y_pred[:, 0], 
                        'test_mu_pred': test_y_pred[:, 1]}, 
-                       filename=f"{self.run_name}_PRED.parquet", 
+                       filename=f"{self.run_name}_predictions.parquet", 
                        folder=os.path.join(self.logdirun, folder, self.run_name))
 
         return test_y_pred, self.test_loss, self.test_eta_pred, self.test_mu_pred

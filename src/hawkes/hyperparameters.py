@@ -7,13 +7,12 @@ File containing Hawkes process hyper-parameters generation functions (Default Pa
 
 """
 
-import os
 from typing import Tuple, Optional, Callable
 
 import numpy as np
 
-import VARIABLES.hawkes_var as hwk
-from UTILS.utils import write_parquet
+import variables.hawkes_var as hwk
+from tools.utils import write_parquet
 
 
 
@@ -25,7 +24,7 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: 
     Generated and saved Hawkes process hyperparameters
 
     Args:
-        filename (str, optional): Filename to save hyperparameters in Parquet file (default: "hawkes_hyperparams.parquet")
+        filename (str, optional): Filename to save hyperparameters in parquet file (default: "hawkes_hyperparams.parquet")
         args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
 
     Returns:
@@ -58,7 +57,7 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: 
     alpha = eta
     mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
 
-    # Written parameters to Parquet file
+    # Written parameters to parquet file
     write_parquet({"alpha": alpha, "beta": beta, "mu": mu}, filename=filename)
     
     # Created dictionaries list containing the parameters

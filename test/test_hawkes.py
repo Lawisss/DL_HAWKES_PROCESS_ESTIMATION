@@ -15,10 +15,10 @@ import Hawkes as hk
 from typing import TypedDict
 from pytest import approx
 
-from VARIABLES import hawkes_var as hwk
-from SRC.HAWKES.hyperparameters import hyper_params_simulation
-from SRC.HAWKES.hawkes import hawkes_simulation, hawkes_simulations, hawkes_estimation
-from SRC.HAWKES.discretisation import discretise, temp_func, find_stepsize, jump_times
+import variables.hawkes_var as hwk
+from hawkes.hyperparameters import hyper_params_simulation
+from hawkes.simulation import hawkes_simulation, hawkes_simulations, hawkes_estimation
+from hawkes.discretisation import discretise, temp_func, find_stepsize, jump_times
 
 
 # Hyperparameters simulation test function

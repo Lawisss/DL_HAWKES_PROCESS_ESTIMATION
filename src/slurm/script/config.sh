@@ -26,10 +26,10 @@
 ###########################################################################################################################
 
 # Checked if folder existed, if not created it
-[ ! -d ../OUTPUT ] && mkdir ../OUTPUT
+[ ! -d ../output ] && mkdir ../output
 
 # Moved output/error files in another folder
-mv *.out ../OUTPUT
+mv *.out ../output
 
 # Setup conda environment, ensured .conda directory is located on workir, if not moved it
 [ -L ~/.conda ] && unlink ~/.conda

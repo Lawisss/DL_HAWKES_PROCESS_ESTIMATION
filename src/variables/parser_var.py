@@ -8,15 +8,15 @@ File containing all parser arguments.
 
 from typing import List
 
-import VARIABLES.hawkes_var as hwk
-import VARIABLES.mlp_var as mlp
-import VARIABLES.evaluation_var as eval
-import VARIABLES.preprocessing_var as prep
+import variables.hawkes_var as hwk
+import variables.mlp_var as mlp
+import variables.eval_var as eval
+import variables.prep_var as prep
 
 
 # Parser parameters (parser_args.py)
 
-PROG: str  = "MAIN"                                                             # Program name for command-line usage
+PROG: str  = "Main"                                                             # Program name for command-line usage
 USAGE: str  = "%(prog)s [options]"                                              # Message to display when invoking --help option
 DESCRIPTION: str  = "Arguments Parser"                                          # Brief description of the program's functionality
 

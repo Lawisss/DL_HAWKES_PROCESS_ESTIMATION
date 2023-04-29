@@ -13,21 +13,21 @@ import numpy as np
 import pandas as pd
 from mpi4py import MPI
 
-import VARIABLES.preprocessing_var as prep
+import variables.prep_var as prep
 
-# Parallelized CSV file writing function
+# Parallelized csv file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = 'simulations') -> None:
 
     """
-    Written dictionaries list to CSV file in parallel using MPI
+    Written dictionaries list to csv file in parallel using MPI
 
     Args:
-        data (List[dict]): Dictionaries list, where each dictionary represents row in CSV file
+        data (List[dict]): Dictionaries list, where each dictionary represents row in csv file
         filename (str, optional): Filename to write data to. If not specified, empty string is used
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
-        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulation')
 
     Returns:
         None: Function does not return anything
@@ -68,25 +68,25 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
             file.close()
 
     except IOError as e:
-        print(f"Cannot read the file: {e}.")
+        print(f"Cannot write csv file: {e}.")
 
 
-# Parallelized CSV file reading function
+# Parallelized csv file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = 'simulations') -> pd.DataFrame:
 
     """
-    Red CSV file in parallel using MPI
+    Red csv file in parallel using MPI
 
     Args:
-        filename (str): CSV filename to read
-        delimiter (str, optional): Delimiter used in CSV file (default: ',')
-        mode (str, optional): Mode used to open CSV file (default: 'r')
-        encoding (str, optional): Encoding used to read CSV file (default: 'utf-8')
-        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        filename (str): csv filename to read
+        delimiter (str, optional): Delimiter used in csv file (default: ',')
+        mode (str, optional): Mode used to open csv file (default: 'r')
+        encoding (str, optional): Encoding used to read csv file (default: 'utf-8')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
 
     Returns:
-           pandas.DataFrame: DataFrame containing data from CSV file
+           pandas.DataFrame: DataFrame containing data from csv file
     """
 
     # Initialized MPI
@@ -123,4 +123,4 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         return pd.DataFrame(rows, columns=headers)
 
     except IOError as e:
-        print(f"Cannot read the file: {e}.")
+        print(f"Cannot read csv file: {e}.")

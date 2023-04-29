@@ -15,9 +15,9 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 
-from UTILS.utils import write_csv, read_csv, write_parquet, read_parquet, timer, profiling
-import VARIABLES.preprocessing_var as prep
-import VARIABLES.evaluation_var as eval
+from tools.utils import write_csv, read_csv, write_parquet, read_parquet, timer, profiling
+import variables.prep_var as prep
+import variables.eval_var as eval
 
 
 # CSV file writing test function

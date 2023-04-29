@@ -16,17 +16,17 @@ import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
 from torch.nn.utils import parameters_to_vector
 
-from DL.mlp_model import MLP, MLPTrainer
-import VARIABLES.mlp_var as mlp
-import VARIABLES.preprocessing_var as prep
+from dl.mlp_model import MLP, MLPTrainer
+import variables.mlp_var as mlp
+import variables.prep_var as prep
 
 
 # Forward test function
 
-@patch('VARIABLES.mlp_var.INPUT_SIZE', 10)
-@patch('VARIABLES.mlp_var.HIDDEN_SIZE', 20)
-@patch('VARIABLES.mlp_var.NUM_HIDDEN_LAYERS', 2)
-@patch('VARIABLES.mlp_var.OUTPUT_SIZE', 1)
+@patch('variables.mlp_var.INPUT_SIZE', 10)
+@patch('variables.mlp_var.HIDDEN_SIZE', 20)
+@patch('variables.mlp_var.NUM_HIDDEN_LAYERS', 2)
+@patch('variables.mlp_var.OUTPUT_SIZE', 1)
 def test_forward(input_data: torch.Tensor = torch.rand((32, mlp.INPUT_SIZE))) -> None:
 
     """
@@ -51,7 +51,7 @@ def test_forward(input_data: torch.Tensor = torch.rand((32, mlp.INPUT_SIZE))) ->
 
 # Summary test function
 
-@patch('DL.mlp.summary')
+@patch('dl.mlp.summary')
 def test_summary_model(mock_summary, trainer: Callable = MLPTrainer()) -> None:
 
     """
@@ -131,7 +131,7 @@ def test_run_epoch(mock_loss, data: List = [(torch.randn(3, 4), torch.tensor([1]
 
 # Evaluation test function
 
-@patch('DL.mlp.MLP.forward')
+@patch('dl.mlp.MLP.forward')
 def test_evaluate(mock_forward, model: Callable = MLP(), val_dataset: TensorDataset = TensorDataset(torch.randn(4, 3, 32, 32), torch.randint(0, 10, size=(4,)))) -> None:
 
     """

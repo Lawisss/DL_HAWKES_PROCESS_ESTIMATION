@@ -10,13 +10,13 @@ File containing executive function
 import argparse
 from typing import Optional
 
-from DL.mlp_model import MLPTrainer
-from DL.linear_model import linear_model
-from UTILS.utils import read_parquet
-from HAWKES.hawkes import hawkes_simulations
-from HAWKES.discretisation import discretise
-from HAWKES.hyperparameters import hyper_params_simulation
-from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
+from dl.mlp_model import MLPTrainer
+from dl.linear_model import linear_model
+from tools.utils import read_parquet
+from hawkes.simulation import hawkes_simulations
+from hawkes.discretisation import discretise
+from hawkes.hyperparameters import hyper_params_simulation
+from preprocessing.dataset import split_data, create_datasets, create_data_loaders
 
 
 # Main function

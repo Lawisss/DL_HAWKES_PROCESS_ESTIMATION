@@ -10,7 +10,7 @@ File running main executive function (app.py) with CLI commands
 import argparse
 
 from app import main
-import VARIABLES.parser_var as prs
+import variables.parser_var as prs
 
 # Arguments parser function
 

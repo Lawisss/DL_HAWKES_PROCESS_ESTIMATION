@@ -7,14 +7,14 @@ File containing Hawkes process function (simulation/estimation)
 
 """
 
-import os
 from typing import Tuple, TypedDict, Optional, Callable
 
 import numpy as np
 import Hawkes as hk
 
-from UTILS.utils import write_parquet
-import VARIABLES.hawkes_var as hwk
+import variables.hawkes_var as hwk
+from tools.utils import write_parquet
+
 
 # Simulated Hawkes process 
 
@@ -25,7 +25,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
     Args:
         params (TypedDict, optional): Parameters of Hawkes process (default: {"mu": 0.1, "alpha": 0.5, "beta": 10.0})
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         Tuple[hk.simulator, np.ndarray]: Hawkes process simulator and the simulated times
@@ -88,7 +88,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
         seq_len = np.minimum(len(t), dict_args['time_horizon'])
         simulated_events_seqs[k,:seq_len] = t[:seq_len]
     
-    # Written parameters to Parquet file
+    # Written parameters to parquet file
     write_parquet(simulated_events_seqs, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
 
     # Created dictionaries list representing simulated event sequences
@@ -110,7 +110,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
     Args:
         t (np.ndarray): Event times
         filename (str, optional): Parquet filename for performance metrics (default: "hawkes_estimation.parquet")
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
@@ -142,7 +142,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
                'Log-Likelihood': round(hawkes_process.L, 3),
                'AIC': round(hawkes_process.AIC, 3)}
 
-    # Written parameters to Parquet file
+    # Written parameters to parquet file
     write_parquet(metrics, filename=filename)
     # Transformed times so that the first observation is at 0 and the last at 1
     [t_transform, interval_transform] = hawkes_process.t_trans() 

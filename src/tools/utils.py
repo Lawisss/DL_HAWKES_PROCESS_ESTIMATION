@@ -18,29 +18,29 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
 from torch.profiler import profile, ProfilerActivity
 
-import VARIABLES.evaluation_var as eval
-import VARIABLES.preprocessing_var as prep
+import variables.eval_var as eval
+import variables.prep_var as prep
 
 
-# CSV file writing function
+# csv file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = 'simulations') -> None:
 
     """
-    Written dictionaries list to a CSV file
+    Written dictionaries list to a csv file
 
     Args:
-        data (List[dict]): Dictionaries list (dictionary = CSV row)
-        filename (str, optional): CSV filename
+        data (List[dict]): Dictionaries list (dictionary = csv row)
+        filename (str, optional): csv filename
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
-        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
 
     Returns:
         None: Function does not return anything
 
     Raises:
-        IOError: Error writing to file
+        IOError: Writing file error
     """
 
     try:
@@ -61,28 +61,28 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         file.close()
                     
     except IOError as e:
-        print(f"Cannot write CSV file: {e}.")
+        print(f"Cannot write csv file: {e}.")
 
 
-# CSV file reading function
+# csv file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = 'SIMULATIONS') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = 'simulations') -> pd.DataFrame:
 
     """
-    Red CSV file and loaded as DataFrame
+    Red csv file and loaded as DataFrame
 
     Args:
         filename (str): Filename to read
         delimiter (str, optional): Delimiter used to separate fields in the file (default: ',')
         mode (str, optional): Mode in which file is opened (default: 'r')
         encoding (str, optional): Character encoding used to read file (default: 'utf-8')
-        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
 
     Returns:
         pd.DataFrame: File contents dataFrame
 
     Raises:
-        IOError: Error reading to file
+        IOError: Reading file error
     """
 
     try:
@@ -97,28 +97,28 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         return pd.DataFrame(rows, columns=headers, dtype=np.float32)
     
     except IOError as e:
-        print(f"Cannot read CSV file: {e}.")
+        print(f"Cannot read csv file: {e}.")
 
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', folder: str = 'SIMULATIONS', columns: Optional[str] = None, compression: Optional[str] = None) -> None:
+def write_parquet(data: TypedDict, filename: str = '', folder: str = 'simulations', columns: Optional[str] = None, compression: Optional[str] = None) -> None:
 
     """
-    Written dictionary to Parquet file
+    Written dictionary to parquet file
 
     Args:
         data (TypedDict): Saved dictionary
         filename (str, optional): Parquet filename (default: '')
-        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         columns (bool, optional): Index column writing (default: None)
-        compression (str, optional): column compression type (default: None)
+        compression (str, optional): Column compression type (default: None)
 
     Returns:
         None: Function does not return anything
 
     Raises:
-        IOError: Error writing to file
+        IOError: Writing file error
     """
 
     try:
@@ -126,58 +126,58 @@ def write_parquet(data: TypedDict, filename: str = '', folder: str = 'SIMULATION
         fp.write(os.path.join(prep.DIRPATH, folder, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
         
     except IOError as e:
-        print(f"Cannot write Parquet file: {e}")
+        print(f"Cannot write parquet file: {e}")
 
 
 # Parquet file reading function
 
-def read_parquet(filename: str, folder: str = 'SIMULATIONS') -> pd.DataFrame:
+def read_parquet(filename: str, folder: str = 'simulations') -> pd.DataFrame:
 
     """
     Red Parquet file and loaded as DataFrame
 
     Args:
         filename (str): Parquet filename
-        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
 
     Returns:
         Pandas dataframe: File contents dataFrame
 
     Raises:
-        IOError: Error reading to file
+        IOError: Reading file error
     """
 
     try:
-        # Load Parquet file using Fastparquet
+        # Load Parquet file using fastparquet
         pf = fp.ParquetFile(os.path.join(prep.DIRPATH, folder, filename))
         # Converted it in dataframe
         return pf.to_pandas(columns=pf.columns)
 
     except IOError as e:
-        print(f"Cannot read Parquet file: {e}.")
+        print(f"Cannot read parquet file: {e}.")
 
 
-# Parquet to CSV function
+# Parquet to csv function
 
-def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False, folder: str = 'SIMULATIONS') -> None:
+def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False, folder: str = 'simulations') -> None:
 
     """
     Parquet to CSV conversion function
 
     Args:
         parquet_file (str, optional): Parquet filename (default: "test.parquet")
-        csv_file (str, optional): CSV filename (default: "test.csv")
+        csv_file (str, optional): csv filename (default: "test.csv")
         index (bool, optional): Write row names (default: False)
-        folder (str, optional): Sub-folder name in RESULTS folder (default: 'SIMULATIONS')
+        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
 
     Returns:
         Pandas dataframe: File contents dataFrame
 
     """
 
-    # Red Parquet file
+    # Red parquet file
     df = pd.read_parquet(os.path.join(prep.DIRPATH, folder, parquet_file))
-    # Writtent CSV file
+    # Writtent csv file
     df.to_csv(os.path.join(prep.DIRPATH, folder, csv_file), index=index)
 
 
@@ -247,7 +247,7 @@ def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: b
         
         return wrapper
     
-    # Decorator call, ex: @argparser / Factory call, ex: @argparser()
+    # Decorator call, ex: @timer / Factory call, ex: @timer()
     return timer_decorator(func) if func else timer_decorator
 
 
@@ -321,10 +321,5 @@ def profiling(func: Callable = None, enable: bool = False) -> Callable:
 
         return wrapper
     
-    # Decorator creator (profiling) return decorator
-    if func:
-        # Actual decorator call, ex: @cached_property
-        return prof_decorator(func)
-    else:
-        # Factory call, ex: @cached_property()
-        return prof_decorator
+    # Decorator call, ex: @profiling / Factory call, ex: @profiling()
+    return prof_decorator(func) if func else prof_decorator

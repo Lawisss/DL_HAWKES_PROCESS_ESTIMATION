@@ -27,4 +27,4 @@ DEVICE: torch.device = \
 
 # Writing/Reading parameters (utils.py)
 
-DIRPATH: str = os.path.abspath("RESULTS")                             # Absolute path to results directory  
+DIRPATH: str = os.path.abspath("results")                             # Absolute path to results directory  

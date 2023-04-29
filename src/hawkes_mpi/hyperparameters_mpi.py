@@ -7,14 +7,13 @@ File containing parallelized Hawkes process hyper-parameters generation function
 
 """
 
-import os
 from typing import Tuple, Optional, Callable
 
 import numpy as np
 from mpi4py import MPI
 
-import VARIABLES.hawkes_var as hwk
-from UTILS.utils import write_parquet
+import variables.hawkes_var as hwk
+from tools.utils import write_parquet
 
 # Parallelized generated Hawkes process hyper-parameters (alpha, beta, mu)
 
@@ -26,7 +25,7 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.p
     Args:
         filename (str, optional): Filename to save hyperparameters in CSV file (default: "hawkes_hyperparams.parquet")
         root (int, optional): Rank of process to use as root for MPI communications (default: 0)
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         A tuple containing:
@@ -82,7 +81,7 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.p
     comm.Reduce(alpha, np.zeros(dict_args['process_num'], dtype=np.float32), op=MPI.SUM, root=root)
     comm.Reduce(mu, np.zeros(dict_args['process_num'], dtype=np.float32), op=MPI.SUM, root=root)
 
-    # Written parameters to Parquet file
+    # Written parameters to parquet file
     if rank == 0:
         write_parquet({"alpha": alpha, "beta": beta, "mu": mu}, filename=filename)
         

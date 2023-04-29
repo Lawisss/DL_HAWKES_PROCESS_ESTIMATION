@@ -13,7 +13,7 @@ import torch
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader
 
-from PREPROCESSING.dataset import split_data, create_datasets, create_data_loaders
+from preprocessing.dataset import split_data, create_datasets, create_data_loaders
 
 
 # Test data splitting function

@@ -13,16 +13,16 @@ from datetime import datetime
 
 from torch.profiler import ProfilerActivity
 
-# Tensorboard (Metrics evaluation - mlp.py)
+# Tensorboard (Metrics evaluation - dl module)
 
-LOGDIRUN: str = os.path.abspath("RESULTS/RUNS")                 # Tensorboard logs directory for each run
+LOGDIRUN: str = os.path.abspath("results/runs")                 # Tensorboard logs directory for each run
 
 RUN_NAME: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") \
-                + "_" + socket.gethostname().upper()            # Name for current run based on timestamp/hostname
+                + "_" + socket.gethostname()                    # Name for current run based on timestamp/hostname
 
 # Tensorboard (Fonction profiling - utils.py)
 
-LOGDIPROF: str = os.path.abspath("RESULTS/PROFILING") 
+LOGDIPROF: str = os.path.abspath("results/profiling") 
                                                                 # Profiling results directory 
 
 ACTIVITIES: List[ProfilerActivity] = \

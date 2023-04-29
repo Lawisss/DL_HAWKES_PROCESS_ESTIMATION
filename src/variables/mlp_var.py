@@ -10,7 +10,7 @@ import socket
 from typing import Tuple
 from datetime import datetime
 
-# MLP parameters (mlp.py)
+# MLP parameters (mlp_model.py)
 
 INPUT_SIZE: int = 100                                                     # MLP input size
 HIDDEN_SIZE: int = 100                                                    # Number of neurons in hidden layers
@@ -22,11 +22,11 @@ LEARNING_RATE: float = 0.01                                               # Lear
 MAX_EPOCHS: int = 500                                                     # Maximum number of epochs for training
 
 FILENAME_BEST_MODEL: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") \
-            + "_" + socket.gethostname().upper() + "_" + "BEST_MODEL.pt"  # Filename to save best model weights
+            + "_" + socket.gethostname() + "_" + "best_model.pt"          # Filename to save best model weights
 EARLY_STOP_PATIENCE: int = 25                                             # Epochs without improvement before early stopping
 EARLY_STOP_DELTA: float = 0.01                                            # Minimum reduction of val_loss to consider improvement
 
-# Model summary (mlp.py)
+# Model summary (mlp_model.py)
 
 SUMMARY_MODEL: str = "MLP"                                                # Model name used for summary
 SUMMARY_MODE: str = "train"                                               # Summary modes: "train"/"eval"

@@ -11,15 +11,14 @@ import os
 from typing import Tuple, Optional, Callable
 
 import numpy as np
-from sklearn.linear_model import LinearRegression
 
-from DL.mlp_model import MLPTrainer
-import VARIABLES.evaluation_var as eval
-from UTILS.utils import write_parquet
+from dl.mlp_model import MLPTrainer
+import variables.eval_var as eval
+from tools.utils import write_parquet
 
 # Linear Regression function (alpha/beta estimation)
 
-def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, step_size: float = 0.05, folder: str = "TESTING", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, step_size: float = 0.05, folder: str = "testing", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Calculates predicted alpha/beta values using linear regression
@@ -29,8 +28,8 @@ def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, st
         train_y (np.ndarray): Labels training data
         val_x (np.ndarray): Inputs validation data
         step_size (float, optional): Step size for alpha values (default: 0.05)
-        folder (str, optional): Sub-folder name in RUNS folder (default: 'TESTING')
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        folder (str, optional): Sub-folder name in runs folder (default: 'testing')
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         dict: Predicted alpha/beta values
@@ -90,7 +89,7 @@ def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, st
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
-    # Written parameters to Parquet file
+    # Written parameters to parquet file
     write_parquet({"alpha_pred_avg": alpha_pred, "beta_pred_avg": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}, 
                   filename=f"{dict_args['run_name']}_LINEAR_PRED.parquet", folder=os.path.join(dict_args['logdirun'], folder, dict_args['run_name']))
 

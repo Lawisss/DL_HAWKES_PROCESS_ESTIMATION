@@ -27,10 +27,10 @@
 ###################################################################################################################
 
 # Checked if folder existed, if not created it
-[ ! -d ../OUTPUT ] && mkdir ../OUTPUT
+[ ! -d ../output ] && mkdir ../output
 
 # Moved output/error files in another folder
-mv *.out ../OUTPUT
+mv *.out ../output
 
 # Checked if necessary modules was loaded, if not, cleaned and did it
 module list 2>&1 | grep -q anaconda3/2022.10/gcc-11.2.0 || module purge && module load anaconda3/2022.10/gcc-11.2.0
@@ -38,5 +38,5 @@ module list 2>&1 | grep -q anaconda3/2022.10/gcc-11.2.0 || module purge && modul
 # Checked if environment was activated, if not, activated it
 $CONDA_DEFAULT_ENV | grep -qw hawkes || source activate hawkes
 
-# Run python script (Copy/Paste in .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/CODE/HAWKES")
+# Run python script (Copy/Paste in .bashrc: export HAWKES="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/src/hawkes")
 python $HAWKES/discretisation.py discretise "binned_hawkes_simulations_ruche.parquet"
