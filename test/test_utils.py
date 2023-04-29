@@ -20,12 +20,12 @@ import variables.prep_var as prep
 import variables.eval_var as eval
 
 
-# CSV file writing test function
+# csv file writing test function
 
 def test_write_csv(data: List[dict] = [{'name': 'John', 'age': 28}, {'name': 'Jane', 'age': 32}], test_file: str = 'write_test.csv') -> None:
 
     """
-    Test function for CSV file writing
+    Test function for csv file writing
     
     Args:
         data (List[dict], optional): List of dictionaries to be written to file (default: [{'name': 'John', 'age': 28}, {'name': 'Jane', 'age': 32}])
@@ -52,12 +52,12 @@ def test_write_csv(data: List[dict] = [{'name': 'John', 'age': 28}, {'name': 'Ja
     assert content == expected_content
 
 
-# CSV file reading test function
+# csv file reading test function
 
 def test_read_csv(filename: str = 'read_test.csv') -> None:
     
     """
-    Test function for CSV file reading
+    Test function for csv file reading
     
     Args:
         filename (str, optional): Filename for test file (default: 'read_test.csv')
@@ -90,11 +90,11 @@ def test_read_csv(filename: str = 'read_test.csv') -> None:
 
 # Parquet file writing test function
 
-@patch("UTILS.utils.write_parquet")
+@patch("tools.utils.write_parquet")
 def test_write_parquet(mock_write, data: TypedDict = {'a': [1, 2, 3], 'b': [4, 5, 6]}, filename: str = 'write_test.parquet', columns: List = ['a', 'b'], compression: str = 'SNAPPY') -> None:
 
     """
-    Test function for Parquet file wrtiting
+    Test function for parquet file wrtiting
     
     Args:
         data (TypedDict, optional): Test data contents (default: {'a': [1, 2, 3], 'b': [4, 5, 6]})
@@ -119,11 +119,11 @@ def test_write_parquet(mock_write, data: TypedDict = {'a': [1, 2, 3], 'b': [4, 5
 
 # Parquet file reading test function
 
-@patch("UTILS.utils.read_parquet")
+@patch("tools.utils.read_parquet")
 def test_read_parquet(mock_read, data: pd.DataFrame = pd.DataFrame({'col1': [1, 2, 3], 'col2': ['a', 'b', 'c']}), filename: str = 'read_test.parquet') -> None:
     
     """
-    Test function for Parquet file reading
+    Test function for parquet file reading
     
     Args:
         mock_read (MagicMock): Mock for read_parquet function

@@ -91,6 +91,9 @@ class MLPTrainer:
                   ('filename_best_model', mlp.FILENAME_BEST_MODEL),
                   ('early_stop_patience', mlp.EARLY_STOP_PATIENCE),
                   ('logdirun', eval.LOGDIRUN),
+                  ('train_dir', eval.TRAIN_DIR),
+                  ('test_dir', eval.TEST_DIR),
+                  ('best_model_dir', eval.BEST_MODEL_DIR),
                   ('run_name', eval.RUN_NAME)]
         
         for attr, default_val in params:
@@ -235,7 +238,7 @@ class MLPTrainer:
         Loaded best model from saved file
 
         Args:
-            folder (str, optional): Sub-folder name in results folder (default: 'best_model')
+            None: Function contain no arguments
 
         Returns:
             str: Message indicating that best model has been loaded

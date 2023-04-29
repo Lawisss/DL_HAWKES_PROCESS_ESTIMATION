@@ -16,7 +16,7 @@ import numpy as np
 import fastparquet as fp
 from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
-from torch.profiler import profile, ProfilerActivity
+from torch.profiler import profile
 
 import variables.eval_var as eval
 import variables.prep_var as prep
@@ -24,7 +24,7 @@ import variables.prep_var as prep
 
 # csv file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8') -> None:
+def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', args: Optional[Callable] = None) -> None:
 
     """
     Written dictionaries list to a csv file
@@ -34,6 +34,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         filename (str, optional): csv filename
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         None: Function does not return anything
@@ -42,12 +43,18 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
         IOError: Writing file error
     """
 
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     try:
         if not isinstance(data, list):
             data = [data]
 
         # Written and field names initialisation
-        with open(os.path.join(prep.DIRPATH, prep.DEFAULT_DIR, filename), mode=mode, encoding=encoding) as file:
+        with open(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename), mode=mode, encoding=encoding) as file:
             file.write(','.join(data[0].keys()))
             file.write('\n')
         
@@ -65,7 +72,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # csv file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8') -> pd.DataFrame:
+def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', args: Optional[Callable] = None) -> pd.DataFrame:
 
     """
     Red csv file and loaded as DataFrame
@@ -75,6 +82,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         delimiter (str, optional): Delimiter used to separate fields in the file (default: ',')
         mode (str, optional): Mode in which file is opened (default: 'r')
         encoding (str, optional): Character encoding used to read file (default: 'utf-8')
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         pd.DataFrame: File contents dataFrame
@@ -83,8 +91,14 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         IOError: Reading file error
     """
 
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     try:
-        with open(os.path.join(prep.DIRPATH, prep.DEFAULT_DIR, filename), mode=mode, encoding=encoding) as file:
+        with open(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename), mode=mode, encoding=encoding) as file:
 
             # Extracted headers
             headers = next(file).strip().split(delimiter)
@@ -100,7 +114,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = None, compression: Optional[str] = None) -> None:
+def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
 
     """
     Written dictionary to parquet file
@@ -111,6 +125,7 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         columns (bool, optional): Index column writing (default: None)
         compression (str, optional): Column compression type (default: None)
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         None: Function does not return anything
@@ -119,9 +134,15 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
         IOError: Writing file error
     """
 
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     try:
         # Write parquet file from dataframe (index/compression checked)
-        fp.write(os.path.join(prep.DIRPATH, prep.DEFAULT_DIR, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
+        fp.write(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
         
     except IOError as e:
         print(f"Cannot write parquet file: {e}")
@@ -129,13 +150,14 @@ def write_parquet(data: TypedDict, filename: str = '', columns: Optional[str] = 
 
 # Parquet file reading function
 
-def read_parquet(filename: str) -> pd.DataFrame:
+def read_parquet(filename: str, args: Optional[Callable] = None) -> pd.DataFrame:
 
     """
     Red Parquet file and loaded as DataFrame
 
     Args:
         filename (str): Parquet filename
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         Pandas dataframe: File contents dataFrame
@@ -144,9 +166,15 @@ def read_parquet(filename: str) -> pd.DataFrame:
         IOError: Reading file error
     """
 
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     try:
         # Load Parquet file using fastparquet
-        pf = fp.ParquetFile(os.path.join(prep.DIRPATH, prep.DEFAULT_DIR, filename))
+        pf = fp.ParquetFile(os.path.join(dict_args['dirpath'], dict_args['default_dir'], filename))
         # Converted it in dataframe
         return pf.to_pandas(columns=pf.columns)
 
@@ -156,7 +184,7 @@ def read_parquet(filename: str) -> pd.DataFrame:
 
 # Parquet to csv function
 
-def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False) -> None:
+def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", index: bool = False, args: Optional[Callable] = None) -> None:
 
     """
     Parquet to CSV conversion function
@@ -165,16 +193,23 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
         parquet_file (str, optional): Parquet filename (default: "test.parquet")
         csv_file (str, optional): csv filename (default: "test.csv")
         index (bool, optional): Write row names (default: False)
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         Pandas dataframe: File contents dataFrame
 
     """
 
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH, "default_dir": prep.DEFAULT_DIR}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
     # Red parquet file
-    df = pd.read_parquet(os.path.join(prep.DIRPATH, prep.DEFAULT_DIR, parquet_file))
+    df = pd.read_parquet(os.path.join(dict_args['dirpath'], dict_args['default_dir'], parquet_file))
     # Writtent csv file
-    df.to_csv(os.path.join(prep.DIRPATH, prep.DEFAULT_DIR, csv_file), index=index)
+    df.to_csv(os.path.join(dict_args['dirpath'], dict_args['default_dir'], csv_file), index=index)
 
 
 # Time measurement function
@@ -249,7 +284,7 @@ def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: b
 
 # Pytorch Tensorboard Profiling 
 
-def profiling(func: Callable = None, enable: bool = False) -> Callable:
+def profiling(func: Callable = None, enable: bool = False, args: Optional[Callable] = None) -> Callable:
 
     """
     Decorator function for profiling models using TensorBoard
@@ -257,6 +292,7 @@ def profiling(func: Callable = None, enable: bool = False) -> Callable:
     Args:
         func (Callable, optional): Function to be decorated
         enable (bool, optional): Flag indicating whether profiling is enabled or not (default: False)
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         Callable: Decorated function
@@ -269,49 +305,71 @@ def profiling(func: Callable = None, enable: bool = False) -> Callable:
         @wraps(func)
 
         # Wrapper called when decorated function called and return decorated function result 
-        def wrapper(*args, **kwargs):
+        def wrapper(*_args, **kwargs):
+            
+            # Default parameters
+            default_params = {"logdiprof": eval.LOGDIPROF, 
+                              "run_name": eval.RUN_NAME,
+                              "activities": eval.ACTIVITIES, 
+                              "wait": eval.WAIT,
+                              "warmup": eval.WARMUP, 
+                              "active": eval.ACTIVE,
+                              "repeat": eval.REPEAT, 
+                              "skip_first": eval.SKIP_FIRST,
+                              "record_shapes": eval.RECORD_SHAPES, 
+                              "profile_memory": eval.PROFILE_MEMORY,
+                              "with_stack": eval.WITH_STACK, 
+                              "with_flops": eval.WITH_FLOPS,
+                              "with_modules": eval.WITH_MODULES, 
+                              "use_cuda": prep.DEVICE,
+                              "group_by_input_shape": eval.GROUP_BY_INPUT_SHAPE,
+                              "group_by_stack_n": eval.GROUP_BY_STACK_N,
+                              "sort_by": eval.SORT_BY,
+                              "row_limit": eval.ROW_LIMIT}
+
+            # Initialized parameters
+            dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
             # Initialized Tensorboard
-            writer = SummaryWriter(os.path.join(eval.LOGDIPROF, eval.RUN_NAME))
+            writer = SummaryWriter(os.path.join(dict_args["logdiprof"], dict_args["run_name"]))
 
             # Activated profiling
             if enable:
                 
                 # Defined profiler options
-                profiler_options = {"activities": [ProfilerActivity.CPU, ProfilerActivity.CUDA],
-                                    "schedule": schedule(wait=eval.WAIT, warmup=eval.WARMUP, active=eval.ACTIVE, repeat=eval.REPEAT, skip_first=eval.SKIP_FIRST),
-                                    "on_trace_ready": tensorboard_trace_handler(eval.LOGDIPROF),
-                                    "record_shapes": eval.RECORD_SHAPES,
-                                    "profile_memory": eval.PROFILE_MEMORY,
-                                    "with_stack": eval.WITH_STACK,
-                                    "with_flops": eval.WITH_FLOPS,
-                                    "with_modules": eval.WITH_MODULES,
-                                    "use_cuda": prep.DEVICE}
+                profiler_options = {"activities": dict_args["activities"],
+                                    "schedule": schedule(wait=dict_args["wait"], warmup=dict_args["warmup"], active=dict_args["active"], repeat=dict_args["repeat"], skip_first=dict_args["skip_first"]),
+                                    "on_trace_ready": tensorboard_trace_handler(dict_args["logdiprof"]),
+                                    "record_shapes": dict_args["record_shapes"],
+                                    "profile_memory": dict_args["profile_memory"],
+                                    "with_stack": dict_args["with_stack"],
+                                    "with_flops": dict_args["with_flops"],
+                                    "with_modules": dict_args["with_modules"],
+                                    "use_cuda": dict_args["use_cuda"]}
 
                 # Started profiling
                 with profile(**profiler_options) as prof:
 
-                    result = func(*args, **kwargs)
+                    result = func(*_args, **kwargs)
 
                     # Added profiling traces/results (average events + group by operator name/input shapes/stack) 
-                    for trace in prof.key_averages(group_by_input_shape=eval.GROUP_BY_INPUT_SHAPE, 
-                                                   group_by_stack_n=eval.GROUP_BY_STACK_N).table(sort_by=eval.SORT_BY,
-                                                                                                 row_limit=eval.ROW_LIMIT):
+                    for trace in prof.key_averages(group_by_input_shape=dict_args["group_by_input_shape"], 
+                                                   group_by_stack_n=dict_args["group_by_stack_n"]).table(sort_by=dict_args["sort_by"], row_limit=dict_args["row_limit"]):
                         writer.add_scalar(trace.key, trace.value, 0)
 
                     # Ended profiling and exported stack traces/collected traces
                     if prof.with_stack:
-                        prof.export_stacks(f"{os.path.join(eval.LOGDIPROF, eval.RUN_NAME)}.txt", 
+                        prof.export_stacks(f"{os.path.join(dict_args['logdiprof'], dict_args['run_name'])}.txt", 
                                            "self_cuda_time_total" if prep.DEVICE == "cuda" else "self_cpu_time_total")
 
-                    prof.export_chrome_trace(f"{os.path.join(eval.LOGDIPROF, eval.RUN_NAME)}.json")
+                    prof.export_chrome_trace(f"{os.path.join(dict_args['logdiprof'], dict_args['run_name'])}.json")
                     writer.add_scalar("Training Time (Total)", prof.total_average().cpu().numpy(), 0)
 
                     # Closed SummaryWriter
                     writer.close()
             else:
                 # No profiling
-                result = func(*args, **kwargs)
+                result = func(*_args, **kwargs)
                 
             return result
 
