@@ -69,7 +69,15 @@ ARG_GROUPS: List = [                                                            
 
     {'name': 'file_params', 
      'description': 'Writing/Loading parameters', 
-     'args': [{'name': '--dirpath', 'type': str, 'nargs': 1, 'default': prep.DIRPATH, 'help': 'Path directory where results are saved'}]},
+     'args': [
+         {'name': '--dirpath', 'type': str, 'nargs': 1, 'default': prep.DIRPATH, 'help': 'Path directory where results are saved'},
+         {'name': '--default_dir', 'type': str, 'nargs': 1, 'default': prep.DEFAULT_DIR, 'help': "Default parquet file folder"},
+         {'name': '--logdirun', 'type': str, 'nargs': 1, 'default': eval.LOGDIRUN, 'help': "Tensorboard logs directory for each run"},
+         {'name': '--train_dir', 'type': str, 'nargs': 1, 'default': eval.TRAIN_DIR, 'help': "Training parquet file folder"},
+         {'name': '--test_dir', 'type': str, 'nargs': 1, 'default': eval.TEST_DIR, 'help': "Testing parquet file folder"},
+         {'name': '--best_model_dir', 'type': str, 'nargs': 1, 'default': eval.BEST_MODEL_DIR, 'help': "Best model folder"},
+         {'name': '--run_name', 'type': str, 'nargs': 1, 'default': eval.RUN_NAME, 'help': "Name for current run based on timestamp/hostname"},
+         {'name': '--logdiprof', 'type': str, 'nargs': 1, 'default': eval.LOGDIPROF, 'help': "Profiling results directory"}]},
 
     {'name': 'mlp_params', 
      'description': 'MLP parameters', 
@@ -96,9 +104,6 @@ ARG_GROUPS: List = [                                                            
     {'name': 'profile_params', 
      'description': 'Profiling parameters', 
      'args': [
-        {'name': '--logdirun', 'type': str, 'nargs': 1, 'default': eval.LOGDIRUN, 'help': "Tensorboard logs directory for each run"},
-        {'name': '--run_name', 'type': str, 'nargs': 1, 'default': eval.RUN_NAME, 'help': "Name for current run based on timestamp/hostname"},
-        {'name': '--logdiprof', 'type': str, 'nargs': 1, 'default': eval.LOGDIPROF, 'help': "Profiling results directory"},
         {'name': '--activities', 'type': list, 'nargs': '+', 'default': eval.ACTIVITIES, 'help': "List of profiling activities to perform"},
         {'name': '--wait', 'type': int, 'nargs': 1, 'default': eval.WAIT, 'help': "Time (in seconds) to wait before starting profiling"},
         {'name': '--warmup', 'type': int, 'nargs': 1, 'default': eval.WARMUP, 'help': "Time (in seconds) for warming up before profiling"},

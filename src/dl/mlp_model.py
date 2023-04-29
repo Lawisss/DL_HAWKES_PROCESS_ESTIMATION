@@ -195,7 +195,7 @@ class MLPTrainer:
 
     # Early stopping function (checkpoint)
 
-    def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0, folder: str = 'best_model') -> bool:
+    def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0) -> bool:
         
         """
         Checked early stopping condition based on validation loss
@@ -203,7 +203,6 @@ class MLPTrainer:
         Args:
             best_loss (float or int, optional): Current best validation loss (default: float('inf'))
             no_improve_count (int, optional): Number of epochs with no improvement in validation loss (default: 0)
-            folder (str, optional): Sub-folder name in results folder (default: 'best_model')
 
         Returns:
             bool: True if early stopping condition is met, False otherwise
@@ -213,7 +212,7 @@ class MLPTrainer:
         # Save model if val_loss has decreased
         if (self.val_loss + self.early_stop_delta) < best_loss:
             
-            torch.save(copy.deepcopy(self.model.state_dict()), os.path.join(self.dirpath, folder, self.filename_best_model))
+            torch.save(copy.deepcopy(self.model.state_dict()), os.path.join(self.dirpath, self.best_model_dir, self.filename_best_model))
             best_loss = self.val_loss
             no_improve_count = 0
 
@@ -230,7 +229,7 @@ class MLPTrainer:
 
     # Loading model function (best model)
 
-    def load_model(self, folder: str = 'best_model') -> str:  
+    def load_model(self) -> str:  
 
         """
         Loaded best model from saved file
@@ -242,7 +241,7 @@ class MLPTrainer:
             str: Message indicating that best model has been loaded
         """     
 
-        self.model.load_state_dict(torch.load(os.path.join(self.dirpath, folder, self.filename_best_model)))
+        self.model.load_state_dict(torch.load(os.path.join(self.dirpath, self.best_model_dir, self.filename_best_model)))
         return f"Best model loading ({self.filename_best_model})..."
     
      
@@ -274,7 +273,7 @@ class MLPTrainer:
     # Training fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor, val_y: torch.Tensor, folder: str = 'training') -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor, val_y: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
 
         """
         Trained and evaluated model
@@ -284,14 +283,13 @@ class MLPTrainer:
             val_loader (DataLoader): Validation data
             val_x (torch.Tensor): Input features for validation data
             val_y (torch.Tensor): Label outputs for validation data
-            folder (str, optional): Sub-folder name in runs folder (default: 'training')
 
         Returns:
             Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]: Model, losses, predictions, eta/mu
         """
 
         # Initialized Tensorboard
-        writer = SummaryWriter(os.path.join(self.logdirun, folder, self.run_name))
+        writer = SummaryWriter(os.path.join(self.logdirun, self.train_dir, self.run_name))
 
         # Displayed model summary
         print(self.summary_model())
@@ -343,14 +341,14 @@ class MLPTrainer:
         write_parquet({'train_losses': self.train_losses, 
                        'val_losses': self.val_losses}, 
                        filename=f"{self.run_name}_losses.parquet", 
-                       folder=os.path.join(self.logdirun, folder, self.run_name))
+                       folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
         
         write_parquet({'val_eta_true': val_y[:, 0], 
                        'val_mu_true': val_y[:, 1],
                        'val_eta_pred': val_y_pred[:, 0], 
                        'val_mu_pred': val_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_predictions.parquet", 
-                       folder=os.path.join(self.logdirun, folder, self.run_name))
+                       folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
         return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta_pred, val_mu_pred
     
@@ -359,7 +357,7 @@ class MLPTrainer:
     
     @profiling(enable=False)
     @torch.no_grad()
-    def test_model(self, test_loader: DataLoader, test_y: torch.Tensor, dtype: torch.dtype = torch.float32, folder: str = 'testing') -> Tuple[np.ndarray, float, float, float]:
+    def test_model(self, test_loader: DataLoader, test_y: torch.Tensor, dtype: torch.dtype = torch.float32) -> Tuple[np.ndarray, float, float, float]:
 
         """
         Tested and evaluated model
@@ -368,7 +366,6 @@ class MLPTrainer:
             test_loader (DataLoader): Testing data
             test_y (torch.Tensor): Label outputs for testing data
             dtype (torch.dtype): Predictions datatype (default: torch.float32)
-            folder (str, optional): Sub-folder name in runs folder (default: 'testing')
 
         Returns:
             Tuple[np.ndarray, float, float, float]: predictions, loss average, eta average, mu average
@@ -382,7 +379,7 @@ class MLPTrainer:
         test_y_pred = torch.empty((len(test_loader.dataset), 2), dtype=dtype)
         
         # Initialized Tensorboard
-        writer = SummaryWriter(os.path.join(self.logdirun, folder, self.run_name))
+        writer = SummaryWriter(os.path.join(self.logdirun, self.test_dir, self.run_name))
 
         for x, y in test_loader:
             
@@ -426,6 +423,6 @@ class MLPTrainer:
                        'test_eta_pred': test_y_pred[:, 0], 
                        'test_mu_pred': test_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_predictions.parquet", 
-                       folder=os.path.join(self.logdirun, folder, self.run_name))
+                       folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
         return test_y_pred, self.test_loss, self.test_eta_pred, self.test_mu_pred

@@ -17,13 +17,13 @@ from tools.utils import write_parquet
 
 # Parallelized generated Hawkes process hyper-parameters (alpha, beta, mu)
 
-def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams_mpi.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process hyperparameters
 
     Args:
-        filename (str, optional): Filename to save hyperparameters in CSV file (default: "hawkes_hyperparams.parquet")
+        filename (str, optional): Filename to save hyperparameters in CSV file (default: "hawkes_hyperparams_mpi.parquet")
         root (int, optional): Rank of process to use as root for MPI communications (default: 0)
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 

@@ -18,7 +18,7 @@ from tools.utils import write_parquet
 
 # Linear Regression function (alpha/beta estimation)
 
-def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, step_size: float = 0.05, folder: str = "testing", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, step_size: float = 0.05, args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Calculates predicted alpha/beta values using linear regression
@@ -28,7 +28,6 @@ def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, st
         train_y (np.ndarray): Labels training data
         val_x (np.ndarray): Inputs validation data
         step_size (float, optional): Step size for alpha values (default: 0.05)
-        folder (str, optional): Sub-folder name in runs folder (default: 'testing')
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
@@ -45,8 +44,8 @@ def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, st
     val_eta_pred, val_mu_pred = map(lambda x: np.array([x], dtype=np.float32), (val_eta_pred, val_mu_pred))
 
     # Defined min and max eta values for comparison
-    min_eta = val_eta_pred - 0.05
-    max_eta = val_eta_pred + 0.05
+    min_eta = val_eta_pred - step_size
+    max_eta = val_eta_pred + step_size
 
     # Kernel in hawkes librairie (alpha = eta)
     eta = train_y[:, 0] # train_y[:, 0] / train_y[:, 1]
@@ -84,13 +83,13 @@ def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, st
 
 
     # Default parameters
-    default_params = {"logdirun": eval.LOGDIRUN, "run_name": eval.RUN_NAME}
+    default_params = {"logdirun": eval.LOGDIRUN, "test_dir": eval.TEST_DIR, "run_name": eval.RUN_NAME}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Written parameters to parquet file
     write_parquet({"alpha_pred_avg": alpha_pred, "beta_pred_avg": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}, 
-                  filename=f"{dict_args['run_name']}_LINEAR_PRED.parquet", folder=os.path.join(dict_args['logdirun'], folder, dict_args['run_name']))
+                  filename=f"{dict_args['run_name']}_LINEAR_PRED.parquet", folder=os.path.join(dict_args['logdirun'], dict_args['test_dir'], dict_args['run_name']))
 
     return np.array([alpha_pred, beta_pred, val_eta_pred, val_mu_pred], dtype=np.float32).T, alpha_pred, beta_pred 

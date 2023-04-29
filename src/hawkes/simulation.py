@@ -64,7 +64,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
         beta (np.ndarray): Decay matrix of each Hawkes process
         mu (np.ndarray): Base intensity of each Hawkes process
         filename (str, optional): Parquet filename to save results (default: "hawkes_simulations.parquet")
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process

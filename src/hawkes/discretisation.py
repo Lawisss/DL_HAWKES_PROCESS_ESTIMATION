@@ -26,7 +26,7 @@ def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulation
     Args:
         jump_times (np.ndarray): Jump times for Hawkes process simulation
         filename (str, optional): Filename to write histogram data in parquet format (default: "binned_hawkes_simulations.parquet")
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Binned histogram counts for each process, where "num_bins" is number of bins used to discretize jump times
@@ -68,7 +68,7 @@ def temp_func(jump_times: np.ndarray, args: Optional[Callable] = None) -> float:
 
     Args:
         jump_times (np.ndarray): Event times in Hawkes process
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         float: Minimum step size between events in Hawkes process. If no events, step size is set to maximum time horizon
@@ -125,7 +125,7 @@ def jump_times(h: np.ndarray, args: Optional[Callable] = None) -> np.ndarray:
 
     Args:
         h (np.ndarray): Event history of point process
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         np.ndarray: Jump times for point process

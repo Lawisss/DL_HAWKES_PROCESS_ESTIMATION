@@ -25,7 +25,7 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: 
 
     Args:
         filename (str, optional): Filename to save hyperparameters in parquet file (default: "hawkes_hyperparams.parquet")
-        args (Callable, optional): Arguments if you use main.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
         A tuple containing:

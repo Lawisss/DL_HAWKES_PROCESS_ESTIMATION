@@ -16,6 +16,9 @@ from torch.profiler import ProfilerActivity
 # Tensorboard (Metrics evaluation - dl module)
 
 LOGDIRUN: str = os.path.abspath("results/runs")                 # Tensorboard logs directory for each run
+TRAIN_DIR: str = "training"                                     # Training parquet file folder
+TEST_DIR: str = "testing"                                       # Testing parquet file folder
+BEST_MODEL_DIR: str = "best_model"                              # Best model folder
 
 RUN_NAME: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") \
                 + "_" + socket.gethostname()                    # Name for current run based on timestamp/hostname
