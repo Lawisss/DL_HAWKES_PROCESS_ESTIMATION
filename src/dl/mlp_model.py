@@ -42,7 +42,7 @@ class MLP(nn.Module):
         # Created linear layers (first layer = input_size / hidden layers = hidden_size neurons) 
         # * operator unpacked list comprehension into individual layers added to nn.ModuleList
         self.layers = nn.ModuleList([nn.Linear(self.input_size, self.hidden_size), 
-                                     *(nn.Linear(self.hidden_size, self.hidden_size) for _ in range(self.num_hidden_layers - 1))])
+                                     *(nn.Linear(self.hidden_size, self.hidden_size) for _ in range(self.num_hidden_layers))])
         
         self.output_layer = nn.Linear(self.hidden_size, self.output_size)
         self.relu = nn.ReLU()
@@ -379,8 +379,8 @@ class MLPTrainer:
 
         # Initialized parameters
         index = 0
-        test_y_pred = torch.empty((len(test_loader.dataset), 2), dtype=dtype)
-        
+        test_y_pred = torch.zeros((len(test_loader.dataset), 2), dtype=dtype)
+
         # Initialized Tensorboard
         writer = SummaryWriter(os.path.join(self.logdirun, self.test_dir, self.run_name))
 
@@ -428,4 +428,4 @@ class MLPTrainer:
                        filename=f"{self.run_name}_predictions.parquet", 
                        folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
-        return test_y_pred, self.test_loss, self.test_eta_pred, self.test_mu_pred
+        return test_y_pred.numpy().astype(np.float32), self.test_loss, self.test_eta_pred, self.test_mu_pred

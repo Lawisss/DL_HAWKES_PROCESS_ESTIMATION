@@ -10,10 +10,12 @@ import socket
 from typing import Tuple
 from datetime import datetime
 
+import variables.hawkes_var as hwk
+
 # MLP parameters (mlp_model.py)
 
-INPUT_SIZE: int = 100                                                     # MLP input size
-HIDDEN_SIZE: int = 100                                                    # Number of neurons in hidden layers
+INPUT_SIZE: int = hwk.TIME_HORIZON                                        # MLP input size (HORIZON = 100)
+HIDDEN_SIZE: int = hwk.TIME_HORIZON                                       # Neurons in hidden layers (HORIZON = 100)
 OUTPUT_SIZE: int = 2                                                      # MLP output size
 NUM_HIDDEN_LAYERS: int = 6                                                # MLP number of hidden layers
 L2_REG: float = 0.001                                                     # L2 regularization parameter
