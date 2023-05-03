@@ -39,13 +39,10 @@ class MLP(nn.Module):
         self.num_hidden_layers = num_hidden_layers
         self.output_size = output_size
 
-        # Created linear layers (first layer = input_size / hidden layers = hidden_size neurons) 
-        # * operator unpacked list comprehension into individual layers added to nn.ModuleList
-        self.layers = nn.ModuleList([nn.Linear(self.input_size, self.hidden_size), 
-                                     *(nn.Linear(self.hidden_size, self.hidden_size) for _ in range(self.num_hidden_layers))])
-        
+        # Created layers (first layer = input_size / hidden layers = hidden_size neurons / last layer = output_size) 
+        self.input_layer = nn.Linear(self.input_size, self.hidden_size)
+        self.layers = nn.ModuleList([nn.Sequential(nn.Linear(self.hidden_size, self.hidden_size), nn.ReLU()) for _ in range(self.num_hidden_layers)])
         self.output_layer = nn.Linear(self.hidden_size, self.output_size)
-        self.relu = nn.ReLU()
 
     # Spread inputs through hidden layers, ReLU function and returns outputs
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -60,8 +57,11 @@ class MLP(nn.Module):
             torch.Tensor: Output tensor of shape (batch_size, output_size)
         """
 
+        x = self.input_layer(x)
+
         for layer in self.layers:
-            x = self.relu(layer(x))
+            x = layer(x)
+            
         x = self.output_layer(x)
 
         return x

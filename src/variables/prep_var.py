@@ -15,8 +15,8 @@ import variables.hawkes_var as hwk
 # Datasets parameters (dataset.py)
 
 VAL_RATIO: float = 0.05                                               # Fraction of data used for validation
-TEST_RATIO: float = 0.05                                              # Fraction of data used for testing
-BATCH_SIZE: int = hwk.PROCESS_NUM * 0.1                               # Number of samples used in each process iteration
+TEST_RATIO: float = 0.00                                              # Fraction of data used for testing
+BATCH_SIZE: int = int(hwk.PROCESS_NUM * 0.1)                          # Number of samples used in each process iteration
 SHUFFLE: bool = True                                                  # Shuffle data in each epoch
 DROP_LAST: bool = True                                                # Drop last inchoate batch if batch size ∤ dataset size
 NUM_WORKERS: int = 4                                                  # Number of worker processes to use for data loading

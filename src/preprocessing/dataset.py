@@ -108,8 +108,8 @@ def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset
 
     # Data Loaders creation (speed up loading process with drop_last, num_workers, pin_memory)
     train_loader = DataLoader(train_dataset, batch_size=dict_args['batch_size'], shuffle=dict_args['shuffle'], drop_last=dict_args['drop_last'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory'])
-    val_loader = DataLoader(val_dataset, batch_size=dict_args['batch_size'], shuffle=None, drop_last=dict_args['drop_last'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory']) 
-    test_loader = DataLoader(test_dataset, batch_size=dict_args['batch_size'], shuffle=None, drop_last=dict_args['drop_last'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory'])
+    val_loader = DataLoader(val_dataset, batch_size=dict_args['batch_size'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory']) 
+    test_loader = DataLoader(test_dataset, batch_size=dict_args['batch_size'], num_workers=dict_args['num_workers'], pin_memory=dict_args['pin_memory'])
 
     return train_loader, val_loader, test_loader
 
