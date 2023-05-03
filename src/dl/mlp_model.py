@@ -41,7 +41,7 @@ class MLP(nn.Module):
 
         # Created layers (first layer = input_size / hidden layers = hidden_size neurons / last layer = output_size) 
         self.input_layer = nn.Linear(self.input_size, self.hidden_size)
-        self.layers = nn.ModuleList([nn.Sequential(nn.Linear(self.hidden_size, self.hidden_size), nn.ReLU()) for _ in range(self.num_hidden_layers)])
+        self.hidden_layers = nn.ModuleList([nn.Sequential(nn.Linear(self.hidden_size, self.hidden_size), nn.ReLU()) for _ in range(self.num_hidden_layers)])
         self.output_layer = nn.Linear(self.hidden_size, self.output_size)
 
     # Spread inputs through hidden layers, ReLU function and returns outputs
@@ -59,9 +59,9 @@ class MLP(nn.Module):
 
         x = self.input_layer(x)
 
-        for layer in self.layers:
-            x = layer(x)
-            
+        for hidden_layers in self.hidden_layers:
+            x = hidden_layers(x)
+
         x = self.output_layer(x)
 
         return x
