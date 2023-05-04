@@ -116,7 +116,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulations", columns: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
+def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulations", columns: Optional[str] = None, dtype: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
 
     """
     Written dictionary to parquet file
@@ -126,6 +126,7 @@ def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulation
         filename (str, optional): Parquet filename (default: '')
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         columns (bool, optional): Index column writing (default: None)
+        dtype (str, optional): Dataframe values dtype (default: None)
         compression (str, optional): Column compression type (default: None)
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
@@ -144,7 +145,7 @@ def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulation
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        fp.write(os.path.join(dict_args['dirpath'], folder, filename), pd.DataFrame(data, columns=columns, dtype=np.float32), compression=compression)
+        pd.DataFrame(data, columns=columns, dtype=dtype).to_parquet(os.path.join(dict_args['dirpath'], folder, filename), compression=compression)
         
     except IOError as e:
         print(f"Cannot write parquet file: {e}")

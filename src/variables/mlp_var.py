@@ -20,11 +20,11 @@ OUTPUT_SIZE: int = 2                                                      # MLP 
 NUM_HIDDEN_LAYERS: int = 6                                                # MLP number of hidden layers
 L2_REG: float = 0.001                                                     # L2 regularization parameter
 
-LEARNING_RATE: float = 0.01                                               # Learning rate for optimizer
+LEARNING_RATE: float = 0.001                                              # Learning rate for optimizer
 MAX_EPOCHS: int = 500                                                     # Maximum number of epochs for training
 
 FILENAME_BEST_MODEL: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") \
-            + "_" + socket.gethostname() + "_" + "best_model.pt"          # Filename to save best model weights
+            + "_" + socket.gethostname().upper() + "_" + "best_model.pt"  # Filename to save best model weights
 EARLY_STOP_PATIENCE: int = 25                                             # Epochs without improvement before early stopping
 EARLY_STOP_DELTA: float = 0.01                                            # Minimum reduction of val_loss to consider improvement
 

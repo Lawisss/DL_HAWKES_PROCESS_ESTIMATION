@@ -100,7 +100,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
     rank = comm.Get_rank()
 
     # Default parameters
-    default_params = {"process_num": hwk.PROCESS_NUM, "time_horizon": hwk.TIME_HORIZON}
+    default_params = {"process_num": hwk.PROCESS_NUM}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
@@ -114,16 +114,14 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
     chunk_beta = beta[rank * chunk_num:(rank + 1) * chunk_num]
 
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((chunk_num, dict_args['time_horizon']), dtype=np.float32)
+    simulated_events_seqs = np.zeros((dict_args['process_num'], ), dtype=object)
 
     for k in range(chunk_num):
         # Simulated Hawkes processes with current simulation parameters
         # The results are stored in the k-th row of the simulated_events_seqs
         _, t = hawkes_simulation(params={"mu": chunk_mu[k], "alpha": chunk_alpha[k], "beta": chunk_beta[k]})
-        
-        # Length clipping to not exceed time horizon
-        seq_len = np.minimum(len(t), dict_args['time_horizon'])
-        simulated_events_seqs[k,:seq_len] = t[:seq_len]
+
+        simulated_events_seqs[k] = t
 
     # Gather simulated_events_seqs from all ranks to root
     simulated_events_seqs = comm.gather(simulated_events_seqs, root=root)
@@ -133,7 +131,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
         simulated_events_seqs = np.concatenate(simulated_events_seqs)
 
         # Written parameters to parquet file
-        write_parquet(simulated_events_seqs, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
+        write_parquet(simulated_events_seqs, columns=["simulations"], dtype=object, filename=filename)
 
         # Created dictionaries list representing simulated event sequences
         # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))

@@ -71,28 +71,26 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
     """
 
     # Default parameters
-    default_params = {"process_num": hwk.PROCESS_NUM, "time_horizon": hwk.TIME_HORIZON}
+    default_params = {"process_num": hwk.PROCESS_NUM}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((dict_args['process_num'], dict_args['time_horizon']), dtype=np.float32)
+    simulated_events_seqs = np.zeros((dict_args['process_num'], ), dtype=object)
 
     for k in range(dict_args['process_num']):
         # Simulated Hawkes processes with the current simulation parameters
         # The results are stored in the k-th row of the simulated_events_seqs array
         _, t = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
         
-        # Length clipping to not exceed time horizon
-        seq_len = np.minimum(len(t), dict_args['time_horizon'])
-        simulated_events_seqs[k,:seq_len] = t[:seq_len]
+        simulated_events_seqs[k] = t
     
     # Written parameters to parquet file
-    write_parquet(simulated_events_seqs, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
+    write_parquet(simulated_events_seqs, columns=["simulations"], dtype=object, filename=filename)
 
     # Created dictionaries list representing simulated event sequences
-    # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(time_horizon)), simulated_events_seqs))
+    # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, _), simulated_events_seqs))
 
     # Written metrics to a CSV file
     # write_csv(seqs_list, filename=filename)
@@ -143,7 +141,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
                'AIC': round(hawkes_process.AIC, 3)}
 
     # Written parameters to parquet file
-    write_parquet(metrics, filename=filename)
+    write_parquet(metrics, dtype=np.float32, filename=filename)
     # Transformed times so that the first observation is at 0 and the last at 1
     [t_transform, interval_transform] = hawkes_process.t_trans() 
     # Predicted the Hawkes process 
