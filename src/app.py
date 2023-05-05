@@ -47,8 +47,6 @@ def main(args: Optional[argparse.Namespace] = None) -> None:
 
     model, train_losses, val_losses, val_y_pred, val_eta, val_mu = MLPTrainer(args=args).train_model(train_loader, val_loader, val_x, val_y)
     test_y_pred, test_loss, test_eta, test_mu = MLPTrainer(args=args).test_model(test_loader, test_y)
-
-    param_pred, alpha_pred, beta_pred = linear_model(train_x, train_y, val_x, args=args)
     
     
 

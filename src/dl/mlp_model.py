@@ -347,10 +347,10 @@ class MLPTrainer:
                        filename=f"{self.run_name}_losses.parquet", 
                        folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
         
-        write_parquet({'val_eta_true': val_y[:, 0], 
-                       'val_mu_true': val_y[:, 1],
-                       'val_eta_pred': val_y_pred[:, 0], 
-                       'val_mu_pred': val_y_pred[:, 1]}, 
+        write_parquet({'eta_true': val_y[:, 0], 
+                       'mu_true': val_y[:, 1],
+                       'eta_pred': val_y_pred[:, 0], 
+                       'mu_pred': val_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_predictions.parquet", 
                        folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
@@ -380,7 +380,7 @@ class MLPTrainer:
 
         # Initialized parameters
         index = 0
-        test_y_pred = torch.zeros((len(test_loader.dataset), 2), dtype=dtype)
+        test_y_pred = torch.zeros((len(test_y), 2), dtype=dtype)
 
         # Initialized Tensorboard
         writer = SummaryWriter(os.path.join(self.logdirun, self.test_dir, self.run_name))
@@ -405,10 +405,10 @@ class MLPTrainer:
             writer.add_scalars("Loss", {"Test Loss": self.test_loss}, index)
 
             # Added results histograms to TensorBoard
-            writer.add_histogram("Baseline intensity Histogram", test_y_pred[:, 1][index], index, bins="auto")
-            writer.add_histogram("Branching ratio Histogram", test_y_pred[:, 0][index], index, bins="auto")
-            writer.add_histogram("Prediction Histogram", test_y_pred[index], index, bins="auto")
-            writer.add_histogram("Validation Histogram", test_y[index], index, bins="auto")
+            writer.add_histogram("Baseline intensity Histogram", test_y_pred[:, 1], index, bins="auto")
+            writer.add_histogram("Branching ratio Histogram", test_y_pred[:, 0], index, bins="auto")
+            writer.add_histogram("Prediction Histogram", test_y_pred, index, bins="auto")
+            writer.add_histogram("Validation Histogram", test_y, index, bins="auto")
 
         # Computed average loss and predictions
         self.test_loss /= len(test_loader.dataset)
@@ -422,10 +422,10 @@ class MLPTrainer:
         writer.close()
 
         # Written parameters to parquet file
-        write_parquet({'test_eta_true': test_y[:, 0], 
-                       'test_mu_true': test_y[:, 1],
-                       'test_eta_pred': test_y_pred[:, 0], 
-                       'test_mu_pred': test_y_pred[:, 1]}, 
+        write_parquet({'eta_true': test_y[:, 0], 
+                       'mu_true': test_y[:, 1],
+                       'eta_pred': test_y_pred[:, 0], 
+                       'mu_pred': test_y_pred[:, 1]}, 
                        filename=f"{self.run_name}_predictions.parquet", 
                        folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 

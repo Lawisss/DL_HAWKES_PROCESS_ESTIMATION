@@ -102,7 +102,7 @@ def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset
                       "drop_last":  prep.DROP_LAST,
                       "num_workers": prep.NUM_WORKERS,
                       "pin_memory": prep.PIN_MEMORY}
-    
+
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
