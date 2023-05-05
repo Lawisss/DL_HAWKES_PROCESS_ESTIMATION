@@ -25,7 +25,7 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams_m
     Args:
         filename (str, optional): Filename to save hyperparameters in CSV file (default: "hawkes_hyperparams_mpi.parquet")
         root (int, optional): Rank of process to use as root for MPI communications (default: 0)
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         A tuple containing:

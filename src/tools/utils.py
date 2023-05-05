@@ -31,11 +31,11 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
     Args:
         data (List[dict]): Dictionaries list (dictionary = csv row)
-        filename (str, optional): csv filename
+        filename (str, optional): csv filename (default: '')
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
-        folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        folder (str, optional): Sub-folder name in results folder (default: "simulations")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         None: Function does not return anything
@@ -84,7 +84,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         mode (str, optional): Mode in which file is opened (default: 'r')
         encoding (str, optional): Character encoding used to read file (default: 'utf-8')
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         pd.DataFrame: File contents dataFrame
@@ -128,7 +128,7 @@ def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulation
         columns (bool, optional): Index column writing (default: None)
         dtype (str, optional): Dataframe values dtype (default: None)
         compression (str, optional): Column compression type (default: None)
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         None: Function does not return anything
@@ -161,7 +161,7 @@ def read_parquet(filename: str, folder: str = "simulations", args: Optional[Call
     Args:
         filename (str): Parquet filename
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         Pandas dataframe: File contents dataFrame
@@ -198,7 +198,7 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
         csv_file (str, optional): csv filename (default: "test.csv")
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         index (bool, optional): Write row names (default: False)
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         Pandas dataframe: File contents dataFrame
@@ -297,7 +297,7 @@ def profiling(func: Callable = None, enable: bool = False, args: Optional[Callab
     Args:
         func (Callable, optional): Function to be decorated
         enable (bool, optional): Flag indicating whether profiling is enabled or not (default: False)
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         Callable: Decorated function

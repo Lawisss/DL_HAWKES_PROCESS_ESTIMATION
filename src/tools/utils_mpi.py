@@ -24,11 +24,11 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
     Args:
         data (List[dict]): Dictionaries list, where each dictionary represents row in csv file
-        filename (str, optional): Filename to write data to. If not specified, empty string is used
+        filename (str, optional): Filename to write data to. If not specified, empty string is used (default: '')
         mode (str, optional): Mode to open file in (default: 'w' (write mode))
         encoding (str, optional): Encoding to use when writing to file (default: 'utf-8')
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         None: Function does not return anything
@@ -91,7 +91,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
         mode (str, optional): Mode used to open csv file (default: 'r')
         encoding (str, optional): Encoding used to read csv file (default: 'utf-8')
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
            pandas.DataFrame: DataFrame containing data from csv file

@@ -28,7 +28,7 @@ def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, st
         train_y (np.ndarray): Labels training data
         val_x (np.ndarray): Inputs validation data
         step_size (float, optional): Step size for alpha values (default: 0.05)
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         dict: Predicted alpha/beta values

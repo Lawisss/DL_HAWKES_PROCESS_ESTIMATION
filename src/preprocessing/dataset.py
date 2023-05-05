@@ -26,7 +26,7 @@ def split_data(x: np.ndarray, y: np.ndarray, args: Optional[Callable] = None) ->
     Args:
         x (np.ndarray): Input features
         y (np.ndarray): target values
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -90,7 +90,7 @@ def create_data_loaders(train_dataset: TensorDataset, val_dataset: TensorDataset
         train_dataset (TensorDataset): Training dataset
         val_dataset (TensorDataset): Validation dataset
         test_dataset (TensorDataset): Testing dataset
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         Tuple[DataLoader, DataLoader, DataLoader]: Data loaders for the training, validation, and testing sets

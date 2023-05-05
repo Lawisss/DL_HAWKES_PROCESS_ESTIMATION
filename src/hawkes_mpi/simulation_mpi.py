@@ -29,7 +29,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
     Args:
         params (TypedDict, optional): Parameters of Hawkes process (default: {"mu": 0.1, "alpha": 0.5, "beta": 10.0})
         root (int, optional): Rank of process to use as root for MPI communications (default: 0)
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         Tuple[hk.simulator, np.ndarray]: Hawkes process simulator and the simulated times
@@ -88,7 +88,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
         mu (np.ndarray): Base intensity of each Hawkes process
         root (int, optional): Rank of process to use as root for MPI communications (default: 0)
         filename (str, optional): Parquet filename to save results (default: "hawkes_simulations_mpi.parquet")
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         np.ndarray: Simulated event sequences of each Hawkes process
@@ -152,7 +152,7 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
         t (np.ndarray): Event times
         root (int, optional): Rank of process to use as root for MPI communications. (default: 0)
         filename (str, optional): Parquet filename for performance metrics. (default: "hawkes_estimation_mpi.parquet")
-        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
         Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]: A tuple containing the following items:
