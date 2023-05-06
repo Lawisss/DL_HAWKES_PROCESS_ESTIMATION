@@ -83,7 +83,7 @@ def convergence_rate(bench_losses: Union[np.ndarray, pd.DataFrame], mlp_losses: 
     axins.legend(axins.get_legend_handles_labels()[0], axins.get_legend_handles_labels()[1], loc="best", fontsize=10)
     ax.indicate_inset_zoom(axins, alpha=0)
 
-    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename))
+    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
 
 
@@ -135,5 +135,5 @@ def error_boxplots(bench_abs_error: np.ndarray, bench_rel_error: np.ndarray, mlp
     ax.set_ylabel('Error', fontsize=16, labelpad=15)
     ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
 
-    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename))
+    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
