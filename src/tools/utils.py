@@ -11,9 +11,7 @@ from functools import wraps, lru_cache
 from time import perf_counter, process_time
 from typing import List, Callable, TypedDict, Optional
 
-import pandas as pd
-import numpy as np
-import fastparquet as fp
+import polars as pl
 from torch.utils.tensorboard import SummaryWriter
 from torch.profiler import schedule, tensorboard_trace_handler
 from torch.profiler import profile
@@ -73,21 +71,19 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # csv file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> pd.DataFrame:
+def read_csv(filename: str, separator: str = ',', folder: str = "simulations", args: Optional[Callable] = None) -> pl.DataFrame:
 
     """
     Red csv file and loaded as DataFrame
 
     Args:
         filename (str): Filename to read
-        delimiter (str, optional): Delimiter used to separate fields in the file (default: ',')
-        mode (str, optional): Mode in which file is opened (default: 'r')
-        encoding (str, optional): Character encoding used to read file (default: 'utf-8')
+        separator (str, optional): Delimiter used to separate fields in the file (default: ',')
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
-        pd.DataFrame: File contents dataFrame
+        pl.DataFrame: File contents dataFrame
 
     Raises:
         IOError: Reading file error
@@ -100,15 +96,8 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     try:
-        with open(os.path.join(dict_args['dirpath'], folder, filename), mode=mode, encoding=encoding) as file:
-
-            # Extracted headers
-            headers = next(file).strip().split(delimiter)
-
-            # Extracted rows
-            rows = np.array(list(map(lambda line: line.strip().split(delimiter), file)), dtype=np.float32)
-                
-        return pd.DataFrame(rows, columns=headers, dtype=np.float32)
+        # Polars read_csv function
+        return pl.read_csv(os.path.join(dict_args['dirpath'], folder, filename), separator=separator)
     
     except IOError as e:
         print(f"Cannot read csv file: {e}.")
@@ -116,7 +105,7 @@ def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulations", columns: Optional[str] = None, dtype: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
+def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulations", schema: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
 
     """
     Written dictionary to parquet file
@@ -125,8 +114,7 @@ def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulation
         data (TypedDict): Saved dictionary
         filename (str, optional): Parquet filename (default: '')
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        columns (bool, optional): Index column writing (default: None)
-        dtype (str, optional): Dataframe values dtype (default: None)
+        schema (bool, optional): Index column writing (default: None)
         compression (str, optional): Column compression type (default: None)
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
@@ -145,15 +133,15 @@ def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulation
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        pd.DataFrame(data, columns=columns, dtype=dtype).to_parquet(os.path.join(dict_args['dirpath'], folder, filename), compression=compression)
-        
+        pl.DataFrame(data, schema).write_parquet(os.path.join(dict_args['dirpath'], folder, filename), compression=compression)
+
     except IOError as e:
         print(f"Cannot write parquet file: {e}")
 
 
 # Parquet file reading function
 
-def read_parquet(filename: str, folder: str = "simulations", args: Optional[Callable] = None) -> pd.DataFrame:
+def read_parquet(filename: str, folder: str = "simulations", args: Optional[Callable] = None) -> pl.DataFrame:
 
     """
     Red Parquet file and loaded as DataFrame
@@ -164,7 +152,7 @@ def read_parquet(filename: str, folder: str = "simulations", args: Optional[Call
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
-        Pandas dataframe: File contents dataFrame
+        Polars dataframe: File contents dataFrame
 
     Raises:
         IOError: Reading file error
@@ -177,10 +165,8 @@ def read_parquet(filename: str, folder: str = "simulations", args: Optional[Call
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     try:
-        # Load Parquet file using fastparquet
-        pf = fp.ParquetFile(os.path.join(dict_args['dirpath'], folder, filename))
-        # Converted it in dataframe
-        return pf.to_pandas(columns=pf.columns)
+        # Polars read_parquet function
+        return pl.read_parquet(os.path.join(dict_args['dirpath'], folder, filename))
 
     except IOError as e:
         print(f"Cannot read parquet file: {e}.")
@@ -188,7 +174,7 @@ def read_parquet(filename: str, folder: str = "simulations", args: Optional[Call
 
 # Parquet to csv function
 
-def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", folder: str = "simulations", index: bool = False, args: Optional[Callable] = None) -> None:
+def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", folder: str = "simulations", args: Optional[Callable] = None) -> None:
 
     """
     Parquet to CSV conversion function
@@ -197,11 +183,10 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
         parquet_file (str, optional): Parquet filename (default: "test.parquet")
         csv_file (str, optional): csv filename (default: "test.csv")
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        index (bool, optional): Write row names (default: False)
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
-        Pandas dataframe: File contents dataFrame
+        None: Function does not return anything
 
     """
 
@@ -212,9 +197,9 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Red parquet file
-    df = pd.read_parquet(os.path.join(dict_args['dirpath'], folder, parquet_file))
-    # Writtent csv file
-    df.to_csv(os.path.join(dict_args['dirpath'], folder, csv_file), index=index)
+    df = pl.read_parquet(os.path.join(dict_args['dirpath'], folder, parquet_file))
+    # Written csv file
+    df.write_csv(os.path.join(dict_args['dirpath'], folder, csv_file))
 
 
 # Time measurement function
