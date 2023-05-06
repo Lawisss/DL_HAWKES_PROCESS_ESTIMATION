@@ -59,7 +59,7 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: 
     mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
 
     # Written parameters to parquet file
-    write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "mu": mu}), filename=filename)
+    write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "mu": mu}).with_columns(pl.col(pl.Float64).cast(pl.Float32)), filename=filename)
     
     # Created dictionaries list containing the parameters
     # params = list(map(lambda a, b, m: {"alpha": a, "beta": b, "mu": m}, alpha, beta, mu)) 

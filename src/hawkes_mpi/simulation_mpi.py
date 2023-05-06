@@ -11,6 +11,7 @@ from functools import partial
 from typing import Tuple, TypedDict, Optional, Callable
 
 import numpy as np
+import polars as pl
 import Hawkes as hk
 from mpi4py import MPI
 
@@ -114,7 +115,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
     chunk_beta = beta[rank * chunk_num:(rank + 1) * chunk_num]
 
     # Initialized array to store Hawkes processes (Pre-allocate memory)
-    simulated_events_seqs = np.zeros((dict_args['process_num'], ), dtype=object)
+    simulated_events_seqs = np.zeros((dict_args['process_num'], ))
 
     for k in range(chunk_num):
         # Simulated Hawkes processes with current simulation parameters
@@ -131,7 +132,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
         simulated_events_seqs = np.concatenate(simulated_events_seqs)
 
         # Written parameters to parquet file
-        write_parquet(simulated_events_seqs, columns=["simulations"], dtype=object, filename=filename)
+        write_parquet(pl.DataFrame(simulated_events_seqs), filename=filename)
 
         # Created dictionaries list representing simulated event sequences
         # seqs_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), simulated_events_seqs))
@@ -207,7 +208,7 @@ def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_esti
                    'AIC': round(hawkes_process.AIC, 3)}
         
         # Written parameters to parquet file
-        write_parquet(metrics, filename=filename)
+        write_parquet(pl.DataFrame(metrics), filename=filename)
         # Transformed times so that the first observation is at 0 and the last at 1
         [t_transform, interval_transform] = hawkes_process.t_trans() 
 
