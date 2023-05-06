@@ -10,6 +10,7 @@ File containing parallelized Hawkes process hyper-parameters generation function
 from typing import Tuple, Optional, Callable
 
 import numpy as np
+import polars as pl
 from mpi4py import MPI
 
 import variables.hawkes_var as hwk
@@ -83,7 +84,7 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams_m
 
     # Written parameters to parquet file
     if rank == 0:
-        write_parquet({"alpha": alpha, "beta": beta, "mu": mu}, filename=filename)
+        write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "mu": mu}), filename=filename)
         
         # Written CSV file on the root process
         # params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]

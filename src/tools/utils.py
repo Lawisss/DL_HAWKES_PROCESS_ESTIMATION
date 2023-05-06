@@ -105,17 +105,16 @@ def read_csv(filename: str, separator: str = ',', folder: str = "simulations", a
 
 # Parquet file writing function
 
-def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulations", schema: Optional[str] = None, compression: Optional[str] = None, args: Optional[Callable] = None) -> None:
+def write_parquet(df: pl.DataFrame, filename: str = '', folder: str = "simulations", compression: Optional[str] = "zstd", args: Optional[Callable] = None) -> None:
 
     """
     Written dictionary to parquet file
 
     Args:
-        data (TypedDict): Saved dictionary
+        df (pl.DataFrame): Saved polars dataframe
         filename (str, optional): Parquet filename (default: '')
         folder (str, optional): Sub-folder name in results folder (default: 'simulations')
-        schema (bool, optional): Index column writing (default: None)
-        compression (str, optional): Column compression type (default: None)
+        compression (str, optional): Column compression type (default: "zstd")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
@@ -133,7 +132,7 @@ def write_parquet(data: TypedDict, filename: str = '', folder: str = "simulation
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        pl.DataFrame(data, schema).write_parquet(os.path.join(dict_args['dirpath'], folder, filename), compression=compression)
+        df.write_parquet(os.path.join(dict_args['dirpath'], folder, filename), compression=compression)
 
     except IOError as e:
         print(f"Cannot write parquet file: {e}")
