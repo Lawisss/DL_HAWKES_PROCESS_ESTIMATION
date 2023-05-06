@@ -320,7 +320,7 @@ class MLPTrainer:
 
                 # Added losses in TensorBoard at each epoch
                 writer.add_scalars("Loss", {"Training": self.train_losses[epoch], "Validation": self.val_losses[epoch]}, epoch)
-                writer.add_scalars("Log Loss", {"Training": np.log10(self.train_losses[epoch] - np.min(self.train_losses) + 1e-20), "Validation":  np.log10(self.val_losses[epoch] - np.min(self.val_losses) + 1e-20)}, epoch)
+                writer.add_scalars("Log Loss", {"Training": np.log10(self.train_losses[epoch] + 1e-20), "Validation":  np.log10(self.val_losses[epoch] + 1e-20)}, epoch)
                 
         # Added model graph to TensorBoard
         writer.add_graph(self.model, val_x)
