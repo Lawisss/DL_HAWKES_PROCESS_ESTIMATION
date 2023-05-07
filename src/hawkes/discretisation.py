@@ -8,7 +8,7 @@ File containing aggregated Hawkes process functions (Hawkes process discrete con
 """
 
 from functools import partial
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 
 import numpy as np
 import polars as pl
@@ -19,13 +19,13 @@ from tools.utils import write_parquet
 
 # Jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: np.ndarray, filename: str = 'binned_hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def discretise(jump_times: List, filename: str = 'binned_hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Discretized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
 
     Args:
-        jump_times (np.ndarray): Jump times for Hawkes process simulation
+        jump_times (List): Jump times for Hawkes process simulation
         filename (str, optional): Filename to write histogram data in parquet format (default: "binned_hawkes_simulations.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 

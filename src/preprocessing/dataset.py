@@ -12,6 +12,7 @@ from typing import Tuple, Optional, Callable
 import torch
 import numpy as np
 import pandas as pd
+import polars as pl
 from torch.utils.data import DataLoader, TensorDataset
 
 import variables.prep_var as prep
@@ -39,8 +40,8 @@ def split_data(x: np.ndarray, y: np.ndarray, args: Optional[Callable] = None) ->
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Converted data
-    if isinstance(x, pd.DataFrame): x = torch.tensor(x.values, dtype=torch.float32).to(dict_args['device'])
-    if isinstance(y, pd.DataFrame): y = torch.tensor(y.values, dtype=torch.float32).to(dict_args['device'])
+    if isinstance(x, (pl.DataFrame, pd.DataFrame)): x = torch.tensor(x.to_numpy(), dtype=torch.float32).to(dict_args['device'])
+    if isinstance(y, (pl.DataFrame, pd.DataFrame)): y = torch.tensor(y.to_numpy(), dtype=torch.float32).to(dict_args['device'])
 
     # Initialized sizing
     val_size = int(len(x) * dict_args['val_ratio'])

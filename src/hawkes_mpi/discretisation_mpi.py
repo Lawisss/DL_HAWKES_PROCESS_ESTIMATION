@@ -8,7 +8,7 @@ File containing parallelized Aggregated Hawkes process functions (Hawkes process
 """
 
 from functools import partial
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 
 import numpy as np
 import polars as pl
@@ -20,13 +20,13 @@ from tools.utils import write_parquet
 
 # Parallelized jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_hawkes_simulations_mpi.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def discretise(jump_times: List, root: int = 0, filename: str = 'binned_hawkes_simulations_mpi.parquet', args: Optional[Callable] = None) -> np.ndarray:
 
     """
     Discretized parallelized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
 
     Args:
-        jump_times (np.ndarray): Jump times for Hawkes process simulation
+        jump_times (List): Jump times for Hawkes process simulation
         root (int, optional): Rank of process to use as root for MPI communications. (default: 0)
         filename (str, optional): Filename to write histogram data in parquet format (default: "binned_hawkes_simulations_mpi.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
