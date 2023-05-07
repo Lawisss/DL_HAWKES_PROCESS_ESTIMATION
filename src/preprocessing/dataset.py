@@ -7,7 +7,7 @@ File containing DL preprocessing function
 
 """
 
-from typing import Tuple, Optional, Callable
+from typing import Tuple, Optional, Callable, Union
 
 import torch
 import numpy as np
@@ -19,14 +19,14 @@ import variables.prep_var as prep
 
 # Splitting function
 
-def split_data(x: np.ndarray, y: np.ndarray, args: Optional[Callable] = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def split_data(x: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y: Union[np.ndarray, pl.DataFrame, pd.DataFrame], args: Optional[Callable] = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
 
     """
     Splitted data into train, validation, and test sets
 
     Args:
-        x (np.ndarray): Input features
-        y (np.ndarray): target values
+        x (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Input features
+        y (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): target values
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
@@ -40,9 +40,9 @@ def split_data(x: np.ndarray, y: np.ndarray, args: Optional[Callable] = None) ->
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Converted data
-    if isinstance(x, (pl.DataFrame, pd.DataFrame)): x = torch.tensor(x.to_numpy(), dtype=torch.float32).to(dict_args['device'])
-    if isinstance(y, (pl.DataFrame, pd.DataFrame)): y = torch.tensor(y.to_numpy(), dtype=torch.float32).to(dict_args['device'])
-
+    x = torch.tensor(x.to_numpy(), dtype=torch.float32).to(dict_args['device']) if not isinstance(x, np.ndarray) else x
+    y = torch.tensor(y.to_numpy(), dtype=torch.float32).to(dict_args['device']) if not isinstance(y, np.ndarray) else y
+    
     # Initialized sizing
     val_size = int(len(x) * dict_args['val_ratio'])
     test_size = int(len(x) * dict_args['test_ratio'])

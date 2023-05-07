@@ -12,6 +12,7 @@ from typing import Union, Callable, Optional
 
 import numpy as np
 import pandas as pd
+import polars as pl
 import scienceplots
 import matplotlib.pyplot as plt
 
@@ -20,14 +21,14 @@ import variables.prep_var as prep
 
 # Convergence rate comparison function
 
-def convergence_rate(bench_losses: Union[np.ndarray, pd.DataFrame], mlp_losses: Union[np.ndarray, pd.DataFrame], folder: str = "photos", filename: str = "convergence_rate.pdf", args: Optional[Callable] = None) -> None:
+def convergence_rate(bench_losses: Union[np.ndarray, pl.DataFrame, pd.DataFrame], mlp_losses: Union[np.ndarray, pl.DataFrame, pd.DataFrame], folder: str = "photos", filename: str = "convergence_rate.pdf", args: Optional[Callable] = None) -> None:
 
     """
     Plotted convergence rate (linear/log) for benchmark and MLP models
 
     Args:
-        bench_losses (Union[np.ndarray, pd.DataFrame]): Benchmark model losses
-        mlp_losses (Union[np.ndarray, pd.DataFrame]): MLP model losses
+        bench_losses (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Benchmark model losses
+        mlp_losses (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): MLP model losses
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "convergence_rate.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -37,8 +38,8 @@ def convergence_rate(bench_losses: Union[np.ndarray, pd.DataFrame], mlp_losses: 
     """
 
     # Checked types
-    bench_losses = bench_losses.values if not isinstance(bench_losses, np.ndarray) else bench_losses
-    mlp_losses = mlp_losses.values if not isinstance(mlp_losses, np.ndarray) else mlp_losses
+    bench_losses = bench_losses.to_numpy() if not isinstance(bench_losses, np.ndarray) else bench_losses
+    mlp_losses = mlp_losses.to_numpy() if not isinstance(mlp_losses, np.ndarray) else mlp_losses
 
     # Default parameters
     default_params = {"dirpath": prep.DIRPATH}
