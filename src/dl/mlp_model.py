@@ -297,7 +297,7 @@ class MLPTrainer:
         # Displayed model summary
         print(self.summary_model())
 
-        # Start training
+        # Started training
         with tqdm(total=self.max_epochs, desc='Training Progress', colour='green') as pbar:
             
             for epoch in range(self.max_epochs):

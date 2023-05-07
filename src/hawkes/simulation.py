@@ -12,6 +12,7 @@ from typing import Tuple, TypedDict, Optional, Callable
 import numpy as np
 import polars as pl
 import Hawkes as hk
+from tqdm import tqdm
 
 import variables.hawkes_var as hwk
 from tools.utils import write_parquet
@@ -77,18 +78,27 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
-    # Initialized an empty dataframe to store simulated sequences
+    # Initialized empty dataframe to store simulations
     simulated_events_seqs = pl.DataFrame({"simulations": pl.Series("", dtype=pl.List(pl.Float64))})
 
-    for k in range(dict_args['process_num']):
-        # Simulated Hawkes processes with the current simulation parameters
-        # The results are stored in the k-th row of the simulated_events_seqs array
-        _, t = hawkes_simulation(params={"mu": mu[k], "alpha": alpha[k], "beta": beta[k]})
-        
-        # Added simulations to list and concatenated
-        series = pl.Series("simulations", [t]).to_list()
-        simulated_events_seqs = pl.concat([simulated_events_seqs, pl.DataFrame({"simulations": series})], how="vertical")
+    # Started simulations
+    with tqdm(total=dict_args['process_num'], desc='Simulation Progress', colour='green') as pbar:
 
+        for i in range(dict_args['process_num']):
+
+            # Simulated Hawkes processes with the current simulation parameters
+            _, t = hawkes_simulation(params={"mu": mu[i], "alpha": alpha[i], "beta": beta[i]})
+            
+            # Listed and concatenated simulations
+            series = pl.Series("simulations", [t]).to_list()
+            simulated_events_seqs = pl.concat([simulated_events_seqs, pl.DataFrame({"simulations": series})], how="vertical")
+
+            # Updated progress bar description
+            pbar.set_description(f"Process {i + 1}/{dict_args['process_num']} - Events: {len(t)}")
+
+            # Updated progress bar
+            pbar.update(1)
+        
     # Written parquet file
     write_parquet(simulated_events_seqs.with_columns(pl.col(pl.List(pl.Float64)).cast(pl.List(pl.Float32))), filename=filename)
 
@@ -98,7 +108,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
     # Written metrics to a CSV file
     # write_csv(seqs_list, filename=filename)
 
-    return simulated_events_seqs
+    return simulated_events_seqs.to_numpy()
 
 
 # Estimated Hawkes process
