@@ -11,6 +11,7 @@ import os
 from typing import Tuple, Optional, Callable
 
 import numpy as np
+import polars as pl
 
 from dl.mlp_model import MLPTrainer
 import variables.eval_var as eval
@@ -89,7 +90,7 @@ def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, st
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Written parameters to parquet file
-    write_parquet({"alpha_pred_avg": alpha_pred, "beta_pred_avg": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}, 
+    write_parquet(pl.DataFrame({"alpha_pred_avg": alpha_pred, "beta_pred_avg": beta_pred, "val_eta_pred": val_eta_pred, "val_mu_pred": val_mu_pred}), 
                   filename=f"{dict_args['run_name']}_linear_predictions.parquet", folder=os.path.join(dict_args['logdirun'], dict_args['test_dir'], dict_args['run_name']))
 
     return np.array([alpha_pred, beta_pred, val_eta_pred, val_mu_pred], dtype=np.float32).T, alpha_pred, beta_pred 

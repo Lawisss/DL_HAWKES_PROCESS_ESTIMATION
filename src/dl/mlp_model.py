@@ -13,6 +13,7 @@ from typing import Tuple, Union, Optional, Callable
 
 import torch
 import numpy as np
+import polars as pl
 import torch.nn as nn
 from tqdm import tqdm
 import torch.optim as optim
@@ -342,17 +343,17 @@ class MLPTrainer:
         writer.close()
         
         # Written parameters to Parquet file
-        write_parquet({'train_losses': self.train_losses, 
-                       'val_losses': self.val_losses}, 
-                       filename=f"{self.run_name}_losses.parquet", 
-                       folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
+        write_parquet(pl.DataFrame({'train_losses': self.train_losses, 
+                                    'val_losses': self.val_losses}), 
+                                    filename=f"{self.run_name}_losses.parquet", 
+                                    folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
         
-        write_parquet({'eta_true': val_y[:, 0], 
-                       'mu_true': val_y[:, 1],
-                       'eta_pred': val_y_pred[:, 0], 
-                       'mu_pred': val_y_pred[:, 1]}, 
-                       filename=f"{self.run_name}_predictions.parquet", 
-                       folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
+        write_parquet(pl.DataFrame({'eta_true': val_y[:, 0], 
+                                    'mu_true': val_y[:, 1],
+                                    'eta_pred': val_y_pred[:, 0], 
+                                    'mu_pred': val_y_pred[:, 1]}), 
+                                    filename=f"{self.run_name}_predictions.parquet", 
+                                    folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
         return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta_pred, val_mu_pred
     
@@ -422,11 +423,11 @@ class MLPTrainer:
         writer.close()
 
         # Written parameters to parquet file
-        write_parquet({'eta_true': test_y[:, 0], 
-                       'mu_true': test_y[:, 1],
-                       'eta_pred': test_y_pred[:, 0], 
-                       'mu_pred': test_y_pred[:, 1]}, 
-                       filename=f"{self.run_name}_predictions.parquet", 
-                       folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
+        write_parquet(pl.DataFrame({'eta_true': test_y[:, 0], 
+                                    'mu_true': test_y[:, 1],
+                                    'eta_pred': test_y_pred[:, 0], 
+                                    'mu_pred': test_y_pred[:, 1]}), 
+                                    filename=f"{self.run_name}_predictions.parquet", 
+                                    folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
         return test_y_pred.numpy().astype(np.float32), self.test_loss, self.test_eta_pred, self.test_mu_pred

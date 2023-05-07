@@ -11,18 +11,19 @@ from typing import Tuple, Union
 
 import numpy as np
 import pandas as pd
+import polars as pl
 
 
 # Absolute / Relative error function
 
-def compute_errors(y_test: Union[np.ndarray, pd.DataFrame], y_pred: Union[np.ndarray, pd.DataFrame], model_name: str = "Benchmark") -> Tuple[np.ndarray, np.ndarray]:
+def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: str = "Benchmark") -> Tuple[np.ndarray, np.ndarray]:
     
     """
     Computed absolute error and relative error between true and predicted values
 
     Args:
-        y_test (Union[np.ndarray, pd.DataFrame]): True values
-        y_pred (Union[np.ndarray, pd.DataFrame]): Predicted values
+        y_test (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): True values
+        y_pred (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Predicted values
         model_name (str, optional): Model name (default: "Benchmark")
 
     Returns:
@@ -30,8 +31,8 @@ def compute_errors(y_test: Union[np.ndarray, pd.DataFrame], y_pred: Union[np.nda
     """
 
     # Checked types
-    y_test = y_test.values if not isinstance(y_test, np.ndarray) else y_test
-    y_pred = y_pred.values if not isinstance(y_pred, np.ndarray) else y_pred
+    y_test = y_test.to_numpy() if not isinstance(y_test, np.ndarray) else y_test
+    y_pred = y_pred.to_numpy() if not isinstance(y_pred, np.ndarray) else y_pred
 
     # Computed absolute/relative error
     abs_error = np.abs(y_pred - y_test)
