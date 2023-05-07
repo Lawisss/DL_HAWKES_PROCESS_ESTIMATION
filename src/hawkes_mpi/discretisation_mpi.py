@@ -11,6 +11,7 @@ from functools import partial
 from typing import Optional, Callable
 
 import numpy as np
+import polars as pl
 from mpi4py import MPI
 
 import variables.hawkes_var as hwk
@@ -64,7 +65,7 @@ def discretise(jump_times: np.ndarray, root: int = 0, filename: str = 'binned_ha
 
     # Written parameters to parquet file
     if rank == 0:
-        write_parquet(counts, columns=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str), filename=filename)
+        write_parquet(pl.DataFrame(counts, schema=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str).tolist()), filename=filename)
 
         # Created dictionaries list representing binned simulated event sequences
         # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(hwk.TIME_HORIZON)), counts))
