@@ -49,14 +49,8 @@ def discretise(jump_times: List, filename: str = 'binned_hawkes_simulations.parq
     for j, h in enumerate(jump_times):
         counts[j], _ = np.histogram(h, bins=np.linspace(0, dict_args['time_horizon'], num_bins + 1))
 
-    # Written parameters to parquet file
+    # Written parquet file
     write_parquet(pl.DataFrame(counts, schema=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str).tolist()), filename=filename)
-
-    # Created dictionaries list representing binned simulated event sequences
-    # counts_list = list(map(partial(lambda _, row: {str(idx): x for idx, x in enumerate(row)}, range(time_horizon)), counts))
-
-    # Written counts to CSV file
-    # write_csv(counts_list, filename=filename)
     
     return counts
 
