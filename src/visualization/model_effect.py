@@ -89,13 +89,13 @@ import variables.prep_var as prep
 #     plt.show()
 
 
-def convergence_rate(losses_list: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]], models: Optional[List[str]] = ["Benchmark", "MLP"], colors: Optional[List[str]] = ["purple", "brown", "blue", "red"], folder: str = "photos", filename: Optional[str] = "convergence_rate.pdf", args: Optional[Callable] = None) -> None:
+def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]], models: Optional[List[str]] = ["Benchmark", "MLP"], colors: Optional[List[str]] = ["purple", "brown", "blue", "red"], folder: str = "photos", filename: Optional[str] = "convergence_rate.pdf", args: Optional[Callable] = None) -> None:
     
     """
     Plotted convergence rate (linear/log) for benchmark and MLP models
 
     Args:
-        losses_list (List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]): Models losses
+        losses (List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]): Models losses
         models (Optional[List[str]], optional): Models names (default: ["Benchmark", "MLP"])
         colors (Optional[List[str]]): Colors names (default: ["purple", "brown", "blue", "red"])
         folder (str, optional): Sub-folder name in results folder (default: "photos")
@@ -121,20 +121,20 @@ def convergence_rate(losses_list: List[Union[np.ndarray, pl.DataFrame, pd.DataFr
     ax.minorticks_on()
     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    for i, losses in enumerate(losses_list):
+    for i, loss in enumerate(losses):
 
-        losses = losses.to_numpy() if not isinstance(losses, np.ndarray) else losses
+        loss = loss.to_numpy() if not isinstance(loss, np.ndarray) else loss
 
-        ax.plot(losses[:, 0], label=models[i] + ' Train Loss', color=colors[i])
-        ax.plot(losses[:, 1], label=models[i] + ' Validation Loss', color=colors[i+1])
+        ax.plot(loss[:, 0], label=models[i] + ' Train Loss', color=colors[i])
+        ax.plot(loss[:, 1], label=models[i] + ' Validation Loss', color=colors[i+1])
 
         # Inset plot
         axins = ax.inset_axes([0.5, 0.30, 0.42, 0.48], transform=ax.transAxes)
 
-        axins.semilogy(losses[:, 0], label=models[i] + ' Train Loss', color=colors[i])
-        axins.semilogy(losses[:, 1], label=models[i] + ' Validation Loss', color=colors[i+1])
+        axins.semilogy(loss[:, 0], label=models[i] + ' Train Loss', color=colors[i])
+        axins.semilogy(loss[:, 1], label=models[i] + ' Validation Loss', color=colors[i+1])
 
-        axins.set_xlim([0, len(losses[:, 0])])
+        axins.set_xlim([0, len(loss[:, 0])])
         axins.set_ylim([0.08, 0.8])
         axins.tick_params(axis='both', which='major', labelsize=12, pad=6)
 
@@ -156,14 +156,13 @@ def convergence_rate(losses_list: List[Union[np.ndarray, pl.DataFrame, pd.DataFr
 
 # Error boxplots function
 
-def error_boxplots(bench_eta_errors: np.ndarray, bench_mu_errors: np.ndarray, mlp_eta_errors: np.ndarray, mlp_mu_errors: np.ndarray, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
+def error_boxplots(errors: List[np.ndarray] = None, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
 
     """
     Plotted absolute/relative error boxplots for benchmark and MLP models
 
     Args:
-        bench_eta_errors (np.ndarray): Benchmark model eta error / relative error
-        bench_mu_errors (np.ndarray): Benchmark model mu error / relative error
+        errors (List[np.ndarray]): Models eta and mu error / relative error
         mlp_eta_errors (np.ndarray): MLP model eta error / relative error
         mlp_mu_errors (np.ndarray): MLP model mu error / relative error
         folder (str, optional): Sub-folder name in results folder (default: "photos")
@@ -181,11 +180,7 @@ def error_boxplots(bench_eta_errors: np.ndarray, bench_mu_errors: np.ndarray, ml
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Regrouped errors
-    eta_error = list(map(np.ndarray.flatten, [bench_eta_errors[:, 0], mlp_eta_errors[:, 0]]))
-    mu_error = list(map(np.ndarray.flatten, [bench_mu_errors[:, 0], mlp_mu_errors[:, 0]]))
-
-    eta_rel_error = list(map(np.ndarray.flatten, [bench_eta_errors[:, 1], mlp_eta_errors[:, 1]]))
-    mu_rel_error = list(map(np.ndarray.flatten, [bench_mu_errors[:, 1], mlp_mu_errors[:, 1]]))
+    error_groups = list(map(lambda x: list(map(np.ndarray.flatten, [x[:, 0], x[:, 1], x[:, 2], x[:, 3]])), errors))
 
     # Built boxplots
     plt.style.use(['science', 'ieee'])
