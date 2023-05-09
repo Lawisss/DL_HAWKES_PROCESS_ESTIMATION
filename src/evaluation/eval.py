@@ -14,7 +14,7 @@ import pandas as pd
 import polars as pl
 
 
-# Absolute / Relative error function
+# Error / Relative error function
 
 def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: str = "Benchmark") -> Tuple[np.ndarray, np.ndarray]:
     
@@ -27,7 +27,7 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
         model_name (str, optional): Model name (default: "Benchmark")
 
     Returns:
-        Absolute error and relative error
+        Branching ratio / Baseline intensity error and relative error
     """
 
     # Checked types
@@ -35,10 +35,19 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
     y_pred = y_pred.to_numpy() if not isinstance(y_pred, np.ndarray) else y_pred
 
     # Computed absolute/relative error
-    abs_error = np.abs(y_pred - y_test)
-    relative_error = abs_error / y_test
+    eta_error = y_pred[:, 0] - y_test[:, 0]
+    mu_error = y_pred[:, 1] - y_test[:, 1]
+
+    eta_rel_error = eta_error / y_test[:, 0]
+    mu_rel_error = mu_error / y_test[:, 1]
 
     # Printed MAE and MRE
-    print(f'{model_name} - MAE: {np.mean(abs_error):.4f}, MRE: {np.mean(relative_error):.4f}')
+    #print(f'{model_name} - Branching Ratio Error Average (η): {np.mean(eta_error):.4f}, Baseline Intensity Error Average (µ): {np.mean(mu_error):.4f}, Branching Ratio MRE (η): {np.mean(eta_rel_error):.4f}, Baseline Intensity MRE (µ): {np.mean(mu_rel_error):.4f}')
 
-    return abs_error, relative_error
+    print(pl.DataFrame({"Model": model_name,
+                        "Error Average (η)": round(np.mean(eta_error), 4),
+                        "Error Average (μ)": round(np.mean(mu_error), 4),
+                        "MRE (η)": round(np.mean(eta_rel_error), 4),
+                        "MRE (μ)": round(np.mean(mu_rel_error), 4)}).with_columns(pl.col(pl.Float64).cast(pl.Float32)))
+    
+    return np.column_stack((eta_error, eta_rel_error)), np.column_stack((mu_error, mu_rel_error))

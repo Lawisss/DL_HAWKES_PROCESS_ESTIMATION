@@ -129,7 +129,7 @@ def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet"
                'AIC': round(hawkes_process.AIC, 3)}
 
     # Written parameters to parquet file
-    write_parquet(pl.DataFrame(metrics).with_columns(pl.col(pl.Float64).cast(pl.Float32)), filename=filename)
+    write_parquet(pl.DataFrame(metrics), filename=filename)
     # Transformed times so that the first observation is at 0 and the last at 1
     [t_transform, interval_transform] = hawkes_process.t_trans() 
     # Predicted the Hawkes process 

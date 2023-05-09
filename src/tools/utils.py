@@ -9,7 +9,7 @@ File containing all utils functions used in other modules (python files)
 import os 
 from functools import wraps, lru_cache
 from time import perf_counter, process_time
-from typing import List, Callable, TypedDict, Optional
+from typing import List, Callable, Optional
 
 import polars as pl
 from torch.utils.tensorboard import SummaryWriter
@@ -22,7 +22,7 @@ import variables.prep_var as prep
 
 # csv file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> None:
+def write_csv(data: List[dict], filename: Optional[str] = '', mode: Optional[str] = 'w', encoding: Optional[str] = 'utf-8', folder: Optional[str] = "simulations", args: Optional[Callable] = None) -> None:
 
     """
     Written dictionaries list to a csv file
@@ -71,7 +71,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # csv file reading function
 
-def read_csv(filename: str, separator: str = ',', folder: str = "simulations", args: Optional[Callable] = None) -> pl.DataFrame:
+def read_csv(filename: str, separator: Optional[str] = ',', folder: Optional[str] = "simulations", args: Optional[Callable] = None) -> pl.DataFrame:
 
     """
     Red csv file and loaded as DataFrame
@@ -105,7 +105,7 @@ def read_csv(filename: str, separator: str = ',', folder: str = "simulations", a
 
 # Parquet file writing function
 
-def write_parquet(df: pl.DataFrame, filename: str = '', folder: str = "simulations", compression: Optional[str] = "zstd", args: Optional[Callable] = None) -> None:
+def write_parquet(df: pl.DataFrame, filename: Optional[str] = '', folder: Optional[str] = "simulations", compression: Optional[str] = "zstd", args: Optional[Callable] = None) -> None:
 
     """
     Written dictionary to parquet file
@@ -132,7 +132,7 @@ def write_parquet(df: pl.DataFrame, filename: str = '', folder: str = "simulatio
 
     try:
         # Write parquet file from dataframe (index/compression checked)
-        df.write_parquet(os.path.join(dict_args['dirpath'], folder, filename), compression=compression)
+        df.with_columns(pl.col(pl.Float64).cast(pl.Float32)).write_parquet(os.path.join(dict_args['dirpath'], folder, filename), compression=compression)
 
     except IOError as e:
         print(f"Cannot write parquet file: {e}")
@@ -140,7 +140,7 @@ def write_parquet(df: pl.DataFrame, filename: str = '', folder: str = "simulatio
 
 # Parquet file reading function
 
-def read_parquet(filename: str, folder: str = "simulations", args: Optional[Callable] = None) -> pl.DataFrame:
+def read_parquet(filename: str, folder: Optional[str] = "simulations", args: Optional[Callable] = None) -> pl.DataFrame:
 
     """
     Red Parquet file and loaded as DataFrame
@@ -173,7 +173,7 @@ def read_parquet(filename: str, folder: str = "simulations", args: Optional[Call
 
 # Parquet to csv function
 
-def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv", folder: str = "simulations", args: Optional[Callable] = None) -> None:
+def parquet_to_csv(parquet_file: Optional[str] = "test.parquet", csv_file: Optional[str] = "test.csv", folder: Optional[str] = "simulations", args: Optional[Callable] = None) -> None:
 
     """
     Parquet to CSV conversion function
@@ -197,19 +197,20 @@ def parquet_to_csv(parquet_file: str = "test.parquet", csv_file: str = "test.csv
 
     # Red parquet file
     df = pl.read_parquet(os.path.join(dict_args['dirpath'], folder, parquet_file))
+
     # Written csv file
-    df.write_csv(os.path.join(dict_args['dirpath'], folder, csv_file))
+    df.with_columns(pl.col(pl.Float64).cast(pl.Float32)).write_csv(os.path.join(dict_args['dirpath'], folder, csv_file))
 
 
 # Time measurement function
 
-def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: bool = False) -> Callable:
+def timer(func: Optional[Callable] = None, n_iter: Optional[int] = 10, repeats: Optional[int] = 7, returned: Optional[bool] = False) -> Callable:
 
     """
     Decorator function for time measurement
 
     Args:
-        func (Callable): Function to be decorated
+        func (Callable, optional): Function to be decorated
         n_iter (int, optional): Iterations to perform (default: 10)
         repeats (int, optional): Times to repeat iterations. (default: 7)
         returned (bool, optional): Flag indicating whether return function results or not (default: False)
@@ -273,7 +274,7 @@ def timer(func: Callable = None, n_iter: int = 10, repeats: int = 7, returned: b
 
 # Pytorch Tensorboard Profiling 
 
-def profiling(func: Callable = None, enable: bool = False, args: Optional[Callable] = None) -> Callable:
+def profiling(func: Optional[Callable] = None, enable: Optional[bool] = False, args: Optional[Callable] = None) -> Callable:
 
     """
     Decorator function for profiling models using TensorBoard

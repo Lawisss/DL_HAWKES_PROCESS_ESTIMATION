@@ -17,7 +17,7 @@ import variables.prep_var as prep
 
 # Parallelized csv file writing function
 
-def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> None:
+def write_csv(data: List[dict], filename: Optional[str] = '', mode: Optional[str] = 'w', encoding: Optional[str] = 'utf-8', folder: Optional[str] = "simulations", args: Optional[Callable] = None) -> None:
 
     """
     Written dictionaries list to csv file in parallel using MPI
@@ -80,7 +80,7 @@ def write_csv(data: List[dict], filename: str = '', mode: str = 'w', encoding: s
 
 # Parallelized csv file reading function
 
-def read_csv(filename: str, delimiter: str = ',', mode: str = 'r', encoding: str = 'utf-8', folder: str = "simulations", args: Optional[Callable] = None) -> pd.DataFrame:
+def read_csv(filename: str, delimiter: Optional[str] = ',', mode: Optional[str] = 'r', encoding: Optional[str] = 'utf-8', folder: Optional[str] = "simulations", args: Optional[Callable] = None) -> pd.DataFrame:
 
     """
     Red csv file in parallel using MPI

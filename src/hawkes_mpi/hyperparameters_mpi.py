@@ -18,7 +18,7 @@ from tools.utils import write_parquet
 
 # Parallelized generated Hawkes process hyper-parameters (alpha, beta, mu)
 
-def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams_mpi.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def hyper_params_simulation(root: Optional[int] = 0, filename: Optional[str] = "hawkes_hyperparams_mpi.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process hyperparameters
@@ -85,9 +85,5 @@ def hyper_params_simulation(root: int = 0, filename: str = "hawkes_hyperparams_m
     # Written parameters to parquet file
     if rank == 0:
         write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "mu": mu}), filename=filename)
-        
-        # Written CSV file on the root process
-        # params = [{"alpha": a, "beta": b, "mu": m} for a, b, m in zip(alpha, beta, mu)]
-        # write_csv(params, filename=filename)
 
         return np.array([alpha, beta, mu], dtype=np.float32).T, alpha, beta, mu

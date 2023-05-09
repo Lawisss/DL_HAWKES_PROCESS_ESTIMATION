@@ -29,9 +29,10 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: 
 
     Returns:
         A tuple containing:
-        - Alpha, beta, and mu parameters for each process
+        - Alpha, beta, eta and mu parameters for each process
         - Alpha parameters for each process
         - Beta parameters for each process
+        - Eta parameters for each process
         - Mu parameters for each process
     """
 
@@ -58,8 +59,8 @@ def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: 
     mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
 
     # Written parameters to parquet file
-    write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "mu": mu}).with_columns(pl.col(pl.Float64).cast(pl.Float32)), filename=filename)
+    write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "eta": eta, "mu": mu}), filename=filename)
 
-    return np.array([alpha, beta, mu], dtype=np.float32).T, alpha, beta, mu
+    return np.array([alpha, beta, eta, mu], dtype=np.float32).T, alpha, beta, eta, mu
 
 

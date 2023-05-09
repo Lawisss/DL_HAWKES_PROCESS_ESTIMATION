@@ -108,11 +108,6 @@ class MLPTrainer:
         # One epoch train/val loss parameters
         self.train_loss = 0
         self.val_loss = 0
-
-        # Test loss/predictions parameters
-        self.test_loss = 0
-        self.test_eta_pred = 0
-        self.test_mu_pred = 0
         
         # Training train/val losses parameters (Many epochs)
         self.train_losses = np.zeros(self.max_epochs, dtype=np.float32)
@@ -150,14 +145,15 @@ class MLPTrainer:
             float: Average training loss over one epoch
         """
         
+        # Training mode
         self.model.train()
 
         for x, y in train_loader:
 
             # Forward pass (Autograd)
             self.optimizer.zero_grad()
-            output = self.model(x)
-            loss = self.criterion(output, y) + (self.l2_reg * norm(parameters_to_vector(self.model.parameters()), ord=2, dtype=torch.float32))
+            y_pred = self.model(x)
+            loss = self.criterion(y_pred, y) + (self.l2_reg * norm(parameters_to_vector(self.model.parameters()), ord=2, dtype=torch.float32))
 
             # Backward pass (Autograd)
             loss.backward()
@@ -184,12 +180,13 @@ class MLPTrainer:
             float: Average validation loss over validation set
         """
 
+        # Evaluation mode
         self.model.eval()
         
         for x, y in val_loader:
             
-            output = self.model(x)
-            loss = self.criterion(output, y)
+            y_pred = self.model(x)
+            loss = self.criterion(y_pred, y)
             self.val_loss += loss.item() * x.size(0)
 
         self.val_loss /= len(val_loader.dataset)
@@ -252,7 +249,7 @@ class MLPTrainer:
     # Prediction function (estimated Hawkes parameters)
 
     @torch.no_grad()
-    def predict(self, val_x: torch.Tensor, dtype: torch.dtype = torch.float32) -> Tuple[torch.Tensor, float, float]:
+    def predict(self, val_x: torch.Tensor, dtype: torch.dtype = torch.float32, set_name: str = "Validation set") -> Tuple[torch.Tensor, float, float]:
 
         """
         Estimated Hawkes parameters using validation dataset
@@ -260,16 +257,23 @@ class MLPTrainer:
         Args:
             val_x (torch.Tensor): Input tensor for validation dataset
             dtype (torch.dtype): Type for tensor operations (default: torch.float32)
+            set_name (str): Dataset name (default: Validation set)
 
         Returns:
             Tuple[torch.Tensor, float, float]: Estimations for branching ratio (eta), and baseline intensity (mu)
         """        
 
+        # Evaluation mode
+        self.model.eval()
+
+        # Forward pass
         val_y_pred = self.model(val_x)
+
+        # Predictions Averages
         val_eta_pred = torch.mean(val_y_pred[:, 0], dtype=dtype).item()
         val_mu_pred = torch.mean(val_y_pred[:, 1], dtype=dtype).item()
 
-        print(f"Validation set - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
+        print(f"{set_name} - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
 
         return val_y_pred, val_eta_pred, val_mu_pred
 
@@ -348,10 +352,10 @@ class MLPTrainer:
                                     filename=f"{self.run_name}_losses.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
         
-        write_parquet(pl.DataFrame({'eta_true': val_y[:, 0], 
-                                    'mu_true': val_y[:, 1],
-                                    'eta_pred': val_y_pred[:, 0], 
-                                    'mu_pred': val_y_pred[:, 1]}), 
+        write_parquet(pl.DataFrame({'eta_true': val_y[:, 0].numpy(), 
+                                    'mu_true': val_y[:, 1].numpy(),
+                                    'eta_pred': val_y_pred[:, 0].numpy(), 
+                                    'mu_pred': val_y_pred[:, 1].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
@@ -361,73 +365,44 @@ class MLPTrainer:
     # Testing fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    @torch.no_grad()
-    def test_model(self, test_loader: DataLoader, test_y: torch.Tensor, dtype: torch.dtype = torch.float32) -> Tuple[np.ndarray, float, float, float]:
+    def test_model(self, test_x: torch.Tensor, test_y: torch.Tensor) -> Tuple[np.ndarray, float, float, float]:
 
         """
         Tested and evaluated model
 
         Args:
-            test_loader (DataLoader): Testing data
+            test_x (torch.Tensor): Features inputs for esting data
             test_y (torch.Tensor): Label outputs for testing data
-            dtype (torch.dtype): Predictions datatype (default: torch.float32)
 
         Returns:
             Tuple[np.ndarray, float, float, float]: predictions, loss average, eta average, mu average
         """
-        
-        # Eval mode
-        self.model.eval()
-
-        # Initialized parameters
-        index = 0
-        test_y_pred = torch.zeros((len(test_y), 2), dtype=dtype)
 
         # Initialized Tensorboard
         writer = SummaryWriter(os.path.join(self.logdirun, self.test_dir, self.run_name))
+        
+        # Loaded best model
+        print(self.load_model())
 
-        for x, y in test_loader:
-            
-            # Forward pass for predictions
-            y_pred = self.model(x)
-            test_y_pred[index:index+len(x), :] = y_pred
-            index += len(x)
+        # Forward pass for predictions
+        test_y_pred, test_eta_pred, test_mu_pred = self.predict(test_x, set_name = "Test set")
 
-            # Computed loss
-            loss = self.criterion(y_pred, y)
-            self.test_loss += loss.item() * x.size(0)
-
-            # Computed branching ratio and baseline intensity predictions
-            self.test_eta_pred += torch.mean(y_pred[:, 0], dtype=dtype).item() * x.size(0)
-            self.test_mu_pred += torch.mean(y_pred[:, 1], dtype=dtype).item() * x.size(0)
-
-            # Add losses, eta, mu values in TensorBoard
-            writer.add_scalars("Prediction", {"Branching ratio": self.test_eta_pred, "Baseline intensity": self.test_mu_pred}, index)
-            writer.add_scalars("Loss", {"Test Loss": self.test_loss}, index)
-
-            # Added results histograms to TensorBoard
-            writer.add_histogram("Baseline intensity Histogram", test_y_pred[:, 1], index, bins="auto")
-            writer.add_histogram("Branching ratio Histogram", test_y_pred[:, 0], index, bins="auto")
-            writer.add_histogram("Prediction Histogram", test_y_pred, index, bins="auto")
-            writer.add_histogram("Validation Histogram", test_y, index, bins="auto")
-
-        # Computed average loss and predictions
-        self.test_loss /= len(test_loader.dataset)
-        self.test_eta_pred /= len(test_loader.dataset)
-        self.test_mu_pred /= len(test_loader.dataset)
-
-        print(f"Test set - Test loss: {self.test_loss:.4f}, Estimated branching ratio (η): {self.test_eta_pred:.4f}, Estimated baseline intensity (µ): {self.test_mu_pred:.4f}")
+        # Added results histograms to TensorBoard
+        writer.add_histogram("Baseline intensity Histogram", test_y_pred[:, 1], len(test_y), bins="auto")
+        writer.add_histogram("Branching ratio Histogram", test_y_pred[:, 0], len(test_y), bins="auto")
+        writer.add_histogram("Prediction Histogram", test_y_pred, len(test_y), bins="auto")
+        writer.add_histogram("Test Histogram", test_y, len(test_y), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
 
         # Written parameters to parquet file
-        write_parquet(pl.DataFrame({'eta_true': test_y[:, 0], 
-                                    'mu_true': test_y[:, 1],
-                                    'eta_pred': test_y_pred[:, 0], 
-                                    'mu_pred': test_y_pred[:, 1]}), 
+        write_parquet(pl.DataFrame({'eta_true': test_y[:, 0].numpy(), 
+                                    'mu_true': test_y[:, 1].numpy(),
+                                    'eta_pred': test_y_pred[:, 0].numpy(), 
+                                    'mu_pred': test_y_pred[:, 1].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
-        return test_y_pred.numpy().astype(np.float32), self.test_loss, self.test_eta_pred, self.test_mu_pred
+        return test_y_pred.numpy(), test_eta_pred, test_mu_pred
