@@ -19,7 +19,7 @@ from tools.utils import write_parquet
 
 # Jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: List, filename: str = 'binned_hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def discretise(jump_times: List, filename: Optional[str] = 'binned_hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Discretized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"

@@ -19,7 +19,7 @@ from tools.utils import write_parquet
 
 # Simulated Hawkes process 
 
-def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, args: Optional[Callable] = None) -> Tuple[hk.simulator, np.ndarray]:
+def hawkes_simulation(params: Optional[TypedDict] = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, args: Optional[Callable] = None) -> Tuple[hk.simulator, np.ndarray]:
     
     """
     Simulated Hawkes process with given parameters
@@ -55,7 +55,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: str='hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: Optional[str] ='hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
@@ -88,7 +88,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
 
 # Estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, filename: str = "hawkes_estimation.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, filename: Optional[str] = "hawkes_estimation.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated Hawkes process from event times, returned predicted process and performance metrics

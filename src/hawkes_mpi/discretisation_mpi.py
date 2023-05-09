@@ -20,7 +20,7 @@ from tools.utils import write_parquet
 
 # Parallelized jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: List, root: int = 0, filename: str = 'binned_hawkes_simulations_mpi.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def discretise(jump_times: List, root: Optional[int] = 0, filename: Optional[str] = 'binned_hawkes_simulations_mpi.parquet', args: Optional[Callable] = None) -> np.ndarray:
 
     """
     Discretized parallelized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
@@ -115,7 +115,7 @@ def temp_func(jump_times: np.ndarray, args: Optional[Callable] = None) -> float:
 
 # Calculated parallelized temp_func(x, hwk.TIME_HORIZON) minimum for each element x in jump_times
 
-def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
+def find_stepsize(jump_times: np.ndarray, root: Optional[int] = 0) -> float:
 
     """
     Calculated parallelized minimum value of "temp_func(x, hwk.TIME_HORIZON)" for each element "x" in "jump_times"
@@ -152,7 +152,7 @@ def find_stepsize(jump_times: np.ndarray, root: int = 0) -> float:
 
 # Computed parallelized point process jump times from the events history and the time hwk.TIME_HORIZON
 
-def jump_times(h: np.ndarray, root: int = 0, args: Optional[Callable] = None) -> np.ndarray:
+def jump_times(h: np.ndarray, root: Optional[int] = 0, args: Optional[Callable] = None) -> np.ndarray:
 
     """
     Computed parallelized point process jump times from events history and time horizon

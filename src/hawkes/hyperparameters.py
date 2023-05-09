@@ -18,7 +18,7 @@ from tools.utils import write_parquet
 
 # Generated Hawkes process hyper-parameters (alpha, beta, mu)
 
-def hyper_params_simulation(filename: str = "hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def hyper_params_simulation(filename: Optional[str] = "hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process hyperparameters

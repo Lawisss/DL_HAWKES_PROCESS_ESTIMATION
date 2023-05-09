@@ -7,7 +7,7 @@ File containing model evaluation functions
 
 """
 
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ import polars as pl
 
 # Error / Relative error function
 
-def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: str = "Benchmark") -> Tuple[np.ndarray, np.ndarray]:
+def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: Optional[str] = "Benchmark") -> Tuple[np.ndarray, np.ndarray]:
     
     """
     Computed absolute error and relative error between true and predicted values

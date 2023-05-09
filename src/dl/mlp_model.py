@@ -32,7 +32,7 @@ import variables.prep_var as prep
 # MLP creation
 
 class MLP(nn.Module):
-    def __init__(self, input_size=None, hidden_size=None, num_hidden_layers=None, output_size=None):
+    def __init__(self, input_size: Optional[int] = None, hidden_size: Optional[int] = None, num_hidden_layers: Optional[int] = None, output_size: Optional[int] = None):
         super().__init__()
 
         self.input_size = input_size
@@ -196,7 +196,7 @@ class MLPTrainer:
 
     # Early stopping function (checkpoint)
 
-    def early_stopping(self, best_loss: Union[float, int] = float('inf'), no_improve_count: int = 0) -> bool:
+    def early_stopping(self, best_loss: Optional[Union[float, int]] = float('inf'), no_improve_count: Optional[int] = 0) -> bool:
         
         """
         Checked early stopping condition based on validation loss
@@ -249,7 +249,7 @@ class MLPTrainer:
     # Prediction function (estimated Hawkes parameters)
 
     @torch.no_grad()
-    def predict(self, val_x: torch.Tensor, dtype: torch.dtype = torch.float32, set_name: str = "Validation set") -> Tuple[torch.Tensor, float, float]:
+    def predict(self, val_x: torch.Tensor, dtype: Optional[torch.dtype] = torch.float32, set_name: Optional[str] = "Validation set") -> Tuple[torch.Tensor, float, float]:
 
         """
         Estimated Hawkes parameters using validation dataset

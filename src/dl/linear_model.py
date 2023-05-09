@@ -19,7 +19,7 @@ from tools.utils import write_parquet
 
 # Linear Regression function (alpha/beta estimation)
 
-def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, step_size: float = 0.05, args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def linear_model(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, step_size: Optional[float] = 0.05, args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Calculates predicted alpha/beta values using linear regression

@@ -22,7 +22,7 @@ from tools.utils import write_parquet
 
 # Parallelized simulated Hawkes process 
 
-def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, root: int = 0, args: Optional[Callable] = None) -> Tuple[hk.simulator, np.ndarray]:
+def hawkes_simulation(params: Optional[TypedDict] = {"mu": 0.1, "alpha": 0.5, "beta": 10.0}, root: Optional[int] = 0, args: Optional[Callable] = None) -> Tuple[hk.simulator, np.ndarray]:
 
     """
     Simulated parallelized Hawkes process with given parameters
@@ -78,7 +78,7 @@ def hawkes_simulation(params: TypedDict = {"mu": 0.1, "alpha": 0.5, "beta": 10.0
 
 # Parallelized simulated Hawkes processes
 
-def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root: int = 0, filename: str='hawkes_simulations_mpi.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root: Optional[int] = 0, filename: Optional[str] = 'hawkes_simulations_mpi.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Simulated several parallelized Hawkes processes using parameters, and saved results to parquet file 
@@ -144,7 +144,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, root
 
 # Parallelized estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, root: int = 0, filename: str = "hawkes_estimation_mpi.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, root: Optional[int] = 0, filename: Optional[str] = "hawkes_estimation_mpi.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated parallelized Hawkes process from event times and returns predicted process and performance metrics
