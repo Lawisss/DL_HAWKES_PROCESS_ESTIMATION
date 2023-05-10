@@ -50,4 +50,4 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
                         "MRE (η)": round(np.mean(eta_rel_error), 4),
                         "MRE (μ)": round(np.mean(mu_rel_error), 4)}).with_columns(pl.col(pl.Float64).cast(pl.Float32)))
     
-    return np.column_stack((eta_error, mu_error, eta_rel_error, mu_rel_error))
+    return np.column_stack((eta_error, eta_rel_error, mu_error, mu_rel_error))

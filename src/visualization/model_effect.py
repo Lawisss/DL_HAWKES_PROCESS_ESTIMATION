@@ -156,15 +156,14 @@ def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]
 
 # Error boxplots function
 
-def error_boxplots(errors: List[np.ndarray] = None, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
+def error_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["Benchmark", "MLP"], folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
 
     """
     Plotted absolute/relative error boxplots for benchmark and MLP models
 
     Args:
-        errors (List[np.ndarray]): Models eta and mu error / relative error
-        mlp_eta_errors (np.ndarray): MLP model eta error / relative error
-        mlp_mu_errors (np.ndarray): MLP model mu error / relative error
+        errors (List[np.ndarray], optional): Models eta and mu error / relative error (default: None)
+        label_names (List[str], optional): Models names (default: ["Benchmark", "MLP"])
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "error_boxplots.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -180,7 +179,7 @@ def error_boxplots(errors: List[np.ndarray] = None, folder: Optional[str] = "pho
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Regrouped errors
-    error_groups = list(map(lambda x: list(map(np.ndarray.flatten, [x[:, 0], x[:, 1], x[:, 2], x[:, 3]])), errors))
+    errors_list = list(map(np.ndarray.flatten, [error[:, i] for error in errors for i in range(error.shape[1])]))
 
     # Built boxplots
     plt.style.use(['science', 'ieee'])
@@ -191,10 +190,7 @@ def error_boxplots(errors: List[np.ndarray] = None, folder: Optional[str] = "pho
     ax.minorticks_on()
     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    ax.boxplot(eta_error + eta_rel_error + mu_error + mu_rel_error, labels=['Benchmark $\eta$ Error', 'MLP $\eta$ Error', 
-                                                                            'Benchmark $\eta$ Relative Error', 'MLP $\eta$ Relative Error',
-                                                                            'Benchmark $\mu$ Error', 'MLP $\mu$ Error',
-                                                                            'Benchmark $\mu$ Relative Error', 'MLP $\mu$ Relative Error'])
+    ax.boxplot(errors_list, labels=[f"{label_name} {error_type}" for label_name in label_names for error_type in ['$\eta$ Error', '$\eta$ Relative Error', '$\mu$ Error', '$\mu$ Relative Error']])
 
     ax.set_title('Error Comparison', fontsize=16, pad=15)
     ax.set_xlabel('Model', fontsize=16, labelpad=15)
