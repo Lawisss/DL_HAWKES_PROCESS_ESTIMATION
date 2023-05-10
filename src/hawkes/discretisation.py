@@ -19,13 +19,14 @@ from tools.utils import write_parquet
 
 # Jump times histogram for each process (counted number of events which occurred over each interval)
 
-def discretise(jump_times: List, filename: Optional[str] = 'binned_hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def discretise(jump_times: List, record: bool = True, filename: Optional[str] = 'binned_hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Discretized jump times into binned histogram, where bin are time interval of length "hwk.DISCRETISE_STEP"
 
     Args:
         jump_times (List): Jump times for Hawkes process simulation
+        record (bool, optional): Record results in parquet file (default: True)
         filename (str, optional): Filename to write histogram data in parquet format (default: "binned_hawkes_simulations.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
@@ -42,15 +43,16 @@ def discretise(jump_times: List, filename: Optional[str] = 'binned_hawkes_simula
     # Computed bins number
     num_bins = int(dict_args['time_horizon'] // dict_args['discretise_step'])
 
-    # Initialized an array with dimensions (number of processes, number of jumps per unit of time)
+    # Initialized array with dimensions (number of processes, number of jumps per unit of time)
     counts = np.zeros((len(jump_times), num_bins), dtype=np.float32)
 
-    # For each process (j), compute jump times histogram (h) using the intervals boundaries specified by the bins
+    # For each process (j), compute jump times histogram (h) using intervals boundaries specified by bins
     for j, h in enumerate(jump_times):
         counts[j], _ = np.histogram(h, bins=np.linspace(0, dict_args['time_horizon'], num_bins + 1))
 
     # Written parquet file
-    write_parquet(pl.DataFrame(counts, schema=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str).tolist()), filename=filename)
+    if record:
+        write_parquet(pl.DataFrame(counts, schema=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str).tolist()), filename=filename)
     
     return counts
 

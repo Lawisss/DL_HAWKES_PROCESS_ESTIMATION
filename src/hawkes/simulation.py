@@ -55,7 +55,7 @@ def hawkes_simulation(params: Optional[TypedDict] = {"mu": 0.1, "alpha": 0.5, "b
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, filename: Optional[str] ='hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, record: bool = True, filename: Optional[str] ='hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
@@ -64,6 +64,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
         alpha (np.ndarray): Excitation matrix of each Hawkes process
         beta (np.ndarray): Decay matrix of each Hawkes process
         mu (np.ndarray): Base intensity of each Hawkes process
+        record (bool, optional): Record results in parquet file (default: True)
         filename (str, optional): Parquet filename to save results (default: "hawkes_simulations.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
@@ -81,20 +82,22 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, file
     simulated_events_seqs = [np.array(hawkes_simulation(params={"mu": mu[i], "alpha": alpha[i], "beta": beta[i]})[1], dtype=np.float32) for i in range(dict_args['process_num'])]
 
     # Written parquet file
-    write_parquet(pl.DataFrame({"simulations": simulated_events_seqs}), filename=filename)
+    if record:
+        write_parquet(pl.DataFrame({"simulations": simulated_events_seqs}), filename=filename)
 
     return simulated_events_seqs
 
 
 # Estimated Hawkes process
 
-def hawkes_estimation(t: np.ndarray, filename: Optional[str] = "hawkes_estimation.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
+def hawkes_estimation(t: np.ndarray, record: bool = True, filename: Optional[str] = "hawkes_estimation.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, TypedDict, np.ndarray, np.ndarray]:
     
     """
     Estimated Hawkes process from event times, returned predicted process and performance metrics
 
     Args:
         t (np.ndarray): Event times
+        record (bool, optional): Record results in parquet file (default: True)
         filename (str, optional): Parquet filename for performance metrics (default: "hawkes_estimation.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
@@ -128,8 +131,9 @@ def hawkes_estimation(t: np.ndarray, filename: Optional[str] = "hawkes_estimatio
                'Log-Likelihood': round(hawkes_process.L, 3),
                'AIC': round(hawkes_process.AIC, 3)}
 
-    # Written parameters to parquet file
-    write_parquet(pl.DataFrame(metrics), filename=filename)
+    # Written parquet file
+    if record:
+        write_parquet(pl.DataFrame(metrics), filename=filename)
     # Transformed times so that the first observation is at 0 and the last at 1
     [t_transform, interval_transform] = hawkes_process.t_trans() 
     # Predicted the Hawkes process 

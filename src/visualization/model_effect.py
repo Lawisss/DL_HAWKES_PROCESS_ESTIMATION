@@ -125,14 +125,14 @@ def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]
 
         loss = loss.to_numpy() if not isinstance(loss, np.ndarray) else loss
 
-        ax.plot(loss[:, 0], label=models[i] + ' Train Loss', color=colors[i])
-        ax.plot(loss[:, 1], label=models[i] + ' Validation Loss', color=colors[i+1])
+        ax.plot(loss[:, 0], label=f"{models[i]} Train Loss", color=colors[i])
+        ax.plot(loss[:, 1], label=f"{models[i]} Validation Loss", color=colors[i+1])
 
         # Inset plot
         axins = ax.inset_axes([0.5, 0.30, 0.42, 0.48], transform=ax.transAxes)
 
-        axins.semilogy(loss[:, 0], label=models[i] + ' Train Loss', color=colors[i])
-        axins.semilogy(loss[:, 1], label=models[i] + ' Validation Loss', color=colors[i+1])
+        axins.semilogy(loss[:, 0], label=f"{models[i]} Train Loss", color=colors[i])
+        axins.semilogy(loss[:, 1], label=f"{models[i]} Validation Loss", color=colors[i+1])
 
         axins.set_xlim([0, len(loss[:, 0])])
         axins.set_ylim([0.08, 0.8])

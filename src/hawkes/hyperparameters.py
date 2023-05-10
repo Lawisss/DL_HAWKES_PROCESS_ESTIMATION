@@ -18,12 +18,13 @@ from tools.utils import write_parquet
 
 # Generated Hawkes process hyper-parameters (alpha, beta, mu)
 
-def hyper_params_simulation(filename: Optional[str] = "hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def hyper_params_simulation(record: bool = True, filename: Optional[str] = "hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process hyperparameters
 
     Args:
+        record (bool, optional): Record results in parquet file (default: True)
         filename (str, optional): Filename to save hyperparameters in parquet file (default: "hawkes_hyperparams.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
@@ -58,8 +59,9 @@ def hyper_params_simulation(filename: Optional[str] = "hawkes_hyperparams.parque
     alpha = eta
     mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
 
-    # Written parameters to parquet file
-    write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "eta": eta, "mu": mu}), filename=filename)
+    # Written parquet file
+    if record:
+        write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "eta": eta, "mu": mu}), filename=filename)
 
     return np.array([alpha, beta, eta, mu], dtype=np.float32).T, alpha, beta, eta, mu
 
