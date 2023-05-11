@@ -63,6 +63,7 @@ def delta_generation(deltas: List = [0.25, 0.5, 1.0, 2.0, 5.0], number_of_tests:
 
             # Predicted eta/mu
             test_x, test_y, _, _, _, _ = split_data(count, np.column_stack((eta, mu)))
+            print(test_x)
             y_pred, _, _ = model.predict(test_x)
             print(y_pred)
             # Computed errors
