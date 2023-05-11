@@ -40,8 +40,8 @@ def split_data(x: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y: Union[np.nda
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Converted data
-    x = torch.tensor(x.to_numpy(), dtype=torch.float32).to(dict_args['device']) if not isinstance(x, np.ndarray) else x
-    y = torch.tensor(y.to_numpy(), dtype=torch.float32).to(dict_args['device']) if not isinstance(y, np.ndarray) else y
+    x = torch.tensor(x.to_numpy() if isinstance(x, pl.DataFrame) else x, dtype=torch.float32).to(dict_args['device'])
+    y = torch.tensor(y.to_numpy() if isinstance(y, pl.DataFrame) else y, dtype=torch.float32).to(dict_args['device'])
     
     # Initialized sizing
     val_size = int(len(x) * dict_args['val_ratio'])
