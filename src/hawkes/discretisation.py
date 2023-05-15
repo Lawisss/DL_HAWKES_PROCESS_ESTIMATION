@@ -52,7 +52,7 @@ def discretise(jump_times: List, record: bool = True, filename: Optional[str] = 
 
     # Written parquet file
     if record:
-        write_parquet(pl.DataFrame(counts, schema=np.arange(dict_args['time_horizon'], dtype=np.int32).astype(str).tolist()), filename=filename)
+        write_parquet(pl.DataFrame(counts, schema=np.arange(num_bins, dtype=np.int32).astype(str).tolist()), filename=filename)
     
     return counts
 
