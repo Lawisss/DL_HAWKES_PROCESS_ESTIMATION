@@ -25,14 +25,14 @@ BASELINE: str = 'const'                   # Type of baseline function
 TIME_ITV_START: int = 0                   # Start time interval for simulation
 TIME_HORIZON: int = 100                   # Time horizon for simulation
 
-PROCESS_NUM: int = 100_000                # Number of processes to simulate
+PROCESS_NUM: int = 20_000                 # Number of processes to simulate
 
 END_T: int = 200                          # End time for estimation
 NUM_SEQ: int = 100                        # Number of sequences for estimation
 
 # Discretisation parameters (discretisation.py)
 
-DISCRETISE_STEP: float = 0.5             # Discretise step = Delta
+DISCRETISE_STEP: float = 5.0              # Discretise step = Delta
 
 # Testing parameters (delta_effect.py)
 

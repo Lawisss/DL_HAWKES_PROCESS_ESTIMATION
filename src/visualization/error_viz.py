@@ -67,7 +67,7 @@ def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]
         axins.semilogy(loss[:, 1], label=f"{models[i]} Validation Loss", color=colors[i+1])
 
         axins.set_xlim([0, len(loss[:, 0])])
-        axins.set_ylim([0.08, 0.8])
+        axins.set_ylim([0.07, 0.8])
         axins.tick_params(axis='both', which='major', labelsize=12, pad=6)
 
         axins.legend(axins.get_legend_handles_labels()[0], axins.get_legend_handles_labels()[1], loc="best", fontsize=10)
@@ -88,7 +88,7 @@ def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]
 
 # Error boxplots function
 
-def error_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["Benchmark", "MLP"], folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
+def error_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["Benchmark", "MLP"], error_names: List[str] = ["$\eta$ Error", '$\eta$ Relative Error', '$\mu$ Error', '$\mu$ Relative Error'], folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
 
     """
     Plotted absolute/relative error boxplots for benchmark and MLP models
@@ -96,6 +96,7 @@ def error_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["B
     Args:
         errors (List[np.ndarray], optional): Models eta and mu error / relative error (default: None)
         label_names (List[str], optional): Models names (default: ["Benchmark", "MLP"])
+        error_names (List[str], optional): Errors names (default: ["$\eta$ Error", '$\eta$ Relative Error', '$\mu$ Error', '$\mu$ Relative Error'])
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "error_boxplots.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -110,8 +111,9 @@ def error_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["B
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
-    # Regrouped errors
+    # Regrouped errors and labels
     errors_list = list(map(np.ndarray.flatten, [error[:, i] for error in errors for i in range(error.shape[1])]))
+    labels = [f"{label_name} {error_name}" for label_name in label_names for error_name in error_names]
 
     # Built boxplots
     plt.style.use(['science', 'ieee'])
@@ -122,7 +124,7 @@ def error_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["B
     ax.minorticks_on()
     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    ax.boxplot(errors_list, labels=[f"{label_name} {error_type}" for label_name in label_names for error_type in ['$\eta$ Error', '$\eta$ Relative Error', '$\mu$ Error', '$\mu$ Relative Error']])
+    ax.boxplot(errors_list, labels)
 
     ax.set_title('Error Comparison', fontsize=16, pad=15)
     ax.set_xlabel('Model', fontsize=16, labelpad=15)
