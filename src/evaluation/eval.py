@@ -13,10 +13,12 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
+from tools.utils import write_parquet
+
 
 # Error / Relative error function
 
-def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: Optional[str] = "Benchmark") -> Tuple[np.ndarray, np.ndarray]:
+def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: Optional[str] = "Benchmark", record: bool = True, filename: Optional[str] = "errors.parquet") -> Tuple[np.ndarray, np.ndarray]:
     
     """
     Computed absolute error and relative error between true and predicted values
@@ -25,6 +27,8 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
         y_test (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): True values
         y_pred (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Predicted values
         model_name (str, optional): Model name (default: "Benchmark")
+        record (bool, optional): Record results in parquet file (default: True)
+        filename (str, optional): Parquet filename to save results (default: "errors.parquet")
 
     Returns:
         Branching ratio / Baseline intensity error and relative error
@@ -42,12 +46,14 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
     mu_rel_error = mu_error / y_test[:, 1]
 
     # Printed MAE and MRE
-    #print(f'{model_name} - Branching Ratio Error Average (η): {np.mean(eta_error):.4f}, Baseline Intensity Error Average (µ): {np.mean(mu_error):.4f}, Branching Ratio MRE (η): {np.mean(eta_rel_error):.4f}, Baseline Intensity MRE (µ): {np.mean(mu_rel_error):.4f}')
-
     print(pl.DataFrame({"Model": model_name,
                         "Error Average (η)": round(np.mean(eta_error), 4),
                         "Error Average (μ)": round(np.mean(mu_error), 4),
                         "MRE (η)": round(np.mean(eta_rel_error), 4),
                         "MRE (μ)": round(np.mean(mu_rel_error), 4)}).with_columns(pl.col(pl.Float64).cast(pl.Float32)))
-    
-    return np.column_stack((eta_error, eta_rel_error, mu_error, mu_rel_error))
+
+    # Written parquet file
+    if record:
+        write_parquet(pl.DataFrame(np.column_stack((eta_error, eta_rel_error, mu_error, mu_rel_error)), schema=["eta_error", "eta_rel_error", "mu_error", "mu_rel_error"]), filename=filename)
+
+    return pl.DataFrame(np.column_stack((eta_error, eta_rel_error, mu_error, mu_rel_error)), schema=["eta_error", "eta_rel_error", "mu_error", "mu_rel_error"])
