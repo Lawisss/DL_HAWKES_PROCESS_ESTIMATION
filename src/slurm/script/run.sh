@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=mlp                         
+#SBATCH --job-name=discretize                         
 #SBATCH --partition=cpu_long                             
-#SBATCH --nodes=1                                 
+#SBATCH --nodes=1                                
 #SBATCH --ntasks=1                                          
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
-#SBATCH --gres=gpu:1
-#SBATCH --time=01:00:00
+##SBATCH --gres=gpu:1 (uncomment to use it)
+#SBATCH --time=168:00:00
 
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.out
@@ -18,13 +18,13 @@
 #SBATCH --export=NONE
 #SBATCH --propagate=NONE
 
-###################################################### DOCUMENTATION ######################################################
+################################################# DOCUMENTATION ###################################################
 
-# Description: MLP Aggregated/Binned Hawkes Process estimation task
-# Usage: sbatch mlp.sh
+# Description: Run all necessary tasks
+# Usage: sbatch run.sh
 # Params: Check documentation: https://mesocentre.pages.centralesupelec.fr/user_doc/ruche/06_slurm_jobs_management/
 
-###########################################################################################################################
+###################################################################################################################
 
 # Checked if folder existed, if not created it
 [ ! -d ../output ] && mkdir ../output
@@ -39,5 +39,5 @@ module purge && module load anaconda3/2022.10/gcc-11.2.0 && module load cuda/12.
 # Checked if environment was activated, if not, activated it
 $CONDA_DEFAULT_ENV | grep -qw hawkes || source activate hawkes
 
-# Run python script (Copy/Paste in .bashrc: export DL="$HOME/Documents/VAE_HAWKES_PROCESS_ESTIMATION/src/dl")
-python "$DL/mlp.py"
+# Run python script
+python run.py
