@@ -14,8 +14,8 @@ MAX_ITV_BETA: float = 3.0                 # Beta maximum interval
 MIN_ITV_ETA: float = 0.2                  # Eta minimum interval
 MAX_ITV_ETA: float = 0.6                  # Eta maximum interval
 
-EXPECTED_ACTIVITY: int = 500              # Total number of expected events 
-STD: float = 50                           # Standard deviation for generating epsilon
+EXPECTED_ACTIVITY: int = 1000             # Total number of expected events 
+STD: float = 10                           # Standard deviation for generating epsilon
 
 # Hawkes Process simulation/estimation parameters (simulation.py, discretisation.py)
 
@@ -32,7 +32,7 @@ NUM_SEQ: int = 100                        # Number of sequences for estimation
 
 # Discretisation parameters (discretisation.py)
 
-DISCRETISE_STEP: float = 0.25              # Discretise step = Delta
+DISCRETISE_STEP: float = 1.0              # Discretise step = Delta
 
 # Testing parameters (delta_effect.py)
 
