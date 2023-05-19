@@ -72,3 +72,5 @@ dependencies:
     - pillow==9.5.0
     - scipy==1.10.1
     - torchinfo==1.7.2
+    - polars==0.17.14
+    - SciencePlots==2.0.1
