@@ -5,6 +5,9 @@
  ┃ ┃ ┣ 📜mlp_model.py
  ┃ ┃ ┣ 📜vae_model.py
  ┃ ┃ ┗ 📜__init__.py
+ ┃ ┣ 📂evaluation
+ ┃ ┃ ┣ 📜eval.py
+ ┃ ┃ ┗ 📜__init__.py
  ┃ ┣ 📂hawkes
  ┃ ┃ ┣ 📜discretisation.py
  ┃ ┃ ┣ 📜hyperparameters.py
@@ -27,7 +30,7 @@
  ┃ ┃ ┃ ┣ 📜main.sh
  ┃ ┃ ┃ ┣ 📜mlp.sh
  ┃ ┃ ┃ ┗ 📜___init__.py
- ┃ ┣ 📂utils
+ ┃ ┣ 📂tools
  ┃ ┃ ┣ 📜utils.py
  ┃ ┃ ┣ 📜utils_mpi.py
  ┃ ┃ ┗ 📜__init__.py
@@ -40,9 +43,7 @@
  ┃ ┃ ┣ 📜vae_var.py
  ┃ ┃ ┗ 📜__init__.py
  ┃ ┣ 📂visualization
- ┃ ┃ ┣ 📜activity_effect.py
- ┃ ┃ ┣ 📜br_effect.py
- ┃ ┃ ┣ 📜discret_effect.py
+ ┃ ┃ ┣ 📜error_viz.py
  ┃ ┃ ┗ 📜__init__.py
  ┃ ┣ 📜app.py
  ┃ ┣ 📜run.py
