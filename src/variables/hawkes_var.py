@@ -11,10 +11,10 @@ File containing all hawkes variables.
 MIN_ITV_BETA: float = 1.0                 # Beta minimum interval
 MAX_ITV_BETA: float = 3.0                 # Beta maximum interval
 
-MIN_ITV_ETA: float = 0.2                  # Eta minimum interval
-MAX_ITV_ETA: float = 0.6                  # Eta maximum interval
+MIN_ITV_ETA: float = 0.05                 # Eta minimum interval
+MAX_ITV_ETA: float = 0.8                  # Eta maximum interval
 
-EXPECTED_ACTIVITY: int = 1000             # Total number of expected events 
+EXPECTED_ACTIVITY: int = 500              # Total number of expected events 
 STD: float = 10                           # Standard deviation for generating epsilon
 
 # Hawkes Process simulation/estimation parameters (simulation.py, discretisation.py)

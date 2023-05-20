@@ -56,7 +56,6 @@ def discretise(jump_times: List, record: bool = True, filename: Optional[str] = 
     
     return counts
 
-
 # Calculated minimum stepsize between events in a given Hawkes process 
 
 def temp_func(jump_times: np.ndarray, args: Optional[Callable] = None) -> float:
