@@ -32,7 +32,7 @@ NUM_SEQ: int = 100                        # Number of sequences for estimation
 
 # Discretisation parameters (discretisation.py)
 
-DISCRETISE_STEP: float = 2.0              # Discretise step = Delta
+DISCRETISE_STEP: float = 5.0              # Discretise step = Delta
 
 
 

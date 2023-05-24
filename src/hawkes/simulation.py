@@ -121,7 +121,7 @@ def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: b
     hawkes_process = hk.estimator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline'])
 
     # Initialized parameters
-    eta_pred, mu_pred = np.zeros(dict_args['process_num']), np.zeros(dict_args['process_num'])
+    eta_pred, mu_pred = np.zeros(dict_args['process_num'], dtype=np.float32), np.zeros(dict_args['process_num'], dtype=np.float32)
 
     # Started estimations
     for i in range(dict_args['process_num']):
