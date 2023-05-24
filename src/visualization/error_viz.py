@@ -189,7 +189,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
         ax.minorticks_on()
         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    ax1.boxplot(errors_list, labels=labels_errors)
+    ax1.boxplot(errors_list, labels=labels_errors) 
     ax2.boxplot(errors_rel_list, labels=labels_errors_rel)
 
     ax1.set_title('Errors Comparison', fontsize=16, pad=15)

@@ -114,6 +114,7 @@ def hawkes_estimation(t: np.ndarray, record: bool = True, filename: Optional[str
                       "baseline": hwk.BASELINE, 
                       "time_itv_start": hwk.TIME_ITV_START,
                       "time_horizon": hwk.TIME_HORIZON,
+                      "discretise_step": hwk.DISCRETISE_STEP,
                       "end_t": hwk.END_T,
                       "num_seq": hwk.NUM_SEQ}
 
@@ -134,10 +135,12 @@ def hawkes_estimation(t: np.ndarray, record: bool = True, filename: Optional[str
     # Written parquet file
     if record:
         write_parquet(pl.DataFrame(metrics), filename=filename)
-    # Transformed times so that the first observation is at 0 and the last at 1
-    [t_transform, interval_transform] = hawkes_process.t_trans() 
+    
     # Predicted the Hawkes process 
     t_pred = hawkes_process.predict(dict_args['end_t'], dict_args['num_seq']) 
+
+    # Transformed times so that the first observation is at 0 and the last at 1
+    [t_transform, interval_transform] = hawkes_process.t_trans() 
 
     # Plotted the empirical survival function of the estimated Hawkes process (don't work with many iteration)
     # hawkes_process.plot_KS()

@@ -128,46 +128,24 @@ def jump_times(h: np.ndarray, args: Optional[Callable] = None) -> np.ndarray:
     """
 
     # Default parameters
-    default_params = {"time_horizon": hwk.TIME_HORIZON}
+    default_params = {"discretise_step": hwk.DISCRETISE_STEP}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
-    
-    # Size of each interval
-    stepsize = dict_args["time_horizon"] / len(h)
 
-    # Retrieval of intervals indices with single jump/multiple jumps
-    idx_1 = np.nonzero(h == 1)[0]
-    idx_2 = np.nonzero(h > 1)[0]
+    # Indices with single jump/multiple jumps
+    times = []
+    idx_1 = np.where(h == 1)[0]
+    idx_2 = np.where(h > 1)[0]
+    stepsize = dict_args["discretise_step"]
 
-    # Initialized jump times list
-    times = np.zeros(len(idx_2) + len(idx_1), dtype=np.float32)
-
-    # Variable to track the index of the times list
-    k = 0
-
-    # Intervals with multiple jumps
+    # Generation of jump times
     if len(idx_2) > 0:
-        for i in idx_2:
-            # Jumps number in i
-            n_jumps = h[i]
+        repeat_idx = np.repeat(idx_2, h[idx_2].astype(int))
+        times.extend(np.random.uniform(repeat_idx * stepsize, (repeat_idx + 1) * stepsize))
 
-            # Bounds of i
-            t_start = (i - 1) * stepsize
-            t_end = i * stepsize
-
-            # Generation of jump times for i
-            times[k:k+n_jumps] = np.random.uniform(t_start, t_end, size=(n_jumps,))
-
-            # Update times list index
-            k += n_jumps
-
-    # Intervals with a single jump
-    if len(idx_1) > 0:
-        times[k:] = idx_1 * stepsize - 0.5 * stepsize
-
-    # Lists concatenation and jump times sorted
-    jump_times = np.concatenate([times])
-    jump_times.sort()
+    # Added and sorted jump times (intervals with single jump)
+    times.extend((idx_1 * stepsize) - (0.5 * stepsize))
+    jump_times = np.sort(times)
 
     return jump_times
