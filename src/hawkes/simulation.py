@@ -112,8 +112,7 @@ def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: b
                       "baseline": hwk.BASELINE,
                       "time_itv_start": hwk.TIME_ITV_START,
                       "time_horizon": hwk.TIME_HORIZON,
-                      "process_num": hwk.PROCESS_NUM,
-                      "discretise_step": hwk.DISCRETISE_STEP}
+                      "process_num": hwk.PROCESS_NUM}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
@@ -127,10 +126,10 @@ def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: b
     # Started estimations
     for i in range(dict_args['process_num']):
 
-        # Randomized events
+        # Generated random events
         t = jump_times(counts[i])
 
-        # Fitted randomized hawkes processes events
+        # Fitted randomized events
         hawkes_process.fit(t, [dict_args['time_itv_start'], dict_args['time_horizon']])
 
         # Stored baseline intensity / branching ratio
