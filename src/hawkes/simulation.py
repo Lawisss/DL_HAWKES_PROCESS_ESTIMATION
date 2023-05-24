@@ -15,7 +15,7 @@ import Hawkes as hk
 
 import variables.hawkes_var as hwk
 from tools.utils import write_parquet
-
+from hawkes.discretisation import jump_times
 
 # Simulated Hawkes process 
 
@@ -87,6 +87,60 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, reco
 
     return simulated_events_seqs
 
+
+# MLE function
+
+def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: bool = True, filename: Optional[str] ='predictions_mle.parquet', args: Optional[Callable] = None):
+
+    """
+    Simulated several Hawkes processes using parameters, and saved results to Parquet file 
+
+    Args:
+        counts (np.ndarray): Binned Hawkes Processes
+        eta_true (np.ndarray): True branching ratio
+        mu_true (np.ndarray): True baseline intensity
+        record (bool, optional): Record results in parquet file (default: True)
+        filename (str, optional): Parquet filename to save results (default: "predictions_mle.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        np.ndarray: Simulated event sequences of each Hawkes process
+    """
+
+    # Default parameters
+    default_params = {"kernel": hwk.KERNEL,
+                      "baseline": hwk.BASELINE,
+                      "time_itv_start": hwk.TIME_ITV_START,
+                      "time_horizon": hwk.TIME_HORIZON,
+                      "process_num": hwk.PROCESS_NUM,
+                      "discretise_step": hwk.DISCRETISE_STEP}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Estimated Hawkes process parameters with the given kernel, baseline, and parameters
+    hawkes_process = hk.estimator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline'])
+
+    # Initialized parameters
+    eta_pred, mu_pred = np.zeros(dict_args['process_num']), np.zeros(dict_args['process_num'])
+
+    # Started estimations
+    for i in range(dict_args['process_num']):
+
+        # Randomized events
+        t = jump_times(counts[i])
+
+        # Fitted randomized hawkes processes events
+        hawkes_process.fit(t, [dict_args['time_itv_start'], dict_args['time_horizon']])
+
+        # Stored baseline intensity / branching ratio
+        eta_pred[i], mu_pred[i] = hawkes_process.br, hawkes_process.parameter['mu']
+    
+    # Written parquet file
+    if record:
+        write_parquet(pl.DataFrame(np.column_stack((eta_true, mu_true, eta_pred, mu_pred)), schema=["eta_true", "mu_true", "eta_pred", "mu_pred"]), filename=filename)
+
+    return np.column_stack((eta_pred, mu_pred)), eta_pred, mu_pred
 
 # Estimated Hawkes process
 

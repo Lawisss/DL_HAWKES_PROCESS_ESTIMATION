@@ -165,51 +165,35 @@ def jump_times(h: np.ndarray, root: Optional[int] = 0, args: Optional[Callable] 
     Returns:
         np.ndarray: Jump times for point process
     """
-
+    
     # Initialized MPI
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
 
     # Default parameters
-    default_params = {"time_horizon": hwk.TIME_HORIZON}
+    default_params = {"discretise_step": hwk.DISCRETISE_STEP}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
-    # Size of each interval
-    stepsize = dict_args["time_horizon"] / len(h)
+    # Indices with single jump/multiple jumps
+    times = []
+    idx_1 = np.where(h == 1)[0]
+    idx_2 = np.where(h > 1)[0]
+    stepsize = dict_args["discretise_step"]
 
-    # Retrieval of intervals indices with single jump/multiple jumps
-    idx_1 = np.nonzero(h == 1)[0]
-    idx_2 = np.nonzero(h > 1)[0]
-
-    # Divided indices into chunks
-    chunks = np.array_split(idx_2, size)
-
-    # Initialized jump times list
-    times_chunk = np.zeros(len(idx_2) // size + len(idx_1), dtype=np.float32)
-
-    # Intervals with multiple jumps
+    # Generation of jump times
     if len(idx_2) > 0:
-        # Process chunks in parallel
-        for i in chunks[rank]:
-            # Jumps number in i
-            n_jumps = h[i]
+        repeat_idx = np.repeat(idx_2, h[idx_2].astype(int))
+        times.extend(np.random.uniform(repeat_idx * stepsize, (repeat_idx + 1) * stepsize))
 
-            # Bounds of i
-            t_start = (i - 1) * stepsize
-            t_end = i * stepsize
-
-            # Generation of jump times for i
-            times_chunk[i:i+n_jumps] = np.random.uniform(t_start, t_end, size=(n_jumps,))
-
-    # Intervals with a single jump
-    if len(idx_1) > 0:
-        times_chunk[len(idx_2) // size:] = idx_1 * stepsize - 0.5 * stepsize
+    # Added and sorted jump times (intervals with single jump)
+    times.extend((idx_1 * stepsize) - (0.5 * stepsize))
+    jump_times = np.sort(times)
 
     # Gathered results from all processors
-    jump_times = comm.gather(times_chunk, root=root)
+    jump_times = comm.gather(jump_times, root=root)
 
     # Concatenate/sort the jump times
     if rank == 0:
