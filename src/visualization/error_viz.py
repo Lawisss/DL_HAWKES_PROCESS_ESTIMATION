@@ -88,7 +88,7 @@ def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]
 
 # Errors boxplots function
 
-def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["Benchmark", "MLP"], error_names: List[str] = ["$\eta$ Error", '$\eta$ Relative Error', '$\mu$ Error', '$\mu$ Relative Error'], folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
+def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["Benchmark", "MLP"], error_names: List[str] = ["$\eta$ Error", '$\eta$ Relative Error', '$\mu$ Error', '$\mu$ Relative Error'], showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
 
     """
     Plotted absolute/relative errors boxplots for benchmark and MLP models
@@ -97,6 +97,7 @@ def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["
         errors (List[np.ndarray], optional): Models eta and mu error / relative error (default: None)
         label_names (List[str], optional): Models names (default: ["Benchmark", "MLP"])
         error_names (List[str], optional): Errors names (default: ["$\eta$ Error", '$\eta$ Relative Error', '$\mu$ Error', '$\mu$ Relative Error'])
+        showfliers (bool, optional): Show outliers (default: True)
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "error_boxplots.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -127,7 +128,7 @@ def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["
     ax.minorticks_on()
     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    ax.boxplot(errors_list, labels)
+    ax.boxplot(errors_list, labels=labels, showfliers=showfliers)
 
     ax.set_title('Error Comparison', fontsize=16, pad=15)
     ax.set_xlabel('Model', fontsize=16, labelpad=15)
@@ -144,7 +145,7 @@ def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["
 def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarray] = None, label_names: List[str] = ["MLP"], 
                      error_names: List[str] = ["$\eta$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)", "$\mu$ Error ($\Delta$ = 5.0)"], 
                      error_rel_names: List[str] = ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"],
-                     folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
+                     showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
     
     """
     Plotted absolute/relative errors boxplots to measure variables effects
@@ -155,6 +156,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
         label_names (List[str], optional): Models names (default: ["Benchmark", "MLP"])
         error_names (List[str], optional): Errors names (default: ["$\eta$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)", "$\mu$ Error ($\Delta$ = 5.0)"])
         error_rel_names (List[str], optional): Relative Errors names (default: ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"])
+        showfliers (bool, optional): Show outliers (default: True)
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "error_boxplots.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -189,8 +191,8 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
         ax.minorticks_on()
         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    ax1.boxplot(errors_list, labels=labels_errors) 
-    ax2.boxplot(errors_rel_list, labels=labels_errors_rel)
+    ax1.boxplot(errors_list, labels=labels_errors, showfliers=showfliers) 
+    ax2.boxplot(errors_rel_list, labels=labels_errors_rel, showfliers=showfliers)
 
     ax1.set_title('Errors Comparison', fontsize=16, pad=15)
     ax2.set_title('Relative Errors Comparison', fontsize=16, pad=15)
