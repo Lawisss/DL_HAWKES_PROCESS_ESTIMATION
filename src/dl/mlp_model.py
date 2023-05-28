@@ -195,21 +195,38 @@ class MLPTrainer:
         return self.val_loss
 
 
-    # Cyclical Annealing function (checkpoint)
+    # Early stopping function (checkpoint)
 
-    def cyclical_annealing(self, best_loss: Optional[Union[float, int]] = float('inf'), no_improve_count: Optional[int] = 0) -> bool:
+    def early_stopping(self, best_loss: Optional[Union[float, int]] = float('inf'), no_improve_count: Optional[int] = 0) -> bool:
+        
+        """
+        Checked early stopping condition based on validation loss
 
-        current_cycle = self.cycle.item()
-        target_mult = min(current_cycle / self.min_cycles, 1)
+        Args:
+            best_loss (float or int, optional): Current best validation loss (default: float('inf'))
+            no_improve_count (int, optional): Number of epochs with no improvement in validation loss (default: 0)
 
-        if epoch >= self.kl_start:
-            new_weight = target_mult * min(2 * (epoch - self.kl_start - (current_cycle - 1) * self.kl_steep) / self.kl_steep, self.anneal_target)
+        Returns:
+            bool: True if early stopping condition is met, False otherwise
+        """
 
-            if (epoch - self.kl_start + 1) % self.kl_steep == 0:
-                self.cycle += 1
+        # Checked early stopping
+        # Save model if val_loss has decreased
+        if (self.val_loss + self.early_stop_delta) < best_loss:
+            
+            torch.save(copy.deepcopy(self.model.state_dict()), os.path.join(self.dirpath, self.best_model_dir, self.filename_best_model))
+            best_loss = self.val_loss
+            no_improve_count = 0
 
-            self.weight = new_weight
-            print(f"ANNEALING KLD: {self.weight}")
+        else:
+            no_improve_count += 1
+
+        # Early stopping condition
+        if no_improve_count >= self.early_stop_patience:
+            print(f"Early stopping, no val_loss improvement for {self.early_stop_patience} epochs")
+            return True
+        else:
+            return False
 
 
     # Loading model function (best model)
