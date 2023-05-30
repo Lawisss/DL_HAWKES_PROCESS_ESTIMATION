@@ -15,7 +15,7 @@ import variables.hawkes_var as hwk
 # VAE parameters (vae_model.py)
 
 INPUT_SIZE: int = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)            # VAE input size (HORIZON = 100)
-LATENT_SIZE: int = 15                                                     # Neurons in hidden layers (HORIZON = 100)
+LATENT_SIZE: int = 15                                                     # Latent space size (HORIZON = 100)
 INTERMEDIATE_SIZE: int = int(INPUT_SIZE * 0.75)                           # VAE output size
 
 LEARNING_RATE: float = 0.001                                              # Learning rate for optimizer
@@ -29,7 +29,7 @@ KL_STEEP: int = 1000
 ANNEAL_TARGET: int = 1
 MIN_CYCLES: int = 8
 
-# Model summary (mlp_model.py)
+# Model summary (vae_model.py)
 
 SUMMARY_MODEL: str = "VAE"                                                # Model name used for summary
 SUMMARY_MODE: str = "train"                                               # Summary modes: "train"/"eval"

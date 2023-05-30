@@ -19,6 +19,7 @@ from tqdm import tqdm
 import torch.optim as optim
 from torchinfo import summary
 from torch.utils.data import DataLoader
+from torch.nn.utils import clip_grad_norm_
 from torch.nn.functional import poisson_nll_loss
 from torch.utils.tensorboard import SummaryWriter
 
@@ -40,7 +41,10 @@ class PoissonVAE(nn.Module):
         self.intermediate_size = intermediate_size
 
         # Initialized encoder
-        self.encoder = nn.Sequential(nn.Linear(input_size, intermediate_size), nn.ReLU(), nn.Linear(intermediate_size, int(intermediate_size * 0.5)))
+        self.encoder = nn.Sequential(nn.Linear(input_size, intermediate_size), 
+                                     nn.ReLU(), 
+                                     nn.Linear(intermediate_size, int(intermediate_size * 0.5)))
+        
         self.latent_mean = nn.Linear(int(intermediate_size * 0.5), latent_size)
         self.latent_log_var = nn.Linear(int(intermediate_size * 0.5), latent_size)
 
@@ -71,7 +75,7 @@ class PoissonVAE(nn.Module):
         std = torch.exp(0.5 * log_var)
         epsilon = torch.randn_like(std, dtype=np.float32)
 
-        return mean + (epsilon * std)
+        return mean + (std * epsilon)
 
 
     # Encoded function
@@ -169,6 +173,15 @@ class VAETrainer:
         # VAE parameters
         self.model = PoissonVAE(self.input_size, self.latent_size, self.intermediate_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        self.weight = torch.tensor(0.0)
+        
+        # One epoch train/val loss parameters
+        self.train_loss = 0
+        self.val_loss = 0
+
+        # Training train/val losses parameters (Many epochs)
+        self.train_losses = np.zeros(self.max_epochs, dtype=np.float32)
+        self.val_losses = np.zeros(self.max_epochs, dtype=np.float32)
     
     # VAE loss function
 
@@ -237,6 +250,9 @@ class VAETrainer:
             
             # Backward pass (Autograd)
             loss.backward()
+
+            # Gradient clipping
+            clip_grad_norm_(self.model.parameters(), 1000)
             self.optimizer.step()
             self.train_loss += loss.detach().item() * x.size(0)
 
@@ -330,7 +346,7 @@ class VAETrainer:
         self.model.eval()
 
         # Forward pass
-        val_y_pred = self.model(val_x)
+        val_x_pred, val_mean, val_log_var = self.model(val_x)
 
         # Predictions Averages
         val_eta_pred = torch.mean(val_y_pred[:, 0], dtype=dtype).item()
@@ -338,7 +354,7 @@ class VAETrainer:
 
         print(f"{set_name} - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
 
-        return val_y_pred, val_eta_pred, val_mu_pred
+        return val_x_pred, val_mean, val_log_var
 
 
     # Training fonction (PyTorch Profiler = disable)
@@ -377,7 +393,7 @@ class VAETrainer:
                 self.val_losses[epoch] = self.evaluate(val_loader)
 
                 # Checked early stopping
-                if self.early_stopping():
+                if self.cyclical_annealing():
                     break
 
                 # Updated progress bar description
