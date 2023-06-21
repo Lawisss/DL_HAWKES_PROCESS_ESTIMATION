@@ -174,7 +174,7 @@ class VAETrainer:
         self.model = PoissonVAE(self.input_size, self.latent_size, self.intermediate_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.weight = torch.tensor(0.0)
-        
+        self.weight = torch.tensor(0.0, dtype=torch.float32)
         # One epoch train/val loss parameters
         self.train_loss = 0
         self.val_loss = 0
