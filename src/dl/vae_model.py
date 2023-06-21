@@ -18,9 +18,9 @@ import torch.nn as nn
 from tqdm import tqdm
 import torch.optim as optim
 from torchinfo import summary
+from torch.distributions import Poisson
 from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
-from torch.nn.functional import poisson_nll_loss
 from torch.utils.tensorboard import SummaryWriter
 
 from tools.utils import profiling, write_parquet
@@ -73,7 +73,7 @@ class PoissonVAE(nn.Module):
         """
 
         std = torch.exp(0.5 * log_var)
-        epsilon = torch.randn_like(std, dtype=np.float32)
+        epsilon = torch.randn_like(std, dtype=torch.float32)
 
         return mean + (std * epsilon)
 
@@ -173,8 +173,9 @@ class VAETrainer:
         # VAE parameters
         self.model = PoissonVAE(self.input_size, self.latent_size, self.intermediate_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
-        self.weight = torch.tensor(0.0)
         self.weight = torch.tensor(0.0, dtype=torch.float32)
+        self.cycle = torch.tensor(1.0, dtype=torch.float32)
+
         # One epoch train/val loss parameters
         self.train_loss = 0
         self.val_loss = 0
@@ -199,11 +200,11 @@ class VAETrainer:
         Returns:
             torch.Tensor: VAE loss
         """
+        lh = Poisson(rate=x_pred)
+        recon_loss = - torch.sum(lh.log_prob(x), dim=-1, dtype=torch.float32)
+        kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=torch.float32)
 
-        recon_loss = torch.sum(poisson_nll_loss(x_pred, x, reduction='none'), dim=-1, dtype=np.float32)
-        kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=np.float32)
-
-        return torch.mean(recon_loss + (self.weight * kl_loss), dtype=np.float32)
+        return recon_loss + (self.weight * kl_loss)
 
 
     # Sum-up model function
@@ -328,7 +329,7 @@ class VAETrainer:
     # Prediction function (estimated Hawkes parameters)
 
     @torch.no_grad()
-    def predict(self, val_x: torch.Tensor, dtype: Optional[torch.dtype] = torch.float32, set_name: Optional[str] = "Validation set") -> Tuple[torch.Tensor, float, float]:
+    def predict(self, val_x: torch.Tensor, dtype: Optional[torch.dtype] = torch.float32) -> Tuple[torch.Tensor, float, float]:
 
         """
         Estimated Hawkes parameters using validation dataset
@@ -336,7 +337,6 @@ class VAETrainer:
         Args:
             val_x (torch.Tensor): Input tensor for validation dataset
             dtype (torch.dtype): Type for tensor operations (default: torch.float32)
-            set_name (str): Dataset name (default: Validation set)
 
         Returns:
             Tuple[torch.Tensor, float, float]: Estimations for branching ratio (eta), and baseline intensity (mu)
@@ -346,15 +346,9 @@ class VAETrainer:
         self.model.eval()
 
         # Forward pass
-        val_x_pred, val_mean, val_log_var = self.model(val_x)
+        val_x_pred, _, _ = self.model(val_x)
 
-        # Predictions Averages
-        val_eta_pred = torch.mean(val_y_pred[:, 0], dtype=dtype).item()
-        val_mu_pred = torch.mean(val_y_pred[:, 1], dtype=dtype).item()
-
-        print(f"{set_name} - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
-
-        return val_x_pred, val_mean, val_log_var
+        return val_x_pred, _, _
 
 
     # Training fonction (PyTorch Profiler = disable)
@@ -393,7 +387,7 @@ class VAETrainer:
                 self.val_losses[epoch] = self.evaluate(val_loader)
 
                 # Checked early stopping
-                if self.cyclical_annealing():
+                if self.cyclical_annealing(epoch):
                     break
 
                 # Updated progress bar description
@@ -404,7 +398,6 @@ class VAETrainer:
 
                 # Added losses in TensorBoard at each epoch
                 writer.add_scalars("Loss", {"Training": self.train_losses[epoch], "Validation": self.val_losses[epoch]}, epoch)
-                writer.add_scalars("Log Loss", {"Training": np.log10(self.train_losses[epoch] + 1e-20), "Validation":  np.log10(self.val_losses[epoch] + 1e-20)}, epoch)
                 
         # Added model graph to TensorBoard
         writer.add_graph(self.model, val_x)
@@ -413,13 +406,11 @@ class VAETrainer:
         print(self.load_model())
 
         # Computed estimated parameters for validation set (After loaded best model)
-        val_y_pred, val_eta_pred, val_mu_pred = self.predict(val_x)
+        val_x_pred, _, _ = self.predict(val_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Baseline intensity Histogram", val_y_pred[:, 1], len(val_y), bins="auto")
-        writer.add_histogram("Branching ratio Histogram", val_y_pred[:, 0], len(val_y), bins="auto")
-        writer.add_histogram("Prediction Histogram", val_y_pred, len(val_y), bins="auto")
-        writer.add_histogram("Validation Histogram", val_y, len(val_y), bins="auto")
+        writer.add_histogram("Prediction Histogram", val_x_pred, len(val_x), bins="auto")
+        writer.add_histogram("Validation Histogram", val_x, len(val_x), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
@@ -430,15 +421,13 @@ class VAETrainer:
                                     'val_losses': self.val_losses}), 
                                     filename=f"{self.run_name}_losses.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
-        
-        write_parquet(pl.DataFrame({'eta_true': val_y[:, 0].numpy(), 
-                                    'mu_true': val_y[:, 1].numpy(),
-                                    'eta_pred': val_y_pred[:, 0].numpy(), 
-                                    'mu_pred': val_y_pred[:, 1].numpy()}), 
+
+        write_parquet(pl.DataFrame({'x_true': val_x.numpy(), 
+                                    'x_pred': val_x_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
-        return self.model, self.train_losses, self.val_losses, val_y_pred, val_eta_pred, val_mu_pred
+        return self.model, self.train_losses, self.val_losses, val_x_pred
     
 
     # Testing fonction (PyTorch Profiler = disable)
@@ -464,25 +453,21 @@ class VAETrainer:
         print(self.load_model())
 
         # Forward pass for predictions
-        test_y_pred, test_eta_pred, test_mu_pred = self.predict(test_x, set_name = "Test set")
+        test_x_pred, _, _ = self.predict(test_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Baseline intensity Histogram", test_y_pred[:, 1], len(test_y), bins="auto")
-        writer.add_histogram("Branching ratio Histogram", test_y_pred[:, 0], len(test_y), bins="auto")
-        writer.add_histogram("Prediction Histogram", test_y_pred, len(test_y), bins="auto")
-        writer.add_histogram("Test Histogram", test_y, len(test_y), bins="auto")
+        writer.add_histogram("Prediction Histogram", test_x_pred, len(test_x), bins="auto")
+        writer.add_histogram("Test Histogram", test_x, len(test_x), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
 
         # Written parameters to parquet file
-        write_parquet(pl.DataFrame({'eta_true': test_y[:, 0].numpy(), 
-                                    'mu_true': test_y[:, 1].numpy(),
-                                    'eta_pred': test_y_pred[:, 0].numpy(), 
-                                    'mu_pred': test_y_pred[:, 1].numpy()}), 
+        write_parquet(pl.DataFrame({'x_true': test_x.numpy(), 
+                                    'x_pred': test_x_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
-        return test_y_pred.numpy(), test_eta_pred, test_mu_pred
+        return test_x_pred
 
