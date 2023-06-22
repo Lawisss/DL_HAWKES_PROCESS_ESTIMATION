@@ -90,7 +90,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, reco
 
 # MLE function
 
-def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: bool = True, filename: Optional[str] ='predictions_mle.parquet', args: Optional[Callable] = None):
+def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: bool = True, filename: Optional[str] ='predictions_mle.parquet', args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
@@ -140,6 +140,27 @@ def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: b
         write_parquet(pl.DataFrame(np.column_stack((eta_true, mu_true, eta_pred, mu_pred)), schema=["eta_true", "mu_true", "eta_pred", "mu_pred"]), filename=filename)
 
     return np.column_stack((eta_pred, mu_pred)), eta_pred, mu_pred
+
+
+# Computed Hawkes intensity
+
+def hawkes_intensity(alpha, beta, mu, discretized_process, args: Optional[Callable] = None):
+
+    # Default parameters
+    default_params = {"time_horizon": hwk.TIME_HORIZON,
+                      "discretise_step": hwk.DISCRETISE_STEP}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    t = np.arange(0, (dict_args['time_horizon'] + 1), dict_args['discretise_step'], dtype=np.float32)
+    intensity = np.zeros(len(t), dtype=np.float32)
+
+    for i in range(len(t)):
+        intensity[i] = np.sum(np.exp(beta * (discretized_process[discretized_process < t[i]] - t[i])))
+
+    return (intensity * alpha) + mu
+
 
 # Estimated Hawkes process
 

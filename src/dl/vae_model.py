@@ -18,7 +18,7 @@ import torch.nn as nn
 from tqdm import tqdm
 import torch.optim as optim
 from torchinfo import summary
-from torch.distributions import Poisson
+from torch.nn.functional import poisson_nll_loss
 from torch.utils.data import DataLoader
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.tensorboard import SummaryWriter
@@ -200,11 +200,14 @@ class VAETrainer:
         Returns:
             torch.Tensor: VAE loss
         """
-        lh = Poisson(rate=x_pred)
-        recon_loss = - torch.sum(lh.log_prob(x), dim=-1, dtype=torch.float32)
+
+        # lh = torch.distributions.Poisson(rate=x_pred)
+        # recon_loss = -torch.sum(lh.log_prob(x), dim=-1)
+
+        recon_loss = torch.sum(poisson_nll_loss(x_pred, x, reduction='none'), dim=-1, dtype=torch.float32)
         kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=torch.float32)
 
-        return recon_loss + (self.weight * kl_loss)
+        return torch.mean(recon_loss + (self.weight * kl_loss), dtype=torch.float32)
 
 
     # Sum-up model function
@@ -212,7 +215,7 @@ class VAETrainer:
     def summary_model(self) -> str:
 
         """
-        Return summary of model architecture
+        Summary of model architecture
 
         Returns:
             str: Summary of model's architecture
@@ -293,15 +296,32 @@ class VAETrainer:
 
     # Cyclical Annealing function (checkpoint)
 
-    def cyclical_annealing(self, epoch) -> None:
+    def cyclical_annealing(self, epoch: int) -> None:
 
+        """
+        Apply cyclical annealing to KL divergence weight
+        
+        Args:
+            epoch (int): Current epoch number
+
+        Returns:
+            None: Function does not return anything
+        
+        """
+        
+        # Retrieve current cycle and target multiplier
         current_cycle = self.cycle.item()
         target_mult = min(current_cycle / self.min_cycles, 1)
 
+        # Save best model
+        torch.save(copy.deepcopy(self.model.state_dict()), os.path.join(self.dirpath, self.best_model_dir, self.filename_best_model))
+
         if epoch >= self.kl_start:
+            # Compute new weight based on target multiplier and annealing parameters
             new_weight = target_mult * min(2 * (epoch - self.kl_start - (current_cycle - 1) * self.kl_steep) / self.kl_steep, self.anneal_target)
 
             if (epoch - self.kl_start + 1) % self.kl_steep == 0:
+                # Increment cycle counter
                 self.cycle += 1
 
             self.weight = new_weight
@@ -329,14 +349,13 @@ class VAETrainer:
     # Prediction function (estimated Hawkes parameters)
 
     @torch.no_grad()
-    def predict(self, val_x: torch.Tensor, dtype: Optional[torch.dtype] = torch.float32) -> Tuple[torch.Tensor, float, float]:
+    def predict(self, val_x: torch.Tensor) -> Tuple[torch.Tensor, float, float]:
 
         """
         Estimated Hawkes parameters using validation dataset
 
         Args:
             val_x (torch.Tensor): Input tensor for validation dataset
-            dtype (torch.dtype): Type for tensor operations (default: torch.float32)
 
         Returns:
             Tuple[torch.Tensor, float, float]: Estimations for branching ratio (eta), and baseline intensity (mu)

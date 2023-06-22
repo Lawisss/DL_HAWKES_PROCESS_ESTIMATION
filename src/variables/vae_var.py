@@ -19,7 +19,7 @@ LATENT_SIZE: int = 15                                                     # Late
 INTERMEDIATE_SIZE: int = int(INPUT_SIZE * 0.75)                           # VAE output size
 
 LEARNING_RATE: float = 0.001                                              # Learning rate for optimizer
-MAX_EPOCHS: int = 10                                                  # Maximum number of epochs for training
+MAX_EPOCHS: int = 10_000                                                  # Maximum number of epochs for training
 
 FILENAME_BEST_MODEL: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") \
             + "_" + socket.gethostname().upper() + "_" + "best_model.pt"  # Filename to save best model weights
