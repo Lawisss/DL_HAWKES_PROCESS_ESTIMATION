@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""VAE module
+"""VAE with dueling decoder module
 
-File containing VAE conditional intensities estimation (lambda)
+File containing VAE conditional intensities and aggregated/binned hawkes process estimation (lambda, eta/mu)
 
 """
 
@@ -29,11 +29,10 @@ import variables.eval_var as eval
 import variables.prep_var as prep
 
 
-# Poisson VAE creation
+# Poisson VAE with dueling decoder
 
 class PoissonVAE(nn.Module):
     def __init__(self, input_size: Optional[int] = None, latent_size: Optional[int] = None, intermediate_size: Optional[int] = None):
-        super().__init__()
 
         # Initialized parameters
         self.input_size = input_size
@@ -42,20 +41,28 @@ class PoissonVAE(nn.Module):
 
         # Initialized encoder
         self.encoder = nn.Sequential(nn.Linear(input_size, intermediate_size), 
-                                     nn.ReLU(), 
+                                     nn.ReLU(),
                                      nn.Linear(intermediate_size, int(intermediate_size * 0.5)))
-        
+
         self.latent_mean = nn.Linear(int(intermediate_size * 0.5), latent_size)
         self.latent_log_var = nn.Linear(int(intermediate_size * 0.5), latent_size)
 
-        # Initialized decoder
-        self.decoder = nn.Sequential(nn.Linear(latent_size, int(intermediate_size * 0.5)),
-                                     nn.ReLU(),
-                                     nn.Linear(int(intermediate_size * 0.5), intermediate_size),
-                                     nn.ReLU(),
-                                     nn.Linear(intermediate_size, input_size),
-                                     nn.Softplus())
+        # Initialized decoders
+        self.intensities_decoder = nn.Sequential(nn.Linear(latent_size, int(intermediate_size * 0.5)),
+                                                 nn.ReLU(),
+                                                 nn.Linear(int(intermediate_size * 0.5), intermediate_size),
+                                                 nn.ReLU(),
+                                                 nn.Linear(intermediate_size, input_size),
+                                                 nn.Softplus())
 
+        self.parameters_decoder = nn.Sequential(nn.Linear(latent_size, int(intermediate_size * 0.5)),
+                                                nn.ReLU(),
+                                                nn.Linear(int(intermediate_size * 0.5), 15),
+                                                nn.ReLU(),
+                                                nn.Linear(15, 15),
+                                                nn.ReLU(),
+                                                nn.Linear(15, 2),
+                                                nn.Softplus())
 
     # Reparameterized function
 
@@ -73,10 +80,10 @@ class PoissonVAE(nn.Module):
         """
 
         std = torch.exp(0.5 * log_var)
-        epsilon = torch.randn_like(std, dtype=torch.float32)
+        epsilon = torch.randn_like(std)
 
         return mean + (std * epsilon)
-
+    
 
     # Encoded function
 
@@ -99,12 +106,12 @@ class PoissonVAE(nn.Module):
         return mean, log_var
 
 
-    # Decoded function
+    # Decoded intensities function
 
-    def decode(self, z: torch.Tensor) -> torch.Tensor:
+    def decode_intensities(self, z):
 
         """
-        Decode latent variable into reconstructed data
+        Decode latent variable into reconstructed intensities
 
         Args:
             z (torch.Tensor): Latent variable
@@ -113,31 +120,51 @@ class PoissonVAE(nn.Module):
             torch.Tensor: Reconstructed data
         """
 
-        x_pred = self.decoder(z)
+        x_pred = self.intensities_decoder(z)
 
         return x_pred
 
+
+    # Decoded parameters function
+
+    def decode_parameters(self, z):
+
+        """
+        Decode latent variable into reconstructed parameters (eta/mu)
+
+        Args:
+            z (torch.Tensor): Latent variable
+
+        Returns:
+            torch.Tensor: Reconstructed data
+        """
+
+        params_pred = self.parameters_decoder(z)
+
+        return params_pred
+    
 
     # Spread inputs through encoding/decoding
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
 
         """
-        Poisson VAE forward pass
+        Poisson VAE with dueling decoder forward pass
 
         Args:
             x (torch.Tensor): Input data
 
         Returns:
-            tuple[torch.Tensor, torch.Tensor, torch.Tensor]: Reconstructed data, mean, and log variance
+            tuple[torch.Tensor, torch.Tensor, torch.Tensor]: Reconstructed outputs, mean, and log variance
         """
 
         mean, log_var = self.encode(x)
-        z = self.reparameterize(mean, log_var)
-        x_pred = self.decode(z)
+        latent = self.reparameterize(mean, log_var)
+        intensities = self.decode_intensities(latent)
+        parameters = self.decode_parameters(latent)
+        outputs = torch.cat((intensities, parameters), dim=1)
 
-        return x_pred, mean, log_var
-
+        return mean, log_var, outputs
 
 
 class VAETrainer:
@@ -202,10 +229,11 @@ class VAETrainer:
             torch.Tensor: VAE loss
         """
 
-        recon_loss = torch.sum(poisson_nll_loss(x_pred, x, reduction='none'), dim=-1, dtype=torch.float32)
+        param_loss = nn.MSELoss()(x_pred[:, self.input_size:(self.input_size + 2)], x[:, self.input_size:(self.input_size + 2)])
+        recon_loss = torch.sum(poisson_nll_loss(x_pred[:, :self.input_size], x[:, :self.input_size], reduction='none'), dim=-1, dtype=torch.float32)
         kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=torch.float32)
 
-        return torch.mean(recon_loss + (self.weight * kl_loss), dtype=torch.float32)
+        return torch.mean(recon_loss + 250 * param_loss + (1 / (1 + self.weight)) * kl_loss, dtype=torch.float32)
 
 
     # Sum-up model function

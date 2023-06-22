@@ -209,3 +209,98 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
     plt.tight_layout(h_pad=3)
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
+
+
+# Intensity reconstruction plot function
+
+def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated_intensities: List[np.ndarray] = None, label_names: List[str] = ["Decoded Intensity", "Integrated Intensity"], 
+                        folder: Optional[str] = "photos", filename: Optional[str] = "reconstruction_plot.pdf", args: Optional[Callable] = None) -> None:
+
+    """
+    Plot intensities reconstruction
+
+    Args:
+        decoded_intensities (List[np.ndarray]): Decoded intensity list
+        integrated_intensities (List[np.ndarray]): Integrated intensity list
+        label_names (List[str], optional): Intensity type (default: ["Decoded Intensity", "Integrated Intensity"])
+        folder (str, optional): Sub-folder name in results folder (default: "photos")
+        filename (str, optional): Parquet filename (default: "reconstruction_plot.pdf")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+        
+    """
+        
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Built boxplots
+    plt.style.use(['science', 'ieee'])
+    
+    _, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(35, 10))
+
+    for ax in (ax1, ax2, ax3, ax4):
+        ax.grid(which='major', color='#999999', linestyle='--')
+        ax.minorticks_on()
+        ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
+    
+    ax1.plot(range(decoded_intensities[0].shape[1]), decoded_intensities[0], color='red', label=label_names[0])
+    ax1.plot(range(integrated_intensities[0].shape[1]), integrated_intensities[0], color='blue', label=label_names[1])
+
+    ax2.plot(range(decoded_intensities[1].shape[1]), decoded_intensities[1], color='red', label=label_names[0])
+    ax2.plot(range(integrated_intensities[1].shape[1]), integrated_intensities[1], color='blue', label=label_names[1])
+
+    ax3.plot(range(decoded_intensities[2].shape[1]), decoded_intensities[2], color='red', label=label_names[0])
+    ax3.plot(range(integrated_intensities[2].shape[1]), integrated_intensities[2], color='blue', label=label_names[1])
+
+    ax4.plot(range(decoded_intensities[3].shape[1]), decoded_intensities[3], color='red', label=label_names[0])
+    ax4.plot(range(integrated_intensities[3].shape[1]), integrated_intensities[3], color='blue', label=label_names[1])
+
+    ax1.set_title('Intensity Reconstruction', fontsize=16, pad=15)
+    ax2.set_title('Intensity Reconstruction', fontsize=16, pad=15)
+    ax3.set_title('Intensity Reconstruction', fontsize=16, pad=15)
+    ax4.set_title('Intensity Reconstruction', fontsize=16, pad=15)
+
+    ax1.set_xlabel('Time', fontsize=16, labelpad=15)
+    ax1.set_ylabel('Intensity', fontsize=16, labelpad=15)
+    ax1.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+    ax2.set_xlabel('Time', fontsize=16, labelpad=15)
+    ax2.set_ylabel('Intensity', fontsize=16, labelpad=15)
+    ax2.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+    ax3.set_xlabel('Time', fontsize=16, labelpad=15)
+    ax3.set_ylabel('Intensity', fontsize=16, labelpad=15)
+    ax3.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+    ax4.set_xlabel('Time', fontsize=16, labelpad=15)
+    ax4.set_ylabel('Intensity', fontsize=16, labelpad=15)
+    ax4.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+    ax1.legend(ax1.get_legend_handles_labels()[0], ax1.get_legend_handles_labels()[1], loc="best", fontsize=12)
+    ax2.legend(ax2.get_legend_handles_labels()[0], ax2.get_legend_handles_labels()[1], loc="best", fontsize=12)
+    ax3.legend(ax3.get_legend_handles_labels()[0], ax3.get_legend_handles_labels()[1], loc="best", fontsize=12)
+    ax4.legend(ax4.get_legend_handles_labels()[0], ax4.get_legend_handles_labels()[1], loc="best", fontsize=12)
+
+    # _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(35, 10))
+    
+    # for ax, decoded, integrated, label in zip(axes, decoded_intensities, integrated_intensities, label_names):
+        
+    #     ax.grid(which='major', color='#999999', linestyle='--')
+    #     ax.minorticks_on()
+    #     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
+        
+    #     ax.plot(range(decoded.shape[1]), decoded, color='red', label=label_names[0])
+    #     ax.plot(range(integrated.shape[1]), integrated, color='blue', label=label_names[1])
+
+    #     ax.set_title('Intensity Reconstruction', fontsize=16, pad=15)
+    #     ax.set_xlabel('Time', fontsize=16, labelpad=15)
+    #     ax.set_ylabel('Intensity', fontsize=16, labelpad=15)
+    #     ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    #     ax.legend(fontsize=12)
+
+    plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
+    plt.tight_layout(h_pad=3)
+    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
+    plt.show()

@@ -63,7 +63,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, reco
     Args:
         alpha (np.ndarray): Excitation matrix of each Hawkes process
         beta (np.ndarray): Decay matrix of each Hawkes process
-        mu (np.ndarray): Base intensity of each Hawkes process
+        mu (np.ndarray): Baseline intensity of each Hawkes process
         record (bool, optional): Record results in parquet file (default: True)
         filename (str, optional): Parquet filename to save results (default: "hawkes_simulations.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -142,22 +142,43 @@ def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: b
     return np.column_stack((eta_pred, mu_pred)), eta_pred, mu_pred
 
 
-# Computed Hawkes intensity
+# Hawkes process intensity function
 
-def hawkes_intensity(alpha, beta, mu, discretized_process, args: Optional[Callable] = None):
+def hawkes_intensity(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, simulated_events_seqs: np.ndarray, record: bool = True, filename: Optional[str] ='hawkes_intensities.parquet', args: Optional[Callable] = None) -> np.ndarray:
+    
+    """
+    Computed hawkes process intensities from hyperparameters and discretized process
+
+    Args:
+        alpha (np.ndarray): Excitation matrix of each Hawkes process
+        beta (np.ndarray): Decay matrix of each Hawkes process
+        mu (np.ndarray): Baseline intensity of each Hawkes process
+        simulated_events_seqs (np.ndarray): Hawkes processes
+        record (bool, optional): Record results in parquet file (default: True)
+        filename (str, optional): Parquet filename to save results (default: "hawkes_intensities.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        np.ndarray: Hawkes process intensity
+    """
 
     # Default parameters
-    default_params = {"time_horizon": hwk.TIME_HORIZON,
-                      "discretise_step": hwk.DISCRETISE_STEP}
+    default_params = {"time_horizon": hwk.TIME_HORIZON, "discretise_step": hwk.DISCRETISE_STEP}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
+    # Initialized horizon and intensity
     t = np.arange(0, (dict_args['time_horizon'] + 1), dict_args['discretise_step'], dtype=np.float32)
     intensity = np.zeros(len(t), dtype=np.float32)
 
+    # Computed intensity
     for i in range(len(t)):
-        intensity[i] = np.sum(np.exp(beta * (discretized_process[discretized_process < t[i]] - t[i])))
+        intensity[i] = np.sum(np.exp(beta * (simulated_events_seqs[simulated_events_seqs < t[i]] - t[i])))
+
+    # Written parquet file
+    if record:
+        write_parquet(pl.DataFrame({"intensities": (intensity * alpha) + mu}), filename=filename)
 
     return (intensity * alpha) + mu
 

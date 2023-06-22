@@ -12,12 +12,11 @@ from datetime import datetime
 
 import variables.hawkes_var as hwk
 
-# VAE parameters (vae_model.py)
+# VAE parameters (vae_model.py, dueling_decoder.py)
 
 INPUT_SIZE: int = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)            # VAE input size (HORIZON = 100)
 LATENT_SIZE: int = 15                                                     # Latent space size (HORIZON = 100)
 INTERMEDIATE_SIZE: int = int(INPUT_SIZE * 0.75)                           # VAE output size
-
 LEARNING_RATE: float = 0.001                                              # Learning rate for optimizer
 MAX_EPOCHS: int = 10_000                                                  # Maximum number of epochs for training
 

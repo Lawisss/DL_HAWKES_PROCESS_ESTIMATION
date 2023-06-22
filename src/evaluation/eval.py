@@ -7,18 +7,21 @@ File containing model evaluation functions
 
 """
 
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, Callable
 
 import numpy as np
 import pandas as pd
 import polars as pl
+from scipy.integrate import quad
 
+import variables.hawkes_var as hwk
 from tools.utils import write_parquet
+from hawkes.simulation import hawkes_intensity
 
 
 # Error / Relative error function
 
-def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: Optional[str] = "Benchmark", record: bool = True, filename: Optional[str] = "errors.parquet") -> Tuple[np.ndarray, np.ndarray]:
+def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: Optional[str] = "Benchmark", record: bool = True, filename: Optional[str] = "errors.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     
     """
     Computed absolute error and relative error between true and predicted values
@@ -57,3 +60,55 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
         write_parquet(pl.DataFrame(np.column_stack((eta_error, eta_rel_error, mu_error, mu_rel_error)), schema=["eta_error", "eta_rel_error", "mu_error", "mu_rel_error"]), filename=filename)
 
     return pl.DataFrame(np.column_stack((eta_error, eta_rel_error, mu_error, mu_rel_error)), schema=["eta_error", "eta_rel_error", "mu_error", "mu_rel_error"])
+
+
+# Normalised Root Mean Square Error (NRMSE) function
+
+def compute_nrmse(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, simulated_events_seqs: Union[np.ndarray, pl.DataFrame, pd.DataFrame], decoded_intensity: Union[np.ndarray, pl.DataFrame, pd.DataFrame], record: bool = True, filename: Optional[str] = "intensity_error.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray]:
+
+    """
+    Computed NRMSE between predicted intensities and the integrated intensities.
+
+    Args:
+        alpha (np.ndarray): Excitation matrix of each Hawkes process
+        beta (np.ndarray): Decay matrix of each Hawkes process
+        mu (np.ndarray): Baseline intensity of each Hawkes process
+        simulated_events_seqs (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Simulated event sequences of each Hawkes process
+        decoded_intensity (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Predicted intensities
+        record (bool, optional): Record results in parquet file (default: True)
+        filename (str, optional): Parquet filename to save results (default: "intensity_error.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        pl.DataFrame: NRMSE
+    """
+        
+    # Default parameters
+    default_params = {"time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Checked types
+    simulated_events_seqs = simulated_events_seqs.to_numpy() if not isinstance(simulated_events_seqs, np.ndarray) else simulated_events_seqs
+    decoded_intensity = decoded_intensity.to_numpy() if not isinstance(decoded_intensity, np.ndarray) else decoded_intensity
+
+    # Initialized intensities
+    true_intensity = hawkes_intensity(alpha, beta, mu, simulated_events_seqs)
+    integrated_intensity = np.zeros(100, dtype=np.float32)
+
+    # Computed integrated intensity
+    for k in range(1, dict_args['time_horizon'] + 1):
+        integrated_intensity[k - 1] = quad(lambda x: true_intensity[int(x * 1000) + 1], k - 1, k, limit=100)[0]
+    
+    # Computed NRMSE
+    nrmse = np.sqrt(np.mean((decoded_intensity - integrated_intensity)**2)) / (np.max(integrated_intensity) - np.min(integrated_intensity))
+    
+    # Printed NRMSE
+    print(pl.DataFrame({"NRMSE": round(nrmse, 4)}))
+
+    # Written parquet file
+    if record:
+        write_parquet(pl.DataFrame(np.column_stack((decoded_intensity, integrated_intensity)), schema=["decoded_intensity", "integrated_intensity"]), filename=filename)
+
+    return pl.DataFrame(np.column_stack((decoded_intensity, integrated_intensity)), schema=["decoded_intensity", "integrated_intensity"])
