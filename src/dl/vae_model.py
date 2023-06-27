@@ -243,7 +243,7 @@ class VAETrainer:
         # Training mode
         self.model.train()
 
-        for x, y in train_loader:
+        for x, _ in train_loader:
 
             # Forward pass (Autograd)
             self.optimizer.zero_grad()
@@ -281,7 +281,7 @@ class VAETrainer:
         # Evaluation mode
         self.model.eval()
         
-        for x, y in val_loader:
+        for x, _ in val_loader:
             
             x_pred, mean, log_var = self.model(x)
             loss = self.vae_loss(x, x_pred, mean, log_var)
@@ -316,8 +316,8 @@ class VAETrainer:
 
         if epoch >= self.kl_start:
             # Compute new weight based on target multiplier and annealing parameters
-            new_weight = target_mult * min(2 * (epoch - self.kl_start - (current_cycle - 1) * self.kl_steep) / self.kl_steep, self.anneal_target)
-
+            new_weight = target_mult * min(2 * (epoch - self.kl_start - (current_cycle - 1) * (self.kl_steep)) / self.kl_steep, self.anneal_target)
+                                               
             if (epoch - self.kl_start + 1) % self.kl_steep == 0:
                 # Increment cycle counter
                 self.cycle += 1

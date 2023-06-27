@@ -60,7 +60,7 @@ def hyper_params_simulation(record: bool = True, filename: Optional[str] = "hawk
     mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
 
     # Written parquet file
-    if record:
+    if record is True:
         write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "eta": eta, "mu": mu}), filename=filename)
 
     return np.array([alpha, beta, eta, mu], dtype=np.float32).T, alpha, beta, eta, mu

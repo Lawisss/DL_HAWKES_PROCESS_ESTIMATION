@@ -23,10 +23,10 @@ MAX_EPOCHS: int = 10_000                                                  # Maxi
 FILENAME_BEST_MODEL: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") \
             + "_" + socket.gethostname().upper() + "_" + "best_model.pt"  # Filename to save best model weights
 
-KL_START: int = 2000
-KL_STEEP: int = 1000
-ANNEAL_TARGET: int = 1
-MIN_CYCLES: int = 8
+KL_START: int = 2000                                                      # KL divergence initial value
+KL_STEEP: int = 1000                                                      # KL divergence increase factor
+ANNEAL_TARGET: int = 1                                                    # KL divergence target value
+MIN_CYCLES: int = 8                                                       # Minimum number of training cycles
 
 # Model summary (vae_model.py)
 

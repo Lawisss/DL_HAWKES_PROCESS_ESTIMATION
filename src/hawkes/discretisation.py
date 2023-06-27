@@ -51,7 +51,7 @@ def discretise(jump_times: List, record: bool = True, filename: Optional[str] = 
         counts[j], _ = np.histogram(h, bins=np.linspace(0, dict_args['time_horizon'], num_bins + 1))
 
     # Written parquet file
-    if record:
+    if record is True:
         write_parquet(pl.DataFrame(counts, schema=np.arange(num_bins, dtype=np.int32).astype(str).tolist()), filename=filename)
     
     return counts

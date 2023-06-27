@@ -214,7 +214,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
 # Intensity reconstruction plot function
 
 def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated_intensities: List[np.ndarray] = None, label_names: List[str] = ["Decoded Intensity", "Integrated Intensity"], 
-                        folder: Optional[str] = "photos", filename: Optional[str] = "reconstruction_plot.pdf", args: Optional[Callable] = None) -> None:
+                        params_names: List[str] = [[1.0, 0.2], [3.0, 0.2], [1.0, 0.7], [3.0, 0.7]], folder: Optional[str] = "photos", filename: Optional[str] = "reconstruction_plot.pdf", args: Optional[Callable] = None) -> None:
 
     """
     Plot intensities reconstruction
@@ -235,72 +235,34 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
-    # Built boxplots
-    plt.style.use(['science', 'ieee'])
-    
-    _, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(35, 10))
+    # Converted to array
+    decoded_intensities = [decoded_intensity.to_numpy() if not isinstance(decoded_intensity, np.ndarray) else decoded_intensity for decoded_intensity in decoded_intensities]
+    integrated_intensities = [integrated_intensity.to_numpy() if not isinstance(integrated_intensity, np.ndarray) else integrated_intensity for integrated_intensity in integrated_intensities]
 
-    for ax in (ax1, ax2, ax3, ax4):
+    # Built lineplots + NRMSE
+    plt.style.use(['science', 'ieee'])
+
+    _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 22))
+    
+    for ax, decoded, integrated, params in zip(axes, decoded_intensities, integrated_intensities, params_names):
+        
         ax.grid(which='major', color='#999999', linestyle='--')
         ax.minorticks_on()
         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
-    
-    ax1.plot(range(decoded_intensities[0].shape[1]), decoded_intensities[0], color='red', label=label_names[0])
-    ax1.plot(range(integrated_intensities[0].shape[1]), integrated_intensities[0], color='blue', label=label_names[1])
-
-    ax2.plot(range(decoded_intensities[1].shape[1]), decoded_intensities[1], color='red', label=label_names[0])
-    ax2.plot(range(integrated_intensities[1].shape[1]), integrated_intensities[1], color='blue', label=label_names[1])
-
-    ax3.plot(range(decoded_intensities[2].shape[1]), decoded_intensities[2], color='red', label=label_names[0])
-    ax3.plot(range(integrated_intensities[2].shape[1]), integrated_intensities[2], color='blue', label=label_names[1])
-
-    ax4.plot(range(decoded_intensities[3].shape[1]), decoded_intensities[3], color='red', label=label_names[0])
-    ax4.plot(range(integrated_intensities[3].shape[1]), integrated_intensities[3], color='blue', label=label_names[1])
-
-    ax1.set_title('Intensity Reconstruction', fontsize=16, pad=15)
-    ax2.set_title('Intensity Reconstruction', fontsize=16, pad=15)
-    ax3.set_title('Intensity Reconstruction', fontsize=16, pad=15)
-    ax4.set_title('Intensity Reconstruction', fontsize=16, pad=15)
-
-    ax1.set_xlabel('Time', fontsize=16, labelpad=15)
-    ax1.set_ylabel('Intensity', fontsize=16, labelpad=15)
-    ax1.tick_params(axis='both', which='major', labelsize=14, pad=8)
-
-    ax2.set_xlabel('Time', fontsize=16, labelpad=15)
-    ax2.set_ylabel('Intensity', fontsize=16, labelpad=15)
-    ax2.tick_params(axis='both', which='major', labelsize=14, pad=8)
-
-    ax3.set_xlabel('Time', fontsize=16, labelpad=15)
-    ax3.set_ylabel('Intensity', fontsize=16, labelpad=15)
-    ax3.tick_params(axis='both', which='major', labelsize=14, pad=8)
-
-    ax4.set_xlabel('Time', fontsize=16, labelpad=15)
-    ax4.set_ylabel('Intensity', fontsize=16, labelpad=15)
-    ax4.tick_params(axis='both', which='major', labelsize=14, pad=8)
-
-    ax1.legend(ax1.get_legend_handles_labels()[0], ax1.get_legend_handles_labels()[1], loc="best", fontsize=12)
-    ax2.legend(ax2.get_legend_handles_labels()[0], ax2.get_legend_handles_labels()[1], loc="best", fontsize=12)
-    ax3.legend(ax3.get_legend_handles_labels()[0], ax3.get_legend_handles_labels()[1], loc="best", fontsize=12)
-    ax4.legend(ax4.get_legend_handles_labels()[0], ax4.get_legend_handles_labels()[1], loc="best", fontsize=12)
-
-    # _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(35, 10))
-    
-    # for ax, decoded, integrated, label in zip(axes, decoded_intensities, integrated_intensities, label_names):
         
-    #     ax.grid(which='major', color='#999999', linestyle='--')
-    #     ax.minorticks_on()
-    #     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
-        
-    #     ax.plot(range(decoded.shape[1]), decoded, color='red', label=label_names[0])
-    #     ax.plot(range(integrated.shape[1]), integrated, color='blue', label=label_names[1])
+        ax.plot(range(len(decoded)), decoded, color='red', label=label_names[0])
+        ax.plot(range(len(integrated)), integrated, color='blue', label=label_names[1])
 
-    #     ax.set_title('Intensity Reconstruction', fontsize=16, pad=15)
-    #     ax.set_xlabel('Time', fontsize=16, labelpad=15)
-    #     ax.set_ylabel('Intensity', fontsize=16, labelpad=15)
-    #     ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
-    #     ax.legend(fontsize=12)
+        nrmse = np.sqrt(np.mean((decoded - integrated)**2)) / (np.max(integrated) - np.min(integrated))
+        
+        #$\beta$: {params[0]}, $\eta$: {params[1]}, 
+        ax.set_title(r"Intensity Reconstruction ($\beta$ = {0}, $\eta$ = {1}, NRMSE = {2:.4f})".format(params[0], params[1], nrmse), fontsize=16, pad=15)
+        ax.set_xlabel("Time", fontsize=16, labelpad=15)
+        ax.set_ylabel("Intensity", fontsize=16, labelpad=15)
+        ax.tick_params(axis="both", which="major", labelsize=14, pad=8)
+        ax.legend(loc="best", fontsize=12)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
-    plt.tight_layout(h_pad=3)
+    plt.tight_layout(pad=3, h_pad=3)
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
