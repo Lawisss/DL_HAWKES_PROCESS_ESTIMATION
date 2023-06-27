@@ -144,15 +144,12 @@ def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: b
 
 # Hawkes process intensity function
 
-def hawkes_intensity(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, simulated_events_seqs: np.ndarray, record: bool = True, filename: Optional[str] ='hawkes_intensities.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def hawkes_intensity(simulated_events_seqs: np.ndarray, record: bool = True, filename: Optional[str] ='hawkes_intensities.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Computed hawkes process intensities from hyperparameters and discretized process
 
     Args:
-        alpha (np.ndarray): Excitation matrix of each Hawkes process
-        beta (np.ndarray): Decay matrix of each Hawkes process
-        mu (np.ndarray): Baseline intensity of each Hawkes process
         simulated_events_seqs (np.ndarray): Hawkes processes
         record (bool, optional): Record results in parquet file (default: True)
         filename (str, optional): Parquet filename to save results (default: "hawkes_intensities.parquet")
@@ -163,18 +160,26 @@ def hawkes_intensity(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, simula
     """
 
     # Default parameters
-    default_params = {"time_horizon": hwk.TIME_HORIZON, "discretise_step": hwk.DISCRETISE_STEP}
+    default_params = {"expected_activity": hwk.EXPECTED_ACTIVITY, 
+                      "time_horizon": hwk.TIME_HORIZON, 
+                      "discretise_step": hwk.DISCRETISE_STEP}
 
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
+    # Initialized hawkes hyperparams
+    eta = 0.2
+    beta = 1
+    alpha = beta * eta
+    mu = (dict_args['expected_activity'] / dict_args['time_horizon']) * (1 - eta) 
+
     # Initialized horizon and intensity
-    t = np.arange(0, (dict_args['time_horizon'] + 1), dict_args['discretise_step'], dtype=np.float32)
+    t = np.arange(0, ((dict_args['time_horizon'] / 0.001) + 1) * 0.001, dtype=np.float32)
     intensity = np.zeros(len(t), dtype=np.float32)
 
     # Computed intensity
     for i in range(len(t)):
-        intensity[i] = np.sum(np.exp(beta * (simulated_events_seqs[simulated_events_seqs < t[i]] - t[i])))
+        intensity[i] = np.sum(np.exp(beta * (simulated_events_seqs[0][simulated_events_seqs[0] < t[i]] - t[i])))
 
     # Written parquet file
     if record:

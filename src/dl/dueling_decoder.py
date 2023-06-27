@@ -55,9 +55,7 @@ class PoissonVAE(nn.Module):
                                                  nn.Linear(intermediate_size, input_size),
                                                  nn.Softplus())
 
-        self.parameters_decoder = nn.Sequential(nn.Linear(latent_size, int(intermediate_size * 0.5)),
-                                                nn.ReLU(),
-                                                nn.Linear(int(intermediate_size * 0.5), 15),
+        self.parameters_decoder = nn.Sequential(nn.Linear(latent_size, 15),
                                                 nn.ReLU(),
                                                 nn.Linear(15, 15),
                                                 nn.ReLU(),
@@ -351,7 +349,6 @@ class VAETrainer:
                 self.cycle += 1
 
             self.weight = new_weight
-            # print(f"ANNEALING KLD: {self.weight}")
 
 
     # Loading model function (best model)
@@ -443,9 +440,6 @@ class VAETrainer:
 
                 # Added losses in TensorBoard at each epoch
                 writer.add_scalars("Loss", {"Training": self.train_losses[epoch], "Validation": self.val_losses[epoch]}, epoch)
-                
-        # Added model graph to TensorBoard
-        writer.add_graph(self.model, val_x)
 
         # Loaded best model
         print(self.load_model())
@@ -468,7 +462,7 @@ class VAETrainer:
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
         write_parquet(pl.DataFrame({'x_true': val_x.numpy(), 
-                                    'x_pred': val_x_pred.numpy()}), 
+                                    'intensities': val_x_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
@@ -510,7 +504,7 @@ class VAETrainer:
 
         # Written parameters to parquet file
         write_parquet(pl.DataFrame({'x_true': test_x.numpy(), 
-                                    'x_pred': test_x_pred.numpy()}), 
+                                    'intensities': test_x_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
