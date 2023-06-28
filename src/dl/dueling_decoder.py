@@ -199,18 +199,29 @@ class VAETrainer:
     
         # VAE parameters
         self.model = PoissonVAE(self.input_size, self.latent_size, self.intermediate_size).to(self.device)
-        self.optimizer = optim.Adam([{'params': self.model.encoder.parameters()},
-                                     {'params': self.model.latent_mean.parameters()},
-                                     {'params': self.model.latent_log_var.parameters()}, 
-                                     {'params': self.model.intensities_decoder.parameters()},
-                                     {'params': self.model.parameters_decoder[0].parameters(), 'weight_decay': self.weight_decay}, 
-                                     {'params': self.model.parameters_decoder[1].parameters()},
-                                     {'params': self.model.parameters_decoder[2].parameters(), 'weight_decay': self.weight_decay},
-                                     {'params': self.model.parameters_decoder[3:].parameters()}], 
-                                    lr=self.learning_rate)
 
-            
+        optimizer_params = [{'params': self.model.encoder.parameters()}, 
+                            {'params': self.model.latent_mean.parameters()},
+                            {'params': self.model.latent_log_var.parameters()}, 
+                            {'params': self.model.intensities_decoder.parameters()}]
 
+        for idx, layer in enumerate(self.model.parameters_decoder):
+            if idx == 0 or idx == 2:
+                optimizer_params.append({'params': layer.parameters(), 'weight_decay': self.weight_decay})
+            else:
+                optimizer_params.append({'params': layer.parameters()})
+        
+        self.optimizer = optim.Adam(optimizer_params, lr=self.learning_rate)
+
+        # self.optimizer = optim.Adam(params=[{'params': self.model.encoder.parameters()},
+        #                                     {'params': self.model.latent_mean.parameters()},
+        #                                     {'params': self.model.latent_log_var.parameters()}, 
+        #                                     {'params': self.model.intensities_decoder.parameters()},
+        #                                     {'params': self.model.parameters_decoder[0].parameters(), 'weight_decay': self.weight_decay}, 
+        #                                     {'params': self.model.parameters_decoder[1].parameters()},
+        #                                     {'params': self.model.parameters_decoder[2].parameters(), 'weight_decay': self.weight_decay},
+        #                                     {'params': self.model.parameters_decoder[3:].parameters()}], 
+        #                             lr=self.learning_rate)
 
         self.weight = torch.tensor(0.0, dtype=torch.float32)
         self.cycle = torch.tensor(1.0, dtype=torch.float32)
