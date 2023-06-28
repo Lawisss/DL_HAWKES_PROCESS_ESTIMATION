@@ -21,7 +21,7 @@ from hawkes.simulation import hawkes_intensity
 
 # Error / Relative error function
 
-def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: Optional[str] = "Benchmark", record: bool = True, filename: Optional[str] = "errors.parquet") -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred: Union[np.ndarray, pl.DataFrame, pd.DataFrame], model_name: Optional[str] = "Benchmark", record: bool = True, filename: Optional[str] = "errors.parquet") -> pl.DataFrame:
     
     """
     Computed absolute error and relative error between true and predicted values
@@ -62,12 +62,12 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
     return pl.DataFrame(np.column_stack((eta_error, eta_rel_error, mu_error, mu_rel_error)), schema=["eta_error", "eta_rel_error", "mu_error", "mu_rel_error"])
 
 
-# Normalised Root Mean Square Error (NRMSE) function
+# Intensity integration function
 
-def compute_nrmse(params: Union[np.ndarray, pl.DataFrame, pd.DataFrame], simulated_events_seqs: Union[np.ndarray, pl.DataFrame, pd.DataFrame], decoded_intensity: Union[np.ndarray, pl.DataFrame, pd.DataFrame], record: bool = True, filename: Optional[str] = "intensity_error.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray]:
+def integrate_intensity(params: Union[np.ndarray, pl.DataFrame, pd.DataFrame], simulated_events_seqs: Union[np.ndarray, pl.DataFrame, pd.DataFrame], decoded_intensity: Union[np.ndarray, pl.DataFrame, pd.DataFrame], record: bool = True, filename: Optional[str] = "intensity_error.parquet", args: Optional[Callable] = None) -> pl.DataFrame:
 
     """
-    Computed NRMSE between predicted intensities and the integrated intensities.
+    Computed integrated intensities to compare with decoded intensities
 
     Args:
         params (Union[np.ndarray, pl.DataFrame, pd.DataFrame]) Hawkes process hyperparameters
@@ -78,7 +78,7 @@ def compute_nrmse(params: Union[np.ndarray, pl.DataFrame, pd.DataFrame], simulat
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
-        pl.DataFrame: NRMSE
+        pl.DataFrame: Decoded intensity and Integrated intensity
     """
         
     # Default parameters

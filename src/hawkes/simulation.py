@@ -104,7 +104,7 @@ def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: b
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
 
     Returns:
-        np.ndarray: Simulated event sequences of each Hawkes process
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: Simulated event sequences of each Hawkes process
     """
 
     # Default parameters
@@ -179,7 +179,7 @@ def hawkes_intensity(params: np.ndarray, simulated_events_seqs: np.ndarray, reco
 
     # Written parquet file
     if record is True:
-        write_parquet(pl.DataFrame({"intensities": (intensity * alpha) + mu}), filename=filename)
+        write_parquet(pl.DataFrame({"intensities_true": (intensity * alpha) + mu}), filename=filename)
 
     return (intensity * alpha) + mu
 

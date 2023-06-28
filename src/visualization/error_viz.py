@@ -217,7 +217,7 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
                         params_names: List[str] = [[1.0, 0.2], [3.0, 0.2], [1.0, 0.7], [3.0, 0.7]], folder: Optional[str] = "photos", filename: Optional[str] = "reconstruction_plot.pdf", args: Optional[Callable] = None) -> None:
 
     """
-    Plot intensities reconstruction
+    Plot intensities reconstruction and NRMSE
 
     Args:
         decoded_intensities (List[np.ndarray]): Decoded intensity list
@@ -226,7 +226,9 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "reconstruction_plot.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
-        
+
+    Returns:
+        None: Function does not return anything
     """
         
     # Default parameters
@@ -242,7 +244,7 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
     # Built lineplots + NRMSE
     plt.style.use(['science', 'ieee'])
 
-    _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 22))
+    _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 24))
     
     for ax, decoded, integrated, params in zip(axes, decoded_intensities, integrated_intensities, params_names):
         
@@ -263,6 +265,6 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
         ax.legend(loc="best", fontsize=12)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
-    plt.tight_layout(pad=3, h_pad=3)
+    plt.tight_layout(pad=4, h_pad=4)
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()

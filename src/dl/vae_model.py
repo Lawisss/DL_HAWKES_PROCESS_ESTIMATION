@@ -43,7 +43,8 @@ class PoissonVAE(nn.Module):
         # Initialized encoder
         self.encoder = nn.Sequential(nn.Linear(input_size, intermediate_size), 
                                      nn.ReLU(), 
-                                     nn.Linear(intermediate_size, int(intermediate_size * 0.5)))
+                                     nn.Linear(intermediate_size, int(intermediate_size * 0.5)),
+                                     nn.ReLU())
         
         self.latent_mean = nn.Linear(int(intermediate_size * 0.5), latent_size)
         self.latent_log_var = nn.Linear(int(intermediate_size * 0.5), latent_size)
@@ -113,9 +114,9 @@ class PoissonVAE(nn.Module):
             torch.Tensor: Reconstructed data
         """
 
-        x_pred = self.decoder(z)
+        intensities_pred = self.decoder(z)
 
-        return x_pred
+        return intensities_pred
 
 
     # Spread inputs through encoding/decoding
@@ -134,9 +135,9 @@ class PoissonVAE(nn.Module):
 
         mean, log_var = self.encode(x)
         z = self.reparameterize(mean, log_var)
-        x_pred = self.decode(z)
+        intensities_pred = self.decode(z)
 
-        return x_pred, mean, log_var
+        return intensities_pred, mean, log_var
 
 
 
@@ -362,15 +363,15 @@ class VAETrainer:
         self.model.eval()
 
         # Forward pass
-        val_x_pred, _, _ = self.model(val_x)
+        val_intensities_pred, mean_pred, log_var_pred = self.model(val_x)
 
-        return val_x_pred, _, _
-
+        return val_intensities_pred, mean_pred, log_var_pred
+    
 
     # Training fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]:
+    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor]:
 
         """
         Trained and evaluated model
@@ -381,7 +382,7 @@ class VAETrainer:
             val_x (torch.Tensor): Input features for validation data
 
         Returns:
-            Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor, float, float]: Model, losses, predictions, eta/mu
+            Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor]: Model, losses, predictions, eta/mu
         """
 
         # Initialized Tensorboard
@@ -418,10 +419,10 @@ class VAETrainer:
         print(self.load_model())
 
         # Computed estimated parameters for validation set (After loaded best model)
-        val_x_pred, _, _ = self.predict(val_x)
+        val_intensities_pred, _, _ = self.predict(val_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Prediction Histogram", val_x_pred, len(val_x), bins="auto")
+        writer.add_histogram("Prediction Histogram", val_intensities_pred, len(val_x), bins="auto")
         writer.add_histogram("Validation Histogram", val_x, len(val_x), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
@@ -435,17 +436,17 @@ class VAETrainer:
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
         write_parquet(pl.DataFrame({'x_true': val_x.numpy(), 
-                                    'intensities': val_x_pred.numpy()}), 
+                                    'intensities_pred': val_intensities_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
-        return self.model, self.train_losses, self.val_losses, val_x_pred
+        return self.model, self.train_losses, self.val_losses, val_intensities_pred
     
 
     # Testing fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def test_model(self, test_x: torch.Tensor) -> Tuple[np.ndarray, float, float, float]:
+    def test_model(self, test_x: torch.Tensor) -> torch.Tensor:
 
         """
         Tested and evaluated model
@@ -454,7 +455,7 @@ class VAETrainer:
             test_x (torch.Tensor): Features inputs for esting data
 
         Returns:
-            Tuple[np.ndarray, float, float, float]: predictions, loss average, eta average, mu average
+            torch.Tensor: Intensities predictions
         """
 
         # Initialized Tensorboard
@@ -464,10 +465,10 @@ class VAETrainer:
         print(self.load_model())
 
         # Forward pass for predictions
-        test_x_pred, _, _ = self.predict(test_x)
+        test_intensities_pred, _, _ = self.predict(test_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Prediction Histogram", test_x_pred, len(test_x), bins="auto")
+        writer.add_histogram("Prediction Histogram", test_intensities_pred, len(test_x), bins="auto")
         writer.add_histogram("Test Histogram", test_x, len(test_x), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
@@ -476,9 +477,9 @@ class VAETrainer:
 
         # Written parameters to parquet file
         write_parquet(pl.DataFrame({'x_true': test_x.numpy(), 
-                                    'intensities': test_x_pred.numpy()}), 
+                                    'intensities_pred': test_intensities_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
-        return test_x_pred
+        return test_intensities_pred
 

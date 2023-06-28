@@ -42,7 +42,8 @@ class PoissonVAE(nn.Module):
         # Initialized encoder
         self.encoder = nn.Sequential(nn.Linear(input_size, intermediate_size), 
                                      nn.ReLU(),
-                                     nn.Linear(intermediate_size, int(intermediate_size * 0.5)))
+                                     nn.Linear(intermediate_size, int(intermediate_size * 0.5)),
+                                     nn.ReLU())
 
         self.latent_mean = nn.Linear(int(intermediate_size * 0.5), latent_size)
         self.latent_log_var = nn.Linear(int(intermediate_size * 0.5), latent_size)
@@ -118,9 +119,9 @@ class PoissonVAE(nn.Module):
             torch.Tensor: Reconstructed data
         """
 
-        x_pred = self.intensities_decoder(z)
+        intensities_pred = self.intensities_decoder(z)
 
-        return x_pred
+        return intensities_pred
 
 
     # Decoded parameters function
@@ -162,7 +163,7 @@ class PoissonVAE(nn.Module):
         parameters = self.decode_parameters(latent)
         outputs = torch.cat((intensities, parameters), dim=1)
 
-        return mean, log_var, outputs
+        return outputs, mean, log_var
 
 
 class VAETrainer:
@@ -173,6 +174,7 @@ class VAETrainer:
                   ('latent_size', vae.LATENT_SIZE),
                   ('intermediate_size', vae.INTERMEDIATE_SIZE),
                   ('device', prep.DEVICE),
+                  ('weight_decay', vae.WEIGHT_DECAY),
                   ('learning_rate', vae.LEARNING_RATE),
                   ('max_epochs', vae.MAX_EPOCHS),
                   ('batch_size', prep.BATCH_SIZE),
@@ -197,7 +199,19 @@ class VAETrainer:
     
         # VAE parameters
         self.model = PoissonVAE(self.input_size, self.latent_size, self.intermediate_size).to(self.device)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        self.optimizer = optim.Adam([{'params': self.model.encoder.parameters()},
+                                     {'params': self.model.latent_mean.parameters()},
+                                     {'params': self.model.latent_log_var.parameters()}, 
+                                     {'params': self.model.intensities_decoder.parameters()},
+                                     {'params': self.model.parameters_decoder[0].parameters(), 'weight_decay': self.weight_decay}, 
+                                     {'params': self.model.parameters_decoder[1].parameters()},
+                                     {'params': self.model.parameters_decoder[2].parameters(), 'weight_decay': self.weight_decay},
+                                     {'params': self.model.parameters_decoder[3:].parameters()}], 
+                                    lr=self.learning_rate)
+
+            
+
+
         self.weight = torch.tensor(0.0, dtype=torch.float32)
         self.cycle = torch.tensor(1.0, dtype=torch.float32)
 
@@ -231,7 +245,7 @@ class VAETrainer:
         recon_loss = torch.sum(poisson_nll_loss(x_pred[:, :self.input_size], x[:, :self.input_size], reduction='none'), dim=-1, dtype=torch.float32)
         kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=torch.float32)
 
-        return torch.mean(recon_loss + 250 * param_loss + (1 / (1 + self.weight)) * kl_loss, dtype=torch.float32)
+        return torch.mean((1 / (1 + self.weight)) * recon_loss + 250 * param_loss + self.weight * kl_loss, dtype=torch.float32)
 
 
     # Sum-up model function
@@ -269,7 +283,7 @@ class VAETrainer:
         # Training mode
         self.model.train()
 
-        for x, y in train_loader:
+        for x, _ in train_loader:
 
             # Forward pass (Autograd)
             self.optimizer.zero_grad()
@@ -307,7 +321,7 @@ class VAETrainer:
         # Evaluation mode
         self.model.eval()
         
-        for x, y in val_loader:
+        for x, _ in val_loader:
             
             x_pred, mean, log_var = self.model(x)
             loss = self.vae_loss(x, x_pred, mean, log_var)
@@ -372,13 +386,15 @@ class VAETrainer:
     # Prediction function (estimated Hawkes parameters)
 
     @torch.no_grad()
-    def predict(self, val_x: torch.Tensor) -> Tuple[torch.Tensor, float, float]:
+    def predict(self, val_x: torch.Tensor, dtype: Optional[torch.dtype] = torch.float32, set_name: Optional[str] = "Validation set") -> Tuple[torch.Tensor, float, float]:
 
         """
         Estimated Hawkes parameters using validation dataset
 
         Args:
             val_x (torch.Tensor): Input tensor for validation dataset
+            dtype (torch.dtype): Type for tensor operations (default: torch.float32)
+            set_name (str): Dataset name (default: Validation set)
 
         Returns:
             Tuple[torch.Tensor, float, float]: Estimations for branching ratio (eta), and baseline intensity (mu)
@@ -388,9 +404,16 @@ class VAETrainer:
         self.model.eval()
 
         # Forward pass
-        val_x_pred, _, _ = self.model(val_x)
+        x_pred, mean_pred, log_var_pred = self.model(val_x)
 
-        return val_x_pred, _, _
+        # Predictions Averages
+        val_eta_pred = torch.mean(x_pred[:, 1], dtype=dtype).item()
+        val_mu_pred = torch.mean(x_pred[:, 2], dtype=dtype).item()
+
+        print(f"{set_name} - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
+
+
+        return x_pred, mean_pred, log_var_pred
 
 
     # Training fonction (PyTorch Profiler = disable)
@@ -445,10 +468,12 @@ class VAETrainer:
         print(self.load_model())
 
         # Computed estimated parameters for validation set (After loaded best model)
-        val_x_pred, _, _ = self.predict(val_x)
+        x_pred, _, _ = self.predict(val_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Prediction Histogram", val_x_pred, len(val_x), bins="auto")
+        writer.add_histogram("Intensities Prediction Histogram", x_pred[:, 0], len(val_x), bins="auto")
+        writer.add_histogram("Branching Ratio Prediction Histogram", x_pred[:, 1], len(val_x), bins="auto")
+        writer.add_histogram("Baseline Intensity Prediction Histogram", x_pred[:, 2], len(val_x), bins="auto")
         writer.add_histogram("Validation Histogram", val_x, len(val_x), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
@@ -462,17 +487,19 @@ class VAETrainer:
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
         write_parquet(pl.DataFrame({'x_true': val_x.numpy(), 
-                                    'intensities': val_x_pred.numpy()}), 
+                                    'intensities_pred': x_pred[:, 0].numpy(),
+                                    'eta_pred': x_pred[:, 1].numpy(),
+                                    'mu_pred': x_pred[:, 2].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
-        return self.model, self.train_losses, self.val_losses, val_x_pred
+        return self.model, self.train_losses, self.val_losses, x_pred
     
 
     # Testing fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def test_model(self, test_x: torch.Tensor, test_y: torch.Tensor) -> Tuple[np.ndarray, float, float, float]:
+    def test_model(self, test_x: torch.Tensor, test_y: torch.Tensor) -> torch.Tensor:
 
         """
         Tested and evaluated model
@@ -482,7 +509,7 @@ class VAETrainer:
             test_y (torch.Tensor): Label outputs for testing data
 
         Returns:
-            Tuple[np.ndarray, float, float, float]: predictions, loss average, eta average, mu average
+            torch.Tensor: Intensities predictions
         """
 
         # Initialized Tensorboard
@@ -492,10 +519,12 @@ class VAETrainer:
         print(self.load_model())
 
         # Forward pass for predictions
-        test_x_pred, _, _ = self.predict(test_x)
+        x_pred, _, _ = self.predict(test_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Prediction Histogram", test_x_pred, len(test_x), bins="auto")
+        writer.add_histogram("Intensities Prediction Histogram", x_pred[:, 0], len(test_x), bins="auto")
+        writer.add_histogram("Branching Ratio Prediction Histogram", x_pred[:, 1], len(test_x), bins="auto")
+        writer.add_histogram("Baseline Intensity Prediction Histogram", x_pred[:, 2], len(test_x), bins="auto")
         writer.add_histogram("Test Histogram", test_x, len(test_x), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
@@ -504,9 +533,11 @@ class VAETrainer:
 
         # Written parameters to parquet file
         write_parquet(pl.DataFrame({'x_true': test_x.numpy(), 
-                                    'intensities': test_x_pred.numpy()}), 
+                                    'intensities_pred': x_pred[:, 0].numpy(),
+                                    'eta_pred': x_pred[:, 1].numpy(),
+                                    'mu_pred': x_pred[:, 2].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
-        return test_x_pred
+        return x_pred
 

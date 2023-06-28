@@ -17,6 +17,7 @@ import variables.hawkes_var as hwk
 INPUT_SIZE: int = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)            # VAE input size (HORIZON = 100)
 LATENT_SIZE: int = 15                                                     # Latent space size (HORIZON = 100)
 INTERMEDIATE_SIZE: int = int(INPUT_SIZE * 0.75)                           # VAE output size
+WEIGHT_DECAY: float = 0.001                                               # Weight decay for optimizer
 LEARNING_RATE: float = 0.001                                              # Learning rate for optimizer
 MAX_EPOCHS: int = 10_000                                                  # Maximum number of epochs for training
 
