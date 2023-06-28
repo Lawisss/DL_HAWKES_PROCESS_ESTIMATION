@@ -214,7 +214,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
 
 # Intensity reconstruction plot function
 
-def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated_intensities: List[np.ndarray] = None, label_names: List[str] = ["Decoded Intensity", "Integrated Intensity"], 
+def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intensities: List[np.ndarray], label_names: List[str] = ["Decoded Intensity", "Integrated Intensity"], 
                         params_names: List[str] = [[1.0, 0.2], [3.0, 0.2], [1.0, 0.7], [3.0, 0.7]], folder: Optional[str] = "photos", filename: Optional[str] = "reconstruction_plot.pdf", args: Optional[Callable] = None) -> None:
 
     """
@@ -224,6 +224,7 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
         decoded_intensities (List[np.ndarray]): Decoded intensity list
         integrated_intensities (List[np.ndarray]): Integrated intensity list
         label_names (List[str], optional): Intensity type (default: ["Decoded Intensity", "Integrated Intensity"])
+        params_names (List[str], optional): Testing parameters (default: [[1.0, 0.2], [3.0, 0.2], [1.0, 0.7], [3.0, 0.7]])
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "reconstruction_plot.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -247,7 +248,7 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
 
     _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 24))
     
-    for ax, decoded, integrated, params in zip(axes, decoded_intensities, integrated_intensities, params_names):
+    for ax, decoded, integrated, params_name in zip(axes, decoded_intensities, integrated_intensities, params_names):
         
         ax.grid(which='major', color='#999999', linestyle='--')
         ax.minorticks_on()
@@ -258,7 +259,7 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
 
         nrmse = np.sqrt(np.mean((decoded - integrated)**2)) / (np.max(integrated) - np.min(integrated))
         
-        ax.set_title(r"Intensity Reconstruction ($\beta$ = {0}, $\eta$ = {1}, NRMSE = {2:.4f})".format(params[0], params[1], nrmse), fontsize=16, pad=15)
+        ax.set_title(r"Intensity Reconstruction ($\beta$ = {0}, $\eta$ = {1}, NRMSE = {2:.4f})".format(params_name[0], params_name[1], nrmse), fontsize=16, pad=15)
         ax.set_xlabel("Time", fontsize=16, labelpad=15)
         ax.set_ylabel("Intensity", fontsize=16, labelpad=15)
         ax.tick_params(axis="both", which="major", labelsize=14, pad=8)
@@ -272,15 +273,16 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
 
 # Density plot function
 
-def density_plot(folder: Optional[str] = "photos", filename: Optional[str] = "density_plot.pdf", args: Optional[Callable] = None) -> None:
+def density_plot(encoded_parameters: List[np.ndarray], decoded_parameters: List[np.ndarray], params_names: List[str] = [[1.0, 0.2], [3.0, 0.2], [1.0, 0.7], [3.0, 0.7]],
+                 folder: Optional[str] = "photos", filename: Optional[str] = "density_plot.pdf", args: Optional[Callable] = None) -> None:
 
     """
-    Eta/Mu density plot
+    Hawkes process parameters density plot
 
     Args:
-        decoded_intensities (List[np.ndarray]): Decoded intensity list
-        integrated_intensities (List[np.ndarray]): Integrated intensity list
-        label_names (List[str], optional): Intensity type (default: ["Decoded Intensity", "Integrated Intensity"])
+        encoded_parameters (List[np.ndarray]): Encoded parameters list
+        decoded_parameters (List[np.ndarray]): Decoded parameters list
+        params_names (List[str], optional): Testing parameters (default: [[1.0, 0.2], [3.0, 0.2], [1.0, 0.7], [3.0, 0.7]])
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename (default: "density_plot.pdf")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -295,25 +297,29 @@ def density_plot(folder: Optional[str] = "photos", filename: Optional[str] = "de
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
+    # Converted to array
+    encoded_parameters = [encoded_parameters.to_numpy() if not isinstance(encoded_parameter, np.ndarray) else encoded_parameter for encoded_parameter in encoded_parameters]
+    decoded_parameters = [decoded_parameter.to_numpy() if not isinstance(decoded_parameter, np.ndarray) else decoded_parameter for decoded_parameter in decoded_parameters]
+
     # Built desnity plots + NRMSE
     plt.style.use(['science', 'ieee'])
 
-    _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 24))
+    _, axes = plt.subplots(len(decoded_parameters), 1, figsize=(42, 24))
     
-    for ax, parameter in zip(axes, parameters):
+    for ax, encoded_parameter, decoded_parameter, params_name in zip(axes, encoded_parameters, decoded_parameters, params_names):
         
         ax.grid(which='major', color='#999999', linestyle='--')
         ax.minorticks_on()
         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-        sns.kdeplot(data=parameter, x='eta', y='mu', fill=True, cmap="viridis", levels=5)
+        sns.kdeplot(data=decoded_parameter, x="eta", y="mu", fill=True, cmap="viridis", levels=5)
 
-        ax.axhline(y=test_mu, color="sienna2", linewidth=1)
-        ax.axvline(x=test_eta, color="sienna2", linewidth=1)
-        ax.scatter(x=test_eta, y=test_mu, color="sienna2", s=25)
+        ax.axhline(y=encoded_parameter[:, 3], color="sienna2", linewidth=1)
+        ax.axvline(x=encoded_parameter[:, 2], color="sienna2", linewidth=1)
+        ax.scatter(x=encoded_parameter[:, 2], y=encoded_parameter[:, 3], color="sienna2", s=25)
         ax.text(0.15, 3.8, "True value", color="sienna2")
 
-        ax.set_title("Density Estimation", fontsize=16, pad=15)
+        ax.set_title(r"Density Estimation ($\beta$ = {0}, $\eta$ = {1})".format(params_name[0], params_name[1]), fontsize=16, pad=15)
         ax.set_xlabel(r"$\eta$", fontsize=16, labelpad=15)
         ax.set_ylabel(r"$\beta$", fontsize=16, labelpad=15)
         ax.tick_params(axis="both", which="major", labelsize=14, pad=8)

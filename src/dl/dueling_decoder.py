@@ -154,16 +154,16 @@ class PoissonVAE(nn.Module):
             x (torch.Tensor): Input data
 
         Returns:
-            tuple[torch.Tensor, torch.Tensor, torch.Tensor]: Reconstructed outputs, mean, and log variance
+            tuple[torch.Tensor, torch.Tensor, torch.Tensor]: Reconstructed x, mean, and log variance
         """
 
         mean, log_var = self.encode(x)
         latent = self.reparameterize(mean, log_var)
         intensities = self.decode_intensities(latent)
         parameters = self.decode_parameters(latent)
-        outputs = torch.cat((intensities, parameters), dim=1)
+        y_pred = torch.cat((intensities, parameters), dim=1)
 
-        return outputs, mean, log_var
+        return y_pred, mean, log_var
 
 
 class DuelingTrainer:
@@ -212,17 +212,6 @@ class DuelingTrainer:
                 optimizer_params.append({'params': layer.parameters()})
         
         self.optimizer = optim.Adam(optimizer_params, lr=self.learning_rate)
-
-        # self.optimizer = optim.Adam(params=[{'params': self.model.encoder.parameters()},
-        #                                     {'params': self.model.latent_mean.parameters()},
-        #                                     {'params': self.model.latent_log_var.parameters()}, 
-        #                                     {'params': self.model.intensities_decoder.parameters()},
-        #                                     {'params': self.model.parameters_decoder[0].parameters(), 'weight_decay': self.weight_decay}, 
-        #                                     {'params': self.model.parameters_decoder[1].parameters()},
-        #                                     {'params': self.model.parameters_decoder[2].parameters(), 'weight_decay': self.weight_decay},
-        #                                     {'params': self.model.parameters_decoder[3:].parameters()}], 
-        #                             lr=self.learning_rate)
-
         self.weight = torch.tensor(0.0, dtype=torch.float32)
         self.cycle = torch.tensor(1.0, dtype=torch.float32)
 
@@ -237,14 +226,14 @@ class DuelingTrainer:
 
     # VAE loss function
 
-    def vae_loss(self, x: torch.Tensor, x_pred: torch.Tensor, mean: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
+    def vae_loss(self, y: torch.Tensor, y_pred: torch.Tensor, mean: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
 
         """
         Compute VAE loss
 
         Args:
-            x (torch.Tensor): Input data
-            x_pred (torch.Tensor): Reconstructed data
+            y (torch.Tensor): Input data
+            y_pred (torch.Tensor): Reconstructed data
             mean (torch.Tensor): Mean of latent distribution
             log_var (torch.Tensor): Log variance of latent distribution
 
@@ -252,8 +241,8 @@ class DuelingTrainer:
             torch.Tensor: VAE loss
         """
 
-        param_loss = nn.MSELoss()(x_pred[:, self.input_size:(self.input_size + 2)], x[:, self.input_size:(self.input_size + 2)])
-        recon_loss = torch.sum(poisson_nll_loss(x_pred[:, :self.input_size], x[:, :self.input_size], reduction='none'), dim=-1, dtype=torch.float32)
+        param_loss = nn.MSELoss()(y_pred[:, self.input_size:(self.input_size + 2)], y[:, self.input_size:(self.input_size + 2)])
+        recon_loss = torch.sum(poisson_nll_loss(y_pred[:, :self.input_size], y[:, :self.input_size], reduction='none'), dim=-1, dtype=torch.float32)
         kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=torch.float32)
 
         return torch.mean(((1 / (1 + self.weight)) * recon_loss) + (250 * param_loss) + (self.weight * kl_loss), dtype=torch.float32)
@@ -294,12 +283,12 @@ class DuelingTrainer:
         # Training mode
         self.model.train()
 
-        for x, _ in train_loader:
+        for x, y in train_loader:
 
             # Forward pass (Autograd)
             self.optimizer.zero_grad()
-            x_pred, mean, log_var = self.model(x)
-            loss = self.vae_loss(x, x_pred, mean, log_var)
+            y_pred, mean, log_var = self.model(x)
+            loss = self.vae_loss(y, y_pred, mean, log_var)
             
             # Backward pass (Autograd)
             loss.backward()
@@ -332,10 +321,10 @@ class DuelingTrainer:
         # Evaluation mode
         self.model.eval()
         
-        for x, _ in val_loader:
+        for x, y in val_loader:
             
-            x_pred, mean, log_var = self.model(x)
-            loss = self.vae_loss(x, x_pred, mean, log_var)
+            y_pred, mean, log_var = self.model(x)
+            loss = self.vae_loss(y, y_pred, mean, log_var)
             self.val_loss += loss.item() * x.size(0)
 
         self.val_loss /= len(val_loader.dataset)
@@ -415,15 +404,15 @@ class DuelingTrainer:
         self.model.eval()
 
         # Forward pass
-        x_pred, mean_pred, log_var_pred = self.model(val_x)
+        y_pred, mean_pred, log_var_pred = self.model(val_x)
 
         # Predictions Averages
-        val_eta_pred = torch.mean(x_pred[:, 1], dtype=dtype).item()
-        val_mu_pred = torch.mean(x_pred[:, 2], dtype=dtype).item()
+        val_eta_pred = torch.mean(y_pred[:, 1], dtype=dtype).item()
+        val_mu_pred = torch.mean(y_pred[:, 2], dtype=dtype).item()
 
         print(f"{set_name} - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
 
-        return x_pred, mean_pred, log_var_pred
+        return y_pred, mean_pred, log_var_pred
 
 
     # Training fonction (PyTorch Profiler = disable)
@@ -478,13 +467,13 @@ class DuelingTrainer:
         print(self.load_model())
 
         # Computed estimated parameters for validation set (After loaded best model)
-        x_pred, _, _ = self.predict(val_x)
+        y_pred, _, _ = self.predict(val_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Intensities Prediction Histogram", x_pred[:, 0], len(val_x), bins="auto")
-        writer.add_histogram("Branching Ratio Prediction Histogram", x_pred[:, 1], len(val_x), bins="auto")
-        writer.add_histogram("Baseline Intensity Prediction Histogram", x_pred[:, 2], len(val_x), bins="auto")
-        writer.add_histogram("Validation Histogram", val_x, len(val_x), bins="auto")
+        writer.add_histogram("Intensities Prediction Histogram", y_pred[:, 0], len(val_y), bins="auto")
+        writer.add_histogram("Branching Ratio Prediction Histogram", y_pred[:, 1], len(val_y), bins="auto")
+        writer.add_histogram("Baseline Intensity Prediction Histogram", y_pred[:, 2], len(val_y), bins="auto")
+        writer.add_histogram("Validation Histogram", val_y, len(val_y), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
@@ -496,14 +485,14 @@ class DuelingTrainer:
                                     filename=f"{self.run_name}_losses.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
-        write_parquet(pl.DataFrame({'x_true': val_x.numpy(), 
-                                    'intensities_pred': x_pred[:, 0].numpy(),
-                                    'eta_pred': x_pred[:, 1].numpy(),
-                                    'mu_pred': x_pred[:, 2].numpy()}), 
+        write_parquet(pl.DataFrame({'x_true': val_y.numpy(), 
+                                    'intensities_pred': y_pred[:, 0].numpy(),
+                                    'eta_pred': y_pred[:, 1].numpy(),
+                                    'mu_pred': y_pred[:, 2].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
-        return self.model, self.train_losses, self.val_losses, x_pred
+        return self.model, self.train_losses, self.val_losses, y_pred
     
 
     # Testing fonction (PyTorch Profiler = disable)
@@ -529,25 +518,25 @@ class DuelingTrainer:
         print(self.load_model())
 
         # Forward pass for predictions
-        x_pred, _, _ = self.predict(test_x)
+        y_pred, _, _ = self.predict(test_x, set_name="Test set")
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Intensities Prediction Histogram", x_pred[:, 0], len(test_x), bins="auto")
-        writer.add_histogram("Branching Ratio Prediction Histogram", x_pred[:, 1], len(test_x), bins="auto")
-        writer.add_histogram("Baseline Intensity Prediction Histogram", x_pred[:, 2], len(test_x), bins="auto")
-        writer.add_histogram("Test Histogram", test_x, len(test_x), bins="auto")
+        writer.add_histogram("Intensities Prediction Histogram", y_pred[:, 0], len(test_y), bins="auto")
+        writer.add_histogram("Branching Ratio Prediction Histogram", y_pred[:, 1], len(test_y), bins="auto")
+        writer.add_histogram("Baseline Intensity Prediction Histogram", y_pred[:, 2], len(test_y), bins="auto")
+        writer.add_histogram("Test Histogram", test_y, len(test_y), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
 
         # Written parameters to parquet file
-        write_parquet(pl.DataFrame({'x_true': test_x.numpy(), 
-                                    'intensities_pred': x_pred[:, 0].numpy(),
-                                    'eta_pred': x_pred[:, 1].numpy(),
-                                    'mu_pred': x_pred[:, 2].numpy()}), 
+        write_parquet(pl.DataFrame({'x_true': test_y.numpy(), 
+                                    'intensities_pred': y_pred[:, 0].numpy(),
+                                    'eta_pred': y_pred[:, 1].numpy(),
+                                    'mu_pred': y_pred[:, 2].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
-        return x_pred
+        return y_pred
 

@@ -371,7 +371,7 @@ class VAETrainer:
     # Training fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor]:
+    def train_model(self, train_loader: DataLoader, val_loader: DataLoader, val_x: torch.Tensor, val_y: torch.Tensor) -> Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor]:
 
         """
         Trained and evaluated model
@@ -380,6 +380,7 @@ class VAETrainer:
             train_loader (DataLoader): Training data
             val_loader (DataLoader): Validation data
             val_x (torch.Tensor): Input features for validation data
+            val_y (torch.Tensor): Label outputs for validation data
 
         Returns:
             Tuple[nn.Module, np.ndarray, np.ndarray, torch.Tensor]: Model, losses, predictions, eta/mu
@@ -422,8 +423,8 @@ class VAETrainer:
         val_intensities_pred, _, _ = self.predict(val_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Prediction Histogram", val_intensities_pred, len(val_x), bins="auto")
-        writer.add_histogram("Validation Histogram", val_x, len(val_x), bins="auto")
+        writer.add_histogram("Prediction Histogram", val_intensities_pred, len(val_y), bins="auto")
+        writer.add_histogram("Validation Histogram", val_y, len(val_y), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
@@ -435,7 +436,7 @@ class VAETrainer:
                                     filename=f"{self.run_name}_losses.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
-        write_parquet(pl.DataFrame({'x_true': val_x.numpy(), 
+        write_parquet(pl.DataFrame({'x_true': val_y.numpy(), 
                                     'intensities_pred': val_intensities_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
@@ -446,13 +447,14 @@ class VAETrainer:
     # Testing fonction (PyTorch Profiler = disable)
     
     @profiling(enable=False)
-    def test_model(self, test_x: torch.Tensor) -> torch.Tensor:
+    def test_model(self, test_x: torch.Tensor, test_y: torch.Tensor) -> torch.Tensor:
 
         """
         Tested and evaluated model
 
         Args:
             test_x (torch.Tensor): Features inputs for esting data
+            test_y (torch.Tensor): Label outputs for testing data
 
         Returns:
             torch.Tensor: Intensities predictions
@@ -468,15 +470,15 @@ class VAETrainer:
         test_intensities_pred, _, _ = self.predict(test_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Prediction Histogram", test_intensities_pred, len(test_x), bins="auto")
-        writer.add_histogram("Test Histogram", test_x, len(test_x), bins="auto")
+        writer.add_histogram("Prediction Histogram", test_intensities_pred, len(test_y), bins="auto")
+        writer.add_histogram("Test Histogram", test_y, len(test_y), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
         writer.flush()
         writer.close()
 
         # Written parameters to parquet file
-        write_parquet(pl.DataFrame({'x_true': test_x.numpy(), 
+        write_parquet(pl.DataFrame({'x_true': test_y.numpy(), 
                                     'intensities_pred': test_intensities_pred.numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
