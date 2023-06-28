@@ -188,14 +188,14 @@ class VAETrainer:
 
     # VAE loss function
 
-    def vae_loss(self, x: torch.Tensor, x_pred: torch.Tensor, mean: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
+    def vae_loss(self, y: torch.Tensor, y_pred: torch.Tensor, mean: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
 
         """
         Compute VAE loss
 
         Args:
-            x (torch.Tensor): Input data
-            x_pred (torch.Tensor): Reconstructed data
+            y (torch.Tensor): Input data
+            y_pred (torch.Tensor): Reconstructed data
             mean (torch.Tensor): Mean of latent distribution
             log_var (torch.Tensor): Log variance of latent distribution
 
@@ -203,7 +203,7 @@ class VAETrainer:
             torch.Tensor: VAE loss
         """
 
-        recon_loss = torch.sum(poisson_nll_loss(x_pred, x, reduction='none'), dim=-1, dtype=torch.float32)
+        recon_loss = torch.sum(poisson_nll_loss(y_pred, y, reduction='none'), dim=-1, dtype=torch.float32)
         kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=torch.float32)
 
         return torch.mean(recon_loss + (self.weight * kl_loss), dtype=torch.float32)
@@ -244,12 +244,12 @@ class VAETrainer:
         # Training mode
         self.model.train()
 
-        for x, _ in train_loader:
+        for x, y in train_loader:
 
             # Forward pass (Autograd)
             self.optimizer.zero_grad()
-            x_pred, mean, log_var = self.model(x)
-            loss = self.vae_loss(x, x_pred, mean, log_var)
+            y_pred, mean, log_var = self.model(x)
+            loss = self.vae_loss(y, y_pred, mean, log_var)
             
             # Backward pass (Autograd)
             loss.backward()
@@ -282,10 +282,10 @@ class VAETrainer:
         # Evaluation mode
         self.model.eval()
         
-        for x, _ in val_loader:
+        for x, y in val_loader:
             
-            x_pred, mean, log_var = self.model(x)
-            loss = self.vae_loss(x, x_pred, mean, log_var)
+            y_pred, mean, log_var = self.model(x)
+            loss = self.vae_loss(y, y_pred, mean, log_var)
             self.val_loss += loss.item() * x.size(0)
 
         self.val_loss /= len(val_loader.dataset)

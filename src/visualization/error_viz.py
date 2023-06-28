@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 import scienceplots
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 import variables.prep_var as prep
@@ -257,7 +258,6 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
 
         nrmse = np.sqrt(np.mean((decoded - integrated)**2)) / (np.max(integrated) - np.min(integrated))
         
-        #$\beta$: {params[0]}, $\eta$: {params[1]}, 
         ax.set_title(r"Intensity Reconstruction ($\beta$ = {0}, $\eta$ = {1}, NRMSE = {2:.4f})".format(params[0], params[1], nrmse), fontsize=16, pad=15)
         ax.set_xlabel("Time", fontsize=16, labelpad=15)
         ax.set_ylabel("Intensity", fontsize=16, labelpad=15)
@@ -268,3 +268,59 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray] = None, integrated
     plt.tight_layout(pad=4, h_pad=4)
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
+
+
+# Density plot function
+
+def density_plot(folder: Optional[str] = "photos", filename: Optional[str] = "density_plot.pdf", args: Optional[Callable] = None) -> None:
+
+    """
+    Eta/Mu density plot
+
+    Args:
+        decoded_intensities (List[np.ndarray]): Decoded intensity list
+        integrated_intensities (List[np.ndarray]): Integrated intensity list
+        label_names (List[str], optional): Intensity type (default: ["Decoded Intensity", "Integrated Intensity"])
+        folder (str, optional): Sub-folder name in results folder (default: "photos")
+        filename (str, optional): Parquet filename (default: "density_plot.pdf")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        None: Function does not return anything
+    """
+        
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Built desnity plots + NRMSE
+    plt.style.use(['science', 'ieee'])
+
+    _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 24))
+    
+    for ax, parameter in zip(axes, parameters):
+        
+        ax.grid(which='major', color='#999999', linestyle='--')
+        ax.minorticks_on()
+        ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
+
+        sns.kdeplot(data=parameter, x='eta', y='mu', fill=True, cmap="viridis", levels=5)
+
+        ax.axhline(y=test_mu, color="sienna2", linewidth=1)
+        ax.axvline(x=test_eta, color="sienna2", linewidth=1)
+        ax.scatter(x=test_eta, y=test_mu, color="sienna2", s=25)
+        ax.text(0.15, 3.8, "True value", color="sienna2")
+
+        ax.set_title("Density Estimation", fontsize=16, pad=15)
+        ax.set_xlabel(r"$\eta$", fontsize=16, labelpad=15)
+        ax.set_ylabel(r"$\beta$", fontsize=16, labelpad=15)
+        ax.tick_params(axis="both", which="major", labelsize=14, pad=8)
+        ax.legend(loc="best", fontsize=12)
+
+    plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
+    plt.tight_layout(pad=4, h_pad=4)
+    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
+    plt.show()
+

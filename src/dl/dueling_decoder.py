@@ -166,7 +166,7 @@ class PoissonVAE(nn.Module):
         return outputs, mean, log_var
 
 
-class VAETrainer:
+class DuelingTrainer:
     def __init__(self, args: Optional[Callable] = None):
 
         # Initialized parameters
@@ -256,7 +256,7 @@ class VAETrainer:
         recon_loss = torch.sum(poisson_nll_loss(x_pred[:, :self.input_size], x[:, :self.input_size], reduction='none'), dim=-1, dtype=torch.float32)
         kl_loss = - 0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp(), dim=-1, dtype=torch.float32)
 
-        return torch.mean((1 / (1 + self.weight)) * recon_loss + 250 * param_loss + self.weight * kl_loss, dtype=torch.float32)
+        return torch.mean(((1 / (1 + self.weight)) * recon_loss) + (250 * param_loss) + (self.weight * kl_loss), dtype=torch.float32)
 
 
     # Sum-up model function
@@ -422,7 +422,6 @@ class VAETrainer:
         val_mu_pred = torch.mean(x_pred[:, 2], dtype=dtype).item()
 
         print(f"{set_name} - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
-
 
         return x_pred, mean_pred, log_var_pred
 
