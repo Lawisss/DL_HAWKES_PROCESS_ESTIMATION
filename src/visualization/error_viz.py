@@ -277,7 +277,7 @@ def density_plot(encoded_parameters: List[np.ndarray], decoded_parameters: List[
                  folder: Optional[str] = "photos", filename: Optional[str] = "density_plot.pdf", args: Optional[Callable] = None) -> None:
 
     """
-    Hawkes process parameters density plot
+     Plot density of hawkes process parameters
 
     Args:
         encoded_parameters (List[np.ndarray]): Encoded parameters list
