@@ -64,7 +64,7 @@ def compute_errors(y_test: Union[np.ndarray, pl.DataFrame, pd.DataFrame], y_pred
 
 # Intensity integration function
 
-def integrate_intensity(params: Union[np.ndarray, pl.DataFrame, pd.DataFrame], simulated_events_seqs: Union[np.ndarray, pl.DataFrame, pd.DataFrame], decoded_intensity: Union[np.ndarray, pl.DataFrame, pd.DataFrame], record: bool = True, filename: Optional[str] = "intensity_error.parquet", args: Optional[Callable] = None) -> pl.DataFrame:
+def integrate_intensity(params: Union[np.ndarray, pl.DataFrame, pd.DataFrame], simulated_events_seqs: Union[np.ndarray, pl.DataFrame, pd.DataFrame], decoded_intensity: Union[np.ndarray, pl.DataFrame, pd.DataFrame], record: bool = True, filename: Optional[str] = "intensity_integration.parquet", args: Optional[Callable] = None) -> pl.DataFrame:
 
     """
     Computed integrated intensities to compare with decoded intensities

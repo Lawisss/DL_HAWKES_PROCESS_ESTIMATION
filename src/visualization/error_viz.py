@@ -312,11 +312,11 @@ def density_plot(encoded_parameters: List[np.ndarray], decoded_parameters: List[
         ax.minorticks_on()
         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-        sns.kdeplot(data=decoded_parameter, x="eta", y="mu", fill=True, cmap="viridis", levels=5)
+        sns.kdeplot(data=decoded_parameter, x="eta_pred", y="mu_pred", fill=True, cmap="viridis", levels=5)
 
-        ax.axhline(y=encoded_parameter[:, 3], color="sienna2", linewidth=1)
-        ax.axvline(x=encoded_parameter[:, 2], color="sienna2", linewidth=1)
-        ax.scatter(x=encoded_parameter[:, 2], y=encoded_parameter[:, 3], color="sienna2", s=25)
+        ax.axhline(y=encoded_parameter[:, 1], color="sienna2", linewidth=1)
+        ax.axvline(x=encoded_parameter[:, 0], color="sienna2", linewidth=1)
+        ax.scatter(x=encoded_parameter[:, 0], y=encoded_parameter[:, 1], color="sienna2", s=25)
         ax.text(0.15, 3.8, "True value", color="sienna2")
 
         ax.set_title(r"Density Estimation ($\beta$ = {0}, $\eta$ = {1})".format(params_name[0], params_name[1]), fontsize=16, pad=15)

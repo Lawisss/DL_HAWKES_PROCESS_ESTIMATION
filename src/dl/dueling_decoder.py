@@ -7,11 +7,13 @@ File containing VAE conditional intensities and aggregated/binned hawkes process
 
 """
 
-import os 
+import os
+import io
 import copy
-from typing import Tuple, Union, Optional, Callable
+from typing import Tuple, Optional, Callable
 
 import torch
+import stan
 import numpy as np
 import polars as pl
 import torch.nn as nn
@@ -543,36 +545,46 @@ class DuelingTrainer:
 
     # Stan testing function
 
-    def stan_test():
+    def stan_test(self, test_y: torch.Tensor, record: bool = True, filename: Optional[str] = "parameters_predictions.parquet") -> pl.DataFrame:
 
-        # Charger le modèle Stan
-        mcmc_fit = pystan.StanModel(file="stan_test.stan")
+        """
+        Stan testing for bayesian inference 
 
-        # Définir les données
-        data = {
-            'p': latent_dim,
-            'p1': intermediate_dim_2,
-            'p2': intermediate_dim,
-            'n': input_dim,
-            'W1': W1,
-            'B1': B1,
-            'W2': W2,
-            'B2': B2,
-            'W3': W3,
-            'B3': B3,
-            'y': test_process[0,:]
-        }
+        Args:
+            test_y (torch.Tensor): Label outputs for testing data
+            record (bool, optional): Record results in parquet file (default: True)
+            filename (str, optional): Parquet filename to save results (default: "parameters_predictions.parquet")
 
-        # Effectuer l'ajustement MCMC
-        mcmc_result = mcmc_fit.sampling(data=data)
+        Returns:
+            pl.DataFrame: Parameters predictions
+        """
 
-        # Extraire les échantillons
+        weights = self.model.intensities_decoder.parameters()
+
+        W1, B1, W2, B2, W3, B3 = weights
+
+        # Initialized testing data
+        data = {"p": self.latent_size, "p1": int(self.intermediate_size * 0.5), "p2": self.intermediate_size, 
+                "n": self.input_size, "W1": W1, "B1": B1, "W2": W2, "B2": B2, "W3": W3, "B3": B3, "y": test_y[0,:]}
+        
+        # Open file and read code
+        with io.open("stan_test.stan", 'r', encoding='utf-8') as file:
+            program_code = file.read()
+
+        # Built stan model
+        mcmc_fit = stan.build(program_code=program_code, data=data)
+
+        # MCMC Adjustment
+        mcmc_result = mcmc_fit.sample()
+
+        # Extracted samples
         latent_draws = mcmc_result['z']
 
-        # Charger le modèle du décodeur theta
-        theta_decoder = load_model('theta_decoder.h5')
+        # Fitting model from samples
+        test_pred = self.model.parameters_decoder.fit(latent_draws)
 
-        # Prédire les valeurs à partir des échantillons
-        test = theta_decoder.predict(latent_draws)
-        data = pd.DataFrame({'eta': test[:, 0], 'mu': test[:, 1]})
+         # Written parquet file
+        if record is True:
+            write_parquet(pl.DataFrame(np.column_stack((test_pred[:, 0], test_pred[:, 1])), schema=["eta_pred", "mu_pred"]), filename=filename)
 
+        return pl.DataFrame(np.column_stack((test_pred[:, 0], test_pred[:, 1])), schema=["eta_pred", "mu_pred"])
