@@ -28,17 +28,17 @@ import variables.prep_var as prep
 
 
 class LSTM(nn.Module):
-    def __init__(self, input_size: Optional[int] = None, hidden_size: Optional[int] = None, num_layers: Optional[int] = None, output_size: Optional[int] = None):
+    def __init__(self, input_size: Optional[int] = None, hidden_size: Optional[int] = None, num_hidden_layers: Optional[int] = None, output_size: Optional[int] = None):
         super().__init__()
 
         # Initialized parameters
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.num_layers = num_layers
+        self.num_hidden_layers = num_hidden_layers
         self.output_size = output_size
 
         # LSTM layer
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
+        self.lstm = nn.LSTM(input_size, hidden_size, num_hidden_layers, batch_first=True)
 
         # Output layer
         self.output_layer = nn.Linear(hidden_size, output_size)
@@ -59,8 +59,8 @@ class LSTM(nn.Module):
         """
 
         # Initialized hidden states
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size, dtype=torch.float32)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size, dtype=torch.float32)
+        h0 = torch.zeros(self.num_hidden_layers, x.size(0), self.hidden_size, dtype=torch.float32)
+        c0 = torch.zeros(self.num_hidden_layers, x.size(0), self.hidden_size, dtype=torch.float32)
 
         # Forward pass
         out, _ = self.lstm(x, (h0, c0))
@@ -79,21 +79,21 @@ class LSTMTrainer:
         # Initialized parameters
         params = [('input_size', lstm.INPUT_SIZE),
                   ('hidden_size', lstm.HIDDEN_SIZE),
-                  ('num_hidden_layers', mlp.NUM_HIDDEN_LAYERS),
-                  ('output_size', mlp.OUTPUT_SIZE),
+                  ('num_hidden_layers', lstm.NUM_HIDDEN_LAYERS),
+                  ('output_size', lstm.OUTPUT_SIZE),
                   ('device', prep.DEVICE),
-                  ('learning_rate', mlp.LEARNING_RATE),
-                  ('max_epochs', mlp.MAX_EPOCHS),
-                  ('l2_reg', mlp.L2_REG),
+                  ('learning_rate', lstm.LEARNING_RATE),
+                  ('max_epochs', lstm.MAX_EPOCHS),
+                  ('l2_reg', lstm.L2_REG),
                   ('batch_size', prep.BATCH_SIZE),
-                  ('summary_col_names', mlp.SUMMARY_COL_NAMES),
-                  ('summary_mode', mlp.SUMMARY_MODE),
-                  ('summary_verbose', mlp.SUMMARY_VERBOSE),
-                  ('sumup_model', mlp.SUMMARY_MODEL),
-                  ('early_stop_delta', mlp.EARLY_STOP_DELTA),
+                  ('summary_col_names', lstm.SUMMARY_COL_NAMES),
+                  ('summary_mode', lstm.SUMMARY_MODE),
+                  ('summary_verbose', lstm.SUMMARY_VERBOSE),
+                  ('sumup_model', lstm.SUMMARY_MODEL),
+                  ('early_stop_delta', lstm.EARLY_STOP_DELTA),
                   ('dirpath', prep.DIRPATH),
-                  ('filename_best_model', mlp.FILENAME_BEST_MODEL),
-                  ('early_stop_patience', mlp.EARLY_STOP_PATIENCE),
+                  ('filename_best_model', lstm.FILENAME_BEST_MODEL),
+                  ('early_stop_patience', lstm.EARLY_STOP_PATIENCE),
                   ('logdirun', eval.LOGDIRUN),
                   ('train_dir', eval.TRAIN_DIR),
                   ('test_dir', eval.TEST_DIR),
