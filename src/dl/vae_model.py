@@ -96,7 +96,7 @@ class PoissonVAE(nn.Module):
         h = self.encoder(x)
         mean = self.latent_mean(h)
         log_var = self.latent_log_var(h)
-
+        
         return mean, log_var
 
 

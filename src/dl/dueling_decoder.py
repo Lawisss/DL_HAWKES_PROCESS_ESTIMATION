@@ -3,7 +3,7 @@
 
 """VAE with dueling decoder module
 
-File containing VAE conditional intensities and aggregated/binned hawkes process estimation (lambda, eta/mu)
+File containing VAE conditional intensities and parameters estimation (lambda, eta/mu)
 
 """
 
@@ -13,7 +13,7 @@ import copy
 from typing import Tuple, Optional, Callable
 
 import torch
-import stan
+# import stan
 import numpy as np
 import polars as pl
 import torch.nn as nn
@@ -35,6 +35,7 @@ import variables.prep_var as prep
 
 class PoissonVAE(nn.Module):
     def __init__(self, input_size: Optional[int] = None, latent_size: Optional[int] = None, intermediate_size: Optional[int] = None):
+        super().__init__()
 
         # Initialized parameters
         self.input_size = input_size
@@ -409,8 +410,8 @@ class DuelingTrainer:
         y_pred, mean_pred, log_var_pred = self.model(val_x)
 
         # Predictions Averages
-        val_eta_pred = torch.mean(y_pred[:, 1], dtype=dtype).item()
-        val_mu_pred = torch.mean(y_pred[:, 2], dtype=dtype).item()
+        val_eta_pred = torch.mean(y_pred[:, -2], dtype=dtype).item()
+        val_mu_pred = torch.mean(y_pred[:, -1], dtype=dtype).item()
 
         print(f"{set_name} - Estimated branching ratio (η): {val_eta_pred:.4f}, Estimated baseline intensity (µ): {val_mu_pred:.4f}")
 
@@ -472,9 +473,9 @@ class DuelingTrainer:
         y_pred, _, _ = self.predict(val_x)
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Intensities Prediction Histogram", y_pred[:, 0], len(val_y), bins="auto")
-        writer.add_histogram("Branching Ratio Prediction Histogram", y_pred[:, 1], len(val_y), bins="auto")
-        writer.add_histogram("Baseline Intensity Prediction Histogram", y_pred[:, 2], len(val_y), bins="auto")
+        writer.add_histogram("Intensities Prediction Histogram", y_pred[:, :-2], len(val_y), bins="auto")
+        writer.add_histogram("Branching Ratio Prediction Histogram", y_pred[:, -2], len(val_y), bins="auto")
+        writer.add_histogram("Baseline Intensity Prediction Histogram", y_pred[:, -1], len(val_y), bins="auto")
         writer.add_histogram("Validation Histogram", val_y, len(val_y), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
@@ -488,9 +489,9 @@ class DuelingTrainer:
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
         write_parquet(pl.DataFrame({'x_true': val_y.numpy(), 
-                                    'intensities_pred': y_pred[:, 0].numpy(),
-                                    'eta_pred': y_pred[:, 1].numpy(),
-                                    'mu_pred': y_pred[:, 2].numpy()}), 
+                                    'intensities_pred': y_pred[:, :-2].numpy(),
+                                    'eta_pred': y_pred[:, -2].numpy(),
+                                    'mu_pred': y_pred[:, -1].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.train_dir, self.run_name))
 
@@ -523,9 +524,9 @@ class DuelingTrainer:
         y_pred, _, _ = self.predict(test_x, set_name="Test set")
 
         # Added results histograms to TensorBoard
-        writer.add_histogram("Intensities Prediction Histogram", y_pred[:, 0], len(test_y), bins="auto")
-        writer.add_histogram("Branching Ratio Prediction Histogram", y_pred[:, 1], len(test_y), bins="auto")
-        writer.add_histogram("Baseline Intensity Prediction Histogram", y_pred[:, 2], len(test_y), bins="auto")
+        writer.add_histogram("Intensities Prediction Histogram", y_pred[:, :-2], len(test_y), bins="auto")
+        writer.add_histogram("Branching Ratio Prediction Histogram", y_pred[:, -2], len(test_y), bins="auto")
+        writer.add_histogram("Baseline Intensity Prediction Histogram", y_pred[:, -1], len(test_y), bins="auto")
         writer.add_histogram("Test Histogram", test_y, len(test_y), bins="auto")
 
         # Stored on disk / Closed SummaryWriter
@@ -534,9 +535,9 @@ class DuelingTrainer:
 
         # Written parameters to parquet file
         write_parquet(pl.DataFrame({'x_true': test_y.numpy(), 
-                                    'intensities_pred': y_pred[:, 0].numpy(),
-                                    'eta_pred': y_pred[:, 1].numpy(),
-                                    'mu_pred': y_pred[:, 2].numpy()}), 
+                                    'intensities_pred': y_pred[:, :-2].numpy(),
+                                    'eta_pred': y_pred[:, -2].numpy(),
+                                    'mu_pred': y_pred[:, -1].numpy()}), 
                                     filename=f"{self.run_name}_predictions.parquet", 
                                     folder=os.path.join(self.logdirun, self.test_dir, self.run_name))
 
@@ -545,46 +546,46 @@ class DuelingTrainer:
 
     # Stan testing function
 
-    def stan_test(self, test_y: torch.Tensor, record: bool = True, filename: Optional[str] = "parameters_predictions.parquet") -> pl.DataFrame:
+    # def stan_test(self, test_y: torch.Tensor, record: bool = True, filename: Optional[str] = "parameters_predictions.parquet") -> pl.DataFrame:
 
-        """
-        Stan testing for bayesian inference 
+    #     """
+    #     Stan testing for bayesian inference 
 
-        Args:
-            test_y (torch.Tensor): Label outputs for testing data
-            record (bool, optional): Record results in parquet file (default: True)
-            filename (str, optional): Parquet filename to save results (default: "parameters_predictions.parquet")
+    #     Args:
+    #         test_y (torch.Tensor): Label outputs for testing data
+    #         record (bool, optional): Record results in parquet file (default: True)
+    #         filename (str, optional): Parquet filename to save results (default: "parameters_predictions.parquet")
 
-        Returns:
-            pl.DataFrame: Parameters predictions
-        """
+    #     Returns:
+    #         pl.DataFrame: Parameters predictions
+    #     """
 
-        weights = self.model.intensities_decoder.parameters()
+    #     weights = self.model.intensities_decoder.parameters()
 
-        W1, B1, W2, B2, W3, B3 = weights
+    #     W1, B1, W2, B2, W3, B3 = weights
 
-        # Initialized testing data
-        data = {"p": self.latent_size, "p1": int(self.intermediate_size * 0.5), "p2": self.intermediate_size, 
-                "n": self.input_size, "W1": W1, "B1": B1, "W2": W2, "B2": B2, "W3": W3, "B3": B3, "y": test_y[0,:]}
+    #     # Initialized testing data
+    #     data = {"p": self.latent_size, "p1": int(self.intermediate_size * 0.5), "p2": self.intermediate_size, 
+    #             "n": self.input_size, "W1": W1, "B1": B1, "W2": W2, "B2": B2, "W3": W3, "B3": B3, "y": test_y[0,:]}
         
-        # Open file and read code
-        with io.open("stan_test.stan", 'r', encoding='utf-8') as file:
-            program_code = file.read()
+    #     # Open file and read code
+    #     with io.open("stan_test.stan", 'r', encoding='utf-8') as file:
+    #         program_code = file.read()
 
-        # Built stan model
-        mcmc_fit = stan.build(program_code=program_code, data=data)
+    #     # Built stan model
+    #     mcmc_fit = stan.build(program_code=program_code, data=data)
 
-        # MCMC Adjustment
-        mcmc_result = mcmc_fit.sample()
+    #     # MCMC Adjustment
+    #     mcmc_result = mcmc_fit.sample()
 
-        # Extracted samples
-        latent_draws = mcmc_result['z']
+    #     # Extracted samples
+    #     latent_draws = mcmc_result['z']
 
-        # Fitting model from samples
-        test_pred = self.model.parameters_decoder.fit(latent_draws)
+    #     # Fitting model from samples
+    #     test_pred = self.model.parameters_decoder.fit(latent_draws)
 
-         # Written parquet file
-        if record is True:
-            write_parquet(pl.DataFrame(np.column_stack((test_pred[:, 0], test_pred[:, 1])), schema=["eta_pred", "mu_pred"]), filename=filename)
+    #      # Written parquet file
+    #     if record is True:
+    #         write_parquet(pl.DataFrame(np.column_stack((test_pred[:, 0], test_pred[:, 1])), schema=["eta_pred", "mu_pred"]), filename=filename)
 
-        return pl.DataFrame(np.column_stack((test_pred[:, 0], test_pred[:, 1])), schema=["eta_pred", "mu_pred"])
+    #     return pl.DataFrame(np.column_stack((test_pred[:, 0], test_pred[:, 1])), schema=["eta_pred", "mu_pred"])
