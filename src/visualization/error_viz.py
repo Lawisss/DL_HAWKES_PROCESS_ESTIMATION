@@ -62,22 +62,22 @@ def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]
         ax.plot(loss[:, 1], label=f"{models[i]} Validation Loss", color=colors[i+1])
 
         # Inset plot
-        # axins = ax.inset_axes([0.5, 0.30, 0.42, 0.48], transform=ax.transAxes)
+        axins = ax.inset_axes([0.5, 0.30, 0.42, 0.48], transform=ax.transAxes)
 
-        # axins.semilogy(loss[:, 0], label=f"{models[i]} Train Loss", color=colors[i])
-        # axins.semilogy(loss[:, 1], label=f"{models[i]} Validation Loss", color=colors[i+1])
+        axins.semilogy(loss[:, 0], label=f"{models[i]} Train Loss", color=colors[i])
+        axins.semilogy(loss[:, 1], label=f"{models[i]} Validation Loss", color=colors[i+1])
 
-        # axins.set_xlim([0, len(loss[:, 0])])
-        # axins.set_ylim([0.05, 0.5])
-        # axins.tick_params(axis='both', which='major', labelsize=12, pad=6)
+        axins.set_xlim([0, len(loss[:, 0])])
+        axins.set_ylim([0.05, 0.5])
+        axins.tick_params(axis='both', which='major', labelsize=12, pad=6)
 
-        # axins.legend(axins.get_legend_handles_labels()[0], axins.get_legend_handles_labels()[1], loc="best", fontsize=10)
-        # ax.indicate_inset_zoom(axins, alpha=0)
+        axins.legend(axins.get_legend_handles_labels()[0], axins.get_legend_handles_labels()[1], loc="best", fontsize=10)
+        ax.indicate_inset_zoom(axins, alpha=0)
 
     ax.set_title('Convergence Rate', fontsize=16, pad=15)
     ax.set_xlabel("Epochs", fontsize=16, labelpad=15)
     ax.set_ylabel("Loss", fontsize=16, labelpad=15)
-    ax.set_ylim([-310, -100])
+    ax.set_ylim([0, 1.2])
 
     ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
     ax.legend(ax.get_legend_handles_labels()[0], ax.get_legend_handles_labels()[1], loc="best", fontsize=12)
@@ -247,7 +247,6 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
     plt.style.use(['science', 'ieee'])
     
     # factors = [3.075, 2.53, 3.35, 1.8]
-    factors = [3.2, 2.2, 3.2, 2.2]
 
     _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 24))
     
@@ -257,7 +256,7 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
         ax.minorticks_on()
         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-        decoded = decoded * factor
+        # decoded = decoded * factor
 
         ax.plot(range(len(decoded)), decoded, color='red', label=label_names[0])
         ax.plot(range(len(integrated)), integrated, color='blue', label=label_names[1])
