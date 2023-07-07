@@ -246,7 +246,8 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
     # Built lineplots + NRMSE
     plt.style.use(['science', 'ieee'])
     
-    factors = [3.075, 2.53, 3.35, 1.8]
+    # factors = [3.075, 2.53, 3.35, 1.8]
+    factors = [3.2, 2.2, 3.2, 2.2]
 
     _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 24))
     

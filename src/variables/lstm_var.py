@@ -14,10 +14,10 @@ import variables.hawkes_var as hwk
 
 # LSTM parameters (mlp_model.py)
 
-INPUT_SIZE: int = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)            # LSTM input size (HORIZON = 100)
-HIDDEN_SIZE: int = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)           # Neurons in hidden layers (HORIZON = 100)
+INPUT_SIZE: int = int(hwk.TIME_HORIZON // hwk.DISCRETISE_STEP)            # LSTM input size
+HIDDEN_SIZE: int = 64                                                     # Features in hidden state 
 OUTPUT_SIZE: int = 2                                                      # LSTM output size
-NUM_HIDDEN_LAYERS: int = 6                                                # LSTM number of hidden layers
+NUM_LAYERS: int = 2                                                       # LSTM number of hidden layers
 L2_REG: float = 0.001                                                     # L2 regularization parameter
 
 LEARNING_RATE: float = 0.001                                              # Learning rate for optimizer

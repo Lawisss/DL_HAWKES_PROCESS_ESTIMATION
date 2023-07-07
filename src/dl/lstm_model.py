@@ -7,7 +7,7 @@ File containing LSTM Aggregated/Binned Hawkes Process estimation (eta/mu)
 
 """
 
-import os
+import os 
 import copy
 from typing import Tuple, Union, Optional, Callable
 
@@ -18,7 +18,9 @@ import torch.nn as nn
 from tqdm import tqdm
 import torch.optim as optim
 from torchinfo import summary
+from torch.linalg import norm
 from torch.utils.data import DataLoader
+from torch.nn.utils import parameters_to_vector
 from torch.utils.tensorboard import SummaryWriter
 
 import variables.lstm_var as lstm
@@ -28,17 +30,17 @@ import variables.prep_var as prep
 
 
 class LSTM(nn.Module):
-    def __init__(self, input_size: Optional[int] = None, hidden_size: Optional[int] = None, num_hidden_layers: Optional[int] = None, output_size: Optional[int] = None):
+    def __init__(self, input_size: Optional[int] = None, hidden_size: Optional[int] = None, num_layers: Optional[int] = None, output_size: Optional[int] = None):
         super().__init__()
 
         # Initialized parameters
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.num_hidden_layers = num_hidden_layers
+        self.num_layers = num_layers
         self.output_size = output_size
 
         # LSTM layer
-        self.lstm = nn.LSTM(input_size, hidden_size, num_hidden_layers, batch_first=True)
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
 
         # Output layer
         self.output_layer = nn.Linear(hidden_size, output_size)
@@ -58,17 +60,11 @@ class LSTM(nn.Module):
             torch.Tensor: Output shape tensor (batch_size, output_size)
         """
 
-        # Initialized hidden states
-        h0 = torch.zeros(self.num_hidden_layers, x.size(0), self.hidden_size, dtype=torch.float32)
-        c0 = torch.zeros(self.num_hidden_layers, x.size(0), self.hidden_size, dtype=torch.float32)
-
         # Forward pass
-        out, _ = self.lstm(x, (h0, c0))
+        x, _ = self.lstm(x)
+        x = self.output_layer(x)
 
-        # Retrieved last element (final time step)
-        out = self.output_layer(out[:, -1, :])
-
-        return out
+        return x
     
 
 # LSTM Training
@@ -79,7 +75,7 @@ class LSTMTrainer:
         # Initialized parameters
         params = [('input_size', lstm.INPUT_SIZE),
                   ('hidden_size', lstm.HIDDEN_SIZE),
-                  ('num_hidden_layers', lstm.NUM_HIDDEN_LAYERS),
+                  ('num_layers', lstm.NUM_LAYERS),
                   ('output_size', lstm.OUTPUT_SIZE),
                   ('device', prep.DEVICE),
                   ('learning_rate', lstm.LEARNING_RATE),
@@ -104,7 +100,7 @@ class LSTMTrainer:
             setattr(self, attr, getattr(args, attr, default_val))
 
         # LSTM parameters
-        self.model = LSTM(self.input_size, self.hidden_size, self.num_hidden_layers, self.output_size).to(self.device)
+        self.model = LSTM(self.input_size, self.hidden_size, self.num_layers, self.output_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
         self.criterion = nn.MSELoss().to(self.device)
 
@@ -188,7 +184,7 @@ class LSTMTrainer:
         self.model.eval()
         
         for x, y in val_loader:
-            
+
             y_pred = self.model(x)
             loss = self.criterion(y_pred, y)
             self.val_loss += loss.item() * x.size(0)
