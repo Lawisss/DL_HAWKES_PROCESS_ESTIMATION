@@ -212,6 +212,43 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
     plt.show()
 
 
+# Models boxplots function
+
+def all_boxplots(predictions: List[np.ndarray], true_param: np.ndarray, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
+                 showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "error_all_boxplots.pdf", args: Optional[Callable] = None) -> None:
+
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Converted to array
+    predictions = [prediction.to_numpy() if not isinstance(prediction, np.ndarray) else prediction for prediction in predictions]
+
+    # Built boxplots
+    plt.style.use(['science', 'ieee'])
+
+    _, ax = plt.subplots(figsize=(18, 9))
+        
+    ax.grid(which='major', color='#999999', linestyle='--')
+    ax.minorticks_on()
+    ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
+
+    ax.boxplot(predictions, labels=deltas, showfliers=showfliers)
+    ax.axhline(y=true_param, color='orange', linestyle='--')
+    
+    ax.set_title(r'Predictions boxplots ($\eta£ = 0.2)', fontsize=16, pad=15)
+    ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
+    ax.set_ylabel(r'$\eta$ predictions', fontsize=16, labelpad=15)
+    ax.legend(loc="best", fontsize=12)
+
+    plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
+    plt.tight_layout()
+    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
+    plt.show()
+
+
 # Intensity reconstruction plot function
 
 def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intensities: List[np.ndarray], label_names: List[str] = ["Decoded Intensity", "Integrated Intensity"], 
@@ -250,7 +287,7 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
 
     _, axes = plt.subplots(len(decoded_intensities), 1, figsize=(42, 24))
     
-    for ax, decoded, integrated, params_name, factor in zip(axes, decoded_intensities, integrated_intensities, params_names, factors):
+    for ax, decoded, integrated, params_name, factor in zip(axes, decoded_intensities, integrated_intensities, params_names):
         
         ax.grid(which='major', color='#999999', linestyle='--')
         ax.minorticks_on()
