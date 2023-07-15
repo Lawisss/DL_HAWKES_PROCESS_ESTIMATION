@@ -214,7 +214,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
 
 # Predictions boxplots function
 
-def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], true_param: Optional[float] = 0.2, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
+def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], eta_true: Optional[float] = 0.2, median_true: Optional[float] = None, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
                   showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "pred_boxplots.pdf", args: Optional[Callable] = None) -> None:
     
     """
@@ -224,7 +224,8 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
         mle_preds (List[np.ndarray], optional): MLE predictions
         mlp_preds (List[np.ndarray], optional): MLP predictions
         lstm_preds (List[np.ndarray]): LSTM predictions
-        true_param (Optional[float]): Branching ratio true value (default: 0.2)
+        eta_true (Optional[float]): Branching ratio true value (default: 0.2)
+        median_true (Optional[float]): Median true value (default: None)
         deltas (List[float], optional): Discretisation step values (default: [0.25, 0.5, 1.0, 2.0, 5.0])
         labels (List[str], optional): Models names (default: ["MLE", "MLP", "LSTM"])
         showfliers (bool, optional): Show outliers (default: True)
@@ -269,13 +270,15 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     ax.set_xticklabels(deltas, fontsize=16)
     ax.set_yticklabels(ax.get_yticklabels(), fontsize=16)
     
-    # bottom=0.06, top=0.36, bottom=0.23, top=0.6, bottom=0.56, top=0.87
-    ax.set_ylim(bottom=0.06, top=0.36) 
+    # Branching ratio ylim: bottom=0.06, top=0.36, bottom=0.23, top=0.6, bottom=0.56, top=0.87
+    # Baseline intensity ylim: bottom=3.5, top=4.8, bottom=0.5, top=3.9, bottom=0.2, top=1.5
+    
+    ax.set_ylim(bottom=3.5, top=4.8) 
     ax.tick_params(axis='both', which='both', pad=8)
-    ax.axhline(y=true_param, color='orange', linestyle='--')
+    ax.axhline(y=median_true, color='orange', linestyle='--')
     ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=12)
 
-    ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(true_param), fontsize=16, pad=15)
+    ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(eta_true), fontsize=16, pad=15)
     ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
     ax.set_ylabel(r'Baseline intensity predictions ($\hat{\mu})$', fontsize=16, labelpad=15)
     # Branching ratio
