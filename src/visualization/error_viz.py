@@ -212,11 +212,30 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
     plt.show()
 
 
-# Models boxplots function
+# Predictions boxplots function
 
-def all_boxplots(predictions: List[np.ndarray], true_param: np.ndarray, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
-                 showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "error_all_boxplots.pdf", args: Optional[Callable] = None) -> None:
+def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], true_param: Optional[float] = 0.2, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
+                  showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "pred_boxplots.pdf", args: Optional[Callable] = None) -> None:
+    
+    """
+    Plotted eta/mu predictions boxplots to compare models
 
+    Args:
+        mle_preds (List[np.ndarray], optional): MLE predictions
+        mlp_preds (List[np.ndarray], optional): MLP predictions
+        lstm_preds (List[np.ndarray]): LSTM predictions
+        true_param (Optional[float]): Branching ratio true value (default: 0.2)
+        deltas (List[float], optional): Discretisation step values (default: [0.25, 0.5, 1.0, 2.0, 5.0])
+        labels (List[str], optional): Models names (default: ["MLE", "MLP", "LSTM"])
+        showfliers (bool, optional): Show outliers (default: True)
+        folder (str, optional): Sub-folder name in results folder (default: "photos")
+        filename (str, optional): Parquet filename (default: "pred_boxplots.pdf")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        None: Function does not return anything
+    """
+        
     # Default parameters
     default_params = {"dirpath": prep.DIRPATH}
 
@@ -224,25 +243,42 @@ def all_boxplots(predictions: List[np.ndarray], true_param: np.ndarray, deltas: 
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Converted to array
-    predictions = [prediction.to_numpy() if not isinstance(prediction, np.ndarray) else prediction for prediction in predictions]
+    mle_preds = [mle_pred.to_numpy().flatten() if not isinstance(mle_pred, np.ndarray) else mle_pred for mle_pred in mle_preds]
+    mlp_preds = [mlp_pred.to_numpy().flatten() if not isinstance(mlp_pred, np.ndarray) else mlp_pred for mlp_pred in mlp_preds]
+    lstm_preds = [lstm_pred.to_numpy().flatten() if not isinstance(lstm_pred, np.ndarray) else lstm_pred for lstm_pred in lstm_preds]
 
     # Built boxplots
     plt.style.use(['science', 'ieee'])
 
     _, ax = plt.subplots(figsize=(18, 9))
-        
+    sns.set_palette("muted")
+
     ax.grid(which='major', color='#999999', linestyle='--')
     ax.minorticks_on()
     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    ax.boxplot(predictions, labels=deltas, showfliers=showfliers)
-    ax.axhline(y=true_param, color='orange', linestyle='--')
-    
-    ax.set_title(r'Predictions boxplots ($\eta£ = 0.2)', fontsize=16, pad=15)
-    ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
-    ax.set_ylabel(r'$\eta$ predictions', fontsize=16, labelpad=15)
-    ax.legend(loc="best", fontsize=12)
+    positions = np.arange(len(mle_preds)) * (len(labels) + 1)
+    colors = sns.color_palette()
 
+    boxplots = [ax.boxplot(preds, positions=positions + i * 0.5 - 0.6, widths=0.4, showfliers=showfliers, patch_artist=True, medianprops={"color": "red"}, whis=[20, 80]) for i, preds in enumerate([mle_preds, mlp_preds, lstm_preds])]
+    [plt.setp(boxplot[component], color=color) for boxplot, color in zip(boxplots, colors) for component in ["boxes"]]
+    legend_labels = [ax.plot([], marker='s', markersize=10, markerfacecolor=color, label=label)[0] for label, color in zip(labels, colors)]
+
+    ax.set_xticks(positions)
+    ax.set_yticks(ax.get_yticks())
+    ax.set_xticklabels(deltas, fontsize=16)
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=16)
+    
+    # bottom=0.06, top=0.36, bottom=0.23, top=0.6, bottom=0.56, top=0.87
+    ax.set_ylim(bottom=0.06, top=0.36) 
+    ax.tick_params(axis='both', which='both', pad=8)
+    ax.axhline(y=true_param, color='orange', linestyle='--')
+    ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=12)
+
+    ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(true_param), fontsize=16, pad=15)
+    ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
+    ax.set_ylabel(r'Baseline intensity predictions ($\hat{\mu})$', fontsize=16, labelpad=15)
+    # Branching ratio
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout()
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
