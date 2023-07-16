@@ -260,8 +260,8 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
 
     positions = np.arange(len(mle_preds)) * (len(labels) + 1)
     colors = sns.color_palette()
-
-    boxplots = [ax.boxplot(preds, positions=positions + i * 0.5 - 0.6, widths=0.4, showfliers=showfliers, patch_artist=True, medianprops={"color": "red"}, whis=[20, 80]) for i, preds in enumerate([mle_preds, mlp_preds, lstm_preds])]
+    # whis=[20, 80]
+    boxplots = [ax.boxplot(preds, positions=positions + i * 0.5 - 0.6, widths=0.4, showfliers=showfliers, patch_artist=True, medianprops={"color": "red"}, whis=[10, 90]) for i, preds in enumerate([mle_preds, mlp_preds, lstm_preds])]
     [plt.setp(boxplot[component], color=color) for boxplot, color in zip(boxplots, colors) for component in ["boxes"]]
     legend_labels = [ax.plot([], marker='s', markersize=10, markerfacecolor=color, label=label)[0] for label, color in zip(labels, colors)]
 
@@ -272,8 +272,8 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     
     # Branching ratio ylim: bottom=0.06, top=0.36, bottom=0.23, top=0.6, bottom=0.56, top=0.87
     # Baseline intensity ylim: bottom=3.5, top=4.8, bottom=0.5, top=3.9, bottom=0.2, top=1.5
-    
-    ax.set_ylim(bottom=3.5, top=4.8) 
+
+    # ax.set_ylim(bottom=3.5, top=4.8) 
     ax.tick_params(axis='both', which='both', pad=8)
     ax.axhline(y=median_true, color='orange', linestyle='--')
     ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=12)
@@ -281,7 +281,7 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(eta_true), fontsize=16, pad=15)
     ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
     ax.set_ylabel(r'Baseline intensity predictions ($\hat{\mu})$', fontsize=16, labelpad=15)
-    # Branching ratio
+    # Branching ratio /
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout()
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
