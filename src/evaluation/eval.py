@@ -7,7 +7,7 @@ File containing model evaluation functions
 
 """
 
-from typing import Optional, Tuple, Union, Callable
+from typing import Optional, Union, Callable
 
 import numpy as np
 import pandas as pd
@@ -105,3 +105,53 @@ def integrate_intensity(params: Union[np.ndarray, pl.DataFrame, pd.DataFrame], s
         write_parquet(pl.DataFrame(np.column_stack((decoded_intensity[0], integrated_intensity)), schema=["decoded_intensity", "integrated_intensity"]), filename=filename)
 
     return pl.DataFrame(np.column_stack((decoded_intensity[0], integrated_intensity)), schema=["decoded_intensity", "integrated_intensity"])
+
+
+# NRMSE error function
+
+def compute_nrmse(params: Union[np.ndarray, pl.DataFrame, pd.DataFrame], simulated_events_seqs: Union[np.ndarray, pl.DataFrame, pd.DataFrame], decoded_intensity: Union[np.ndarray, pl.DataFrame, pd.DataFrame], record: bool = True, filename: Optional[str] = "nrmse_errors.parquet") -> pl.DataFrame:
+    
+    """
+    Computed NRMSE error
+
+    Args:
+        params (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Hawkes processes hyperparameters
+        simulated_events_seqs (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Hawkes processes
+        decoded_intensities (Union[np.ndarray, pl.DataFrame, pd.DataFrame]): Predicted intensities
+        record (bool, optional): Record results in parquet file (default: True)
+        filename (str, optional): Parquet filename to save results (default: "nrmse_errors.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        pl.DataFrame: NRMSE error
+    """
+
+    # Checked types
+    params = params.to_numpy() if not isinstance(params, np.ndarray) else params
+    simulated_events_seqs = simulated_events_seqs.to_numpy() if not isinstance(simulated_events_seqs, np.ndarray) else simulated_events_seqs
+    decoded_intensity = decoded_intensity.to_numpy() if not isinstance(decoded_intensity, np.ndarray) else decoded_intensity
+    
+    # Initialized parameters
+    _, beta, _ = params[0, 0], params[0, 1], params[0, 3]
+    t = (np.arange(0, (100 / 0.001), dtype=np.float32) * 0.001)
+    intensity = np.zeros((100, len(t)), dtype=np.float32)
+    integrated_intensity = np.zeros((100, 100), dtype=np.float32)
+    
+    # Computed intensity
+    for i in range(100):
+        for j in range(len(t)):
+            intensity[i, j] = np.sum(np.exp(beta * (simulated_events_seqs[i, 0][simulated_events_seqs[i, 0] < t[j]] - t[j])), dtype=np.float32)
+    
+    # Computed integrated intensity
+    for i in range(100):
+        for k in range(1, 100 + 1):
+            integrated_intensity[k-1] = quad(lambda x: intensity[i, int(x * 1000)], k-1, k, limit=1000, epsabs=0.01)[0]
+    
+    # Computed NRMSE
+    nrmse = [np.sqrt(np.mean((decoded_intensities - integrated_intensities)**2)) / (np.max(integrated_intensities) - np.min(integrated_intensities)) for decoded_intensities, integrated_intensities in zip(integrated_intensity.tolist(), decoded_intensity.tolist())]
+
+    # Written parquet file
+    if record is True:
+        write_parquet(pl.DataFrame(np.column_stack((nrmse)), schema=["nrmse_error"]), filename=filename)
+
+    return pl.DataFrame(np.column_stack((nrmse)), schema=["nrmse_error"])

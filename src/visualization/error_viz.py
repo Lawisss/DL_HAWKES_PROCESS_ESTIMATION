@@ -185,7 +185,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
     # Built boxplots
     plt.style.use(['science', 'ieee'])
     
-    _, (ax1, ax2) = plt.subplots(2, 1, figsize=(35, 10))
+    _, (ax1, ax2) = plt.subplots(2, 1, figsize=(45, 15))
 
     for ax in (ax1, ax2):
         ax.grid(which='major', color='#999999', linestyle='--')
@@ -214,7 +214,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
 
 # Predictions boxplots function
 
-def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], eta_true: Optional[float] = 0.2, median_true: Optional[float] = None, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
+def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], eta_true: Optional[float] = 0.2, median_true: Optional[float] = None, deltas: List[float] = [0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10], labels = ['MLE', 'MLP', 'LSTM'], 
                   showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "pred_boxplots.pdf", args: Optional[Callable] = None) -> None:
     
     """
@@ -226,7 +226,7 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
         lstm_preds (List[np.ndarray]): LSTM predictions
         eta_true (Optional[float]): Branching ratio true value (default: 0.2)
         median_true (Optional[float]): Median true value (default: None)
-        deltas (List[float], optional): Discretisation step values (default: [0.25, 0.5, 1.0, 2.0, 5.0])
+        deltas (List[float], optional): Discretisation step values (default: [0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10])
         labels (List[str], optional): Models names (default: ["MLE", "MLP", "LSTM"])
         showfliers (bool, optional): Show outliers (default: True)
         folder (str, optional): Sub-folder name in results folder (default: "photos")
@@ -260,8 +260,9 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
 
     positions = np.arange(len(mle_preds)) * (len(labels) + 1)
     colors = sns.color_palette()
+
     # whis=[20, 80]
-    boxplots = [ax.boxplot(preds, positions=positions + i * 0.5 - 0.6, widths=0.4, showfliers=showfliers, patch_artist=True, medianprops={"color": "red"}, whis=[10, 90]) for i, preds in enumerate([mle_preds, mlp_preds, lstm_preds])]
+    boxplots = [ax.boxplot(preds, positions=positions + i * 0.5 - 0.6, widths=0.4, showfliers=showfliers, patch_artist=True, medianprops={"color": "red"}, whis=[20, 80]) for i, preds in enumerate([mle_preds, mlp_preds, lstm_preds])]
     [plt.setp(boxplot[component], color=color) for boxplot, color in zip(boxplots, colors) for component in ["boxes"]]
     legend_labels = [ax.plot([], marker='s', markersize=10, markerfacecolor=color, label=label)[0] for label, color in zip(labels, colors)]
 
@@ -280,8 +281,9 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
 
     ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(eta_true), fontsize=16, pad=15)
     ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
-    ax.set_ylabel(r'Baseline intensity predictions ($\hat{\mu})$', fontsize=16, labelpad=15)
-    # Branching ratio /
+    ax.set_ylabel(r'Branching ratio predictions ($\hat{\eta})$', fontsize=16, labelpad=15)
+    # Branching ratio / Baseline Intensity
+
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout()
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
@@ -347,6 +349,45 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout(pad=4, h_pad=4)
+    plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
+    plt.show()
+
+
+# NRMSE Boxplot function
+
+def nrmse_boxplot(decoded_intensities: List[np.ndarray], integrated_intensities: List[np.ndarray], 
+                  error_names: List[str] = ["Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.2)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.2)",  "Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.7)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.7)"], showfliers: bool = True, 
+                  folder: Optional[str] = "photos", filename: Optional[str] = "nrmse_boxplot.pdf", args: Optional[Callable] = None) -> None:
+
+    # Default parameters
+    default_params = {"dirpath": prep.DIRPATH}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Converted to array
+    decoded_intensities = [decoded_intensity.to_numpy() if not isinstance(decoded_intensity, np.ndarray) else decoded_intensity for decoded_intensity in decoded_intensities]
+    integrated_intensities = [integrated_intensity.to_numpy() if not isinstance(integrated_intensity, np.ndarray) else integrated_intensity for integrated_intensity in integrated_intensities]
+
+    # Built lineplots + NRMSE
+    plt.style.use(['science', 'ieee'])
+
+    _, ax = plt.subplots(figsize=(30, 10))
+
+    ax.grid(which='major', color='#999999', linestyle='--')
+    ax.minorticks_on()
+    ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
+    
+    for decoded, integrated in zip(decoded_intensities, integrated_intensities):
+        nrmse = np.sqrt(np.mean((decoded - integrated)**2)) / (np.max(integrated) - np.min(integrated))
+        ax.boxplot(nrmse, labels=error_names, showfliers=showfliers)
+
+    ax.set_title('Reconstruction Error Comparison', fontsize=16, pad=15)
+    ax.set_xlabel('Model', fontsize=16, labelpad=15)
+    ax.set_ylabel('Error (NRMSE)', fontsize=16, labelpad=15)
+    ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+    plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
 
