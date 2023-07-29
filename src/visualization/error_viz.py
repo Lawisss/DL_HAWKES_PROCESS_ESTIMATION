@@ -354,8 +354,8 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
 
 # NRMSE Boxplot function
 
-def nrmse_boxplot(vae_errors: List[np.ndarray], dd_errors: List[np.ndarray], labels = ['Poisson-VAE', 'Dueling Decoder'], xlabels: List[str] = [r"($\beta$ = 1.0, $\eta$ = 0.2)", r"($\beta$ = 3.0, $\eta$ = 0.2)", r"($\beta$ = 1.0, $\eta$ = 0.7)", r"($\beta$ = 3.0, $\eta$ = 0.7)"], showfliers: bool = True, 
-                  folder: Optional[str] = "photos", filename: Optional[str] = "nrmse_boxplot.pdf", args: Optional[Callable] = None) -> None:
+def nrmse_boxplot(vae_errors: List[np.ndarray], dd_errors: List[np.ndarray], labels: List[str] = ['Poisson-VAE', 'Dueling Decoder'], xlabels: List[str] = [r"($\beta$ = 1.0, $\eta$ = 0.2)", r"($\beta$ = 3.0, $\eta$ = 0.2)", r"($\beta$ = 1.0, $\eta$ = 0.7)", r"($\beta$ = 3.0, $\eta$ = 0.7)"], 
+                  showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "nrmse_boxplot.pdf", args: Optional[Callable] = None) -> None:
     
     """
     Computed NRMSE error
@@ -363,7 +363,8 @@ def nrmse_boxplot(vae_errors: List[np.ndarray], dd_errors: List[np.ndarray], lab
     Args:
         vae_errors (List[np.ndarray]): Poisson-VAE NRMSE errors
         dd_errors (List[np.ndarray]): Dueling Decoder NRMSE errors
-        error_names ("Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.2)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.2)",  "Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.7)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.7)"): Errors names
+        labels (List[str]): Models labels (default: ['Poisson-VAE', 'Dueling Decoder'])
+        xlabels (List[str]): Parameters labels  (default: ["($\beta$ = 1.0, $\eta$ = 0.2)", "($\beta$ = 3.0, $\eta$ = 0.2)",  "($\beta$ = 1.0, $\eta$ = 0.7)", "($\beta$ = 3.0, $\eta$ = 0.7)"])
         showfliers (bool, optional): Show outliers (default: True)
         folder (str, optional): Sub-folder name in results folder (default: "photos")
         filename (str, optional): Parquet filename to save results (default: "nrmse_boxplot.parquet")
