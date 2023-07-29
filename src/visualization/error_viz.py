@@ -261,7 +261,6 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     positions = np.arange(len(mle_preds)) * (len(labels) + 1)
     colors = sns.color_palette()
 
-    # whis=[20, 80]
     boxplots = [ax.boxplot(preds, positions=positions + i * 0.5 - 0.6, widths=0.4, showfliers=showfliers, patch_artist=True, medianprops={"color": "red"}, whis=[20, 80]) for i, preds in enumerate([mle_preds, mlp_preds, lstm_preds])]
     [plt.setp(boxplot[component], color=color) for boxplot, color in zip(boxplots, colors) for component in ["boxes"]]
     legend_labels = [ax.plot([], marker='s', markersize=10, markerfacecolor=color, label=label)[0] for label, color in zip(labels, colors)]
@@ -278,11 +277,11 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     ax.tick_params(axis='both', which='both', pad=8)
     ax.axhline(y=median_true, color='orange', linestyle='--')
     ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=12)
-
+    
+    # Branching ratio / Baseline Intensity
     ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(eta_true), fontsize=16, pad=15)
     ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
     ax.set_ylabel(r'Branching ratio predictions ($\hat{\eta})$', fontsize=16, labelpad=15)
-    # Branching ratio / Baseline Intensity
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout()
@@ -355,9 +354,24 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
 
 # NRMSE Boxplot function
 
-def nrmse_boxplot(decoded_intensities: List[np.ndarray], integrated_intensities: List[np.ndarray], 
-                  error_names: List[str] = ["Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.2)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.2)",  "Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.7)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.7)"], showfliers: bool = True, 
+def nrmse_boxplot(vae_errors: List[np.ndarray], dd_errors: List[np.ndarray], labels = ['Poisson-VAE', 'Dueling Decoder'], xlabels: List[str] = [r"($\beta$ = 1.0, $\eta$ = 0.2)", r"($\beta$ = 3.0, $\eta$ = 0.2)", r"($\beta$ = 1.0, $\eta$ = 0.7)", r"($\beta$ = 3.0, $\eta$ = 0.7)"], showfliers: bool = True, 
                   folder: Optional[str] = "photos", filename: Optional[str] = "nrmse_boxplot.pdf", args: Optional[Callable] = None) -> None:
+    
+    """
+    Computed NRMSE error
+
+    Args:
+        vae_errors (List[np.ndarray]): Poisson-VAE NRMSE errors
+        dd_errors (List[np.ndarray]): Dueling Decoder NRMSE errors
+        error_names ("Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.2)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.2)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.2)",  "Poisson VAE ($\beta$ = 1.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 1.0, $\eta$ = 0.7)", "Poisson VAE ($\beta$ = 3.0, $\eta$ = 0.7)", "Dueling Decoder ($\beta$ = 3.0, $\eta$ = 0.7)"): Errors names
+        showfliers (bool, optional): Show outliers (default: True)
+        folder (str, optional): Sub-folder name in results folder (default: "photos")
+        filename (str, optional): Parquet filename to save results (default: "nrmse_boxplot.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        None: Function does not return anything
+    """
 
     # Default parameters
     default_params = {"dirpath": prep.DIRPATH}
@@ -366,26 +380,36 @@ def nrmse_boxplot(decoded_intensities: List[np.ndarray], integrated_intensities:
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Converted to array
-    decoded_intensities = [decoded_intensity.to_numpy() if not isinstance(decoded_intensity, np.ndarray) else decoded_intensity for decoded_intensity in decoded_intensities]
-    integrated_intensities = [integrated_intensity.to_numpy() if not isinstance(integrated_intensity, np.ndarray) else integrated_intensity for integrated_intensity in integrated_intensities]
+    vae_errors = [vae_error.to_numpy().flatten() if not isinstance(vae_error, np.ndarray) else vae_error for vae_error in vae_errors]
+    dd_errors = [dd_error.to_numpy().flatten() if not isinstance(dd_error, np.ndarray) else dd_error for dd_error in dd_errors]
 
     # Built lineplots + NRMSE
     plt.style.use(['science', 'ieee'])
 
-    _, ax = plt.subplots(figsize=(30, 10))
+    _, ax = plt.subplots(figsize=(18, 9))
+    sns.set_palette("muted")
 
     ax.grid(which='major', color='#999999', linestyle='--')
     ax.minorticks_on()
     ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
     
-    for decoded, integrated in zip(decoded_intensities, integrated_intensities):
-        nrmse = np.sqrt(np.mean((decoded - integrated)**2)) / (np.max(integrated) - np.min(integrated))
-        ax.boxplot(nrmse, labels=error_names, showfliers=showfliers)
+    positions = np.arange(len(vae_errors)) * (len(xlabels) + 1)
+    colors = sns.color_palette()
+
+    boxplots = [ax.boxplot(preds, positions=positions + i * 0.5 - 0.6, widths=0.4, showfliers=showfliers, patch_artist=True, medianprops={"color": "red"}, whis=[20, 80]) for i, preds in enumerate([vae_errors, dd_errors])]
+    [plt.setp(boxplot[component], color=color) for boxplot, color in zip(boxplots, colors) for component in ["boxes"]]
+    legend_labels = [ax.plot([], marker='s', markersize=10, markerfacecolor=color, label=label)[0] for label, color in zip(labels, colors)]
+    
+    ax.set_xticks(positions * 0.96)
+    ax.set_yticks(ax.get_yticks())
+    ax.set_xticklabels(xlabels, fontsize=16)
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=16)
 
     ax.set_title('Reconstruction Error Comparison', fontsize=16, pad=15)
-    ax.set_xlabel('Model', fontsize=16, labelpad=15)
+    ax.set_xlabel('Parameters', fontsize=16, labelpad=15)
     ax.set_ylabel('Error (NRMSE)', fontsize=16, labelpad=15)
     ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=12)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
