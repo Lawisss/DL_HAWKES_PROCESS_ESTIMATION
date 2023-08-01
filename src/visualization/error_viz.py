@@ -66,7 +66,7 @@ def convergence_rate(losses: List[Union[np.ndarray, pl.DataFrame, pd.DataFrame]]
 
         axins.semilogy(loss[:, 0], label=f"{models[i]} Train Loss", color=colors[i])
         axins.semilogy(loss[:, 1], label=f"{models[i]} Validation Loss", color=colors[i+1])
-
+        
         axins.set_xlim([0, len(loss[:, 0])])
         axins.set_ylim([0.05, 0.5])
         axins.tick_params(axis='both', which='major', labelsize=12, pad=6)
