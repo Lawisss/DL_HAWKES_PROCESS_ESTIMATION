@@ -16,16 +16,16 @@ import variables.hawkes_var as hwk
 from tools.utils import write_parquet
 
 
-# Generated Hawkes process hyper-parameters (alpha, beta, mu)
+# Generated Hawkes process exponential hyperparameters (alpha, beta, mu)
 
-def hyper_params_simulation(record: bool = True, filename: Optional[str] = "hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def exp_hyperparams(record: bool = True, filename: Optional[str] = "exp_hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
-    Generated and saved Hawkes process hyperparameters
+    Generated and saved Hawkes process exponential hyperparameters
 
     Args:
         record (bool, optional): Record results in parquet file (default: True)
-        filename (str, optional): Filename to save hyperparameters in parquet file (default: "hawkes_hyperparams.parquet")
+        filename (str, optional): Filename to save hyperparameters in parquet file (default: "exp_hawkes_hyperparams.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
 
     Returns:
@@ -65,4 +65,59 @@ def hyper_params_simulation(record: bool = True, filename: Optional[str] = "hawk
 
     return np.array([alpha, beta, eta, mu], dtype=np.float32).T, alpha, beta, eta, mu
 
+
+# Generated Hawkes process power law hyperparameters (k, c, p)
+
+def pow_hyperparams(record: bool = True, filename: Optional[str] = "pow_hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+    """
+    Generated and saved Hawkes process power law hyperparameters
+
+    Args:
+        record (bool, optional): Record results in parquet file (default: True)
+        filename (str, optional): Filename to save hyperparameters in parquet file (default: "pow_hawkes_hyperparams.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb
+
+    Returns:
+        A tuple containing:
+        - k, c, p, eta and mu parameters for each process
+        - k parameters for each process
+        - c parameters for each process
+        - p parameters for each process
+        - Eta parameters for each process
+        - Mu parameters for each process
+    """
+
+    # Default parameters
+    default_params = {"expected_activity": hwk.EXPECTED_ACTIVITY,
+                      "std": hwk.STD,
+                      "process_num": hwk.PROCESS_NUM,
+                      "min_itv_eta": hwk.MIN_ITV_ETA,
+                      "max_itv_eta": hwk.MAX_ITV_ETA,
+                      "min_itv_k": hwk.MIN_ITV_K,
+                      "max_itv_k": hwk.MAX_ITV_K,
+                      "min_itv_c": hwk.MIN_ITV_C,
+                      "max_itv_c": hwk.MAX_ITV_C,
+                      "min_itv_p": hwk.MIN_ITV_P,
+                      "max_itv_p": hwk.MAX_ITV_P,
+                      "time_horizon": hwk.TIME_HORIZON}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Generated random vectors of size PROCESS_NUM (epsilon = average of events)
+    k = np.random.gamma(dict_args['min_itv_k'], dict_args['max_itv_k'], dict_args['process_num'])
+    c = np.random.gamma(dict_args['min_itv_c'], dict_args['max_itv_c'], dict_args['process_num'])
+    p = np.random.normal(dict_args['min_itv_p'], dict_args['max_itv_p'], dict_args['process_num'])
+    epsilon = np.random.normal(dict_args['expected_activity'], dict_args['std'], dict_args['process_num'])
+    eta = np.random.gamma(dict_args['min_itv_eta'], dict_args['max_itv_eta'], dict_args['process_num'])
+
+    # Calculated mu vectors from eta vectors
+    mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
+
+    # Written parquet file
+    if record is True:
+        write_parquet(pl.DataFrame({"k": k, "c": c, "p": p, "eta": eta, "mu": mu}), filename=filename)
+
+    return np.array([k, c, p, eta, mu], dtype=np.float32).T, k, c, p, eta, mu
 
