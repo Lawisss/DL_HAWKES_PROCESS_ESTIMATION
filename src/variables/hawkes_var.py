@@ -8,17 +8,17 @@ File containing all hawkes variables.
 
 # Hawkes process hyperparameters generation parameters (hyperparameters.py)
 
-MIN_ITV_BETA: float = 1.0                 # Beta minimum interval (exponential kernel)
-MAX_ITV_BETA: float = 3.0                 # Beta maximum interval (exponential kernel)
+MIN_ITV_BETA: float = 1.0                 # Beta minimum interval (Exponential - decay rate)
+MAX_ITV_BETA: float = 3.0                 # Beta maximum interval (Exponential - decay rate)
 
-MIN_ITV_K: float = 0.05                   # K minimum interval (power law kernel)
-MAX_ITV_K: float = 2.5                    # K maximum interval (power law kernel)
+MIN_ITV_K: float = 0.01                   # K minimum interval (Power law - amplitude ratio)
+MAX_ITV_K: float = 10                     # K maximum interval (Power law - amplitude ratio)
 
-MIN_ITV_C: float = 1.0                    # C minimum interval (power law kernel)
-MAX_ITV_C: float = 3.0                    # C maximum interval (power law kernel)
+MIN_ITV_C: float = 0.1                    # C minimum interval (Power law - scaling factor)
+MAX_ITV_C: float = 2.0                    # C maximum interval (Power law - scaling factor)
 
-MIN_ITV_P: float = 1.0                    # P minimum interval
-MAX_ITV_P: float = 0.5                    # P maximum interval
+MIN_ITV_P: float = 1.0                    # P minimum interval (Power law - power law exponent)
+MAX_ITV_P: float = 3.0                    # P maximum interval (Power law - power law exponent)
 
 MIN_ITV_ETA: float = 0.05                 # Eta minimum interval
 MAX_ITV_ETA: float = 0.8                  # Eta maximum interval

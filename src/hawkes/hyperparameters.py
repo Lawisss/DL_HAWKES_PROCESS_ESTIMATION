@@ -68,7 +68,7 @@ def exp_hyperparams(record: bool = True, filename: Optional[str] = "exp_hawkes_h
 
 # Generated Hawkes process power law hyperparameters (k, c, p)
 
-def pow_hyperparams(record: bool = True, filename: Optional[str] = "pow_hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def pow_hyperparams(record: bool = True, filename: Optional[str] = "pow_hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process power law hyperparameters
@@ -105,10 +105,12 @@ def pow_hyperparams(record: bool = True, filename: Optional[str] = "pow_hawkes_h
     # Initialized parameters
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
-    # Generated random vectors of size PROCESS_NUM (epsilon = average of events)
-    k = np.random.gamma(dict_args['min_itv_k'], dict_args['max_itv_k'], dict_args['process_num'])
-    c = np.random.gamma(dict_args['min_itv_c'], dict_args['max_itv_c'], dict_args['process_num'])
-    p = np.random.normal(dict_args['min_itv_p'], dict_args['max_itv_p'], dict_args['process_num'])
+    # Generated random vectors for power-law hyperparameters
+    k = np.random.exponential(scale=(dict_args['min_itv_k'] + dict_args['max_itv_k']) / 2, size=dict_args['process_num'])
+    c = np.random.exponential(scale=(dict_args['min_itv_c'] + dict_args['max_itv_c']) / 2, size=dict_args['process_num'])
+    p = np.random.uniform(dict_args['min_itv_p'], dict_args['max_itv_p'], dict_args['process_num'])
+
+    # Generated random vectors for hawkes hyperparameters
     epsilon = np.random.normal(dict_args['expected_activity'], dict_args['std'], dict_args['process_num'])
     eta = np.random.uniform(dict_args['min_itv_eta'], dict_args['max_itv_eta'], dict_args['process_num'])
 
