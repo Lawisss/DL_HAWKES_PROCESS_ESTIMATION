@@ -110,7 +110,7 @@ def pow_hyperparams(record: bool = True, filename: Optional[str] = "pow_hawkes_h
     c = np.random.gamma(dict_args['min_itv_c'], dict_args['max_itv_c'], dict_args['process_num'])
     p = np.random.normal(dict_args['min_itv_p'], dict_args['max_itv_p'], dict_args['process_num'])
     epsilon = np.random.normal(dict_args['expected_activity'], dict_args['std'], dict_args['process_num'])
-    eta = np.random.gamma(dict_args['min_itv_eta'], dict_args['max_itv_eta'], dict_args['process_num'])
+    eta = np.random.uniform(dict_args['min_itv_eta'], dict_args['max_itv_eta'], dict_args['process_num'])
 
     # Calculated mu vectors from eta vectors
     mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
