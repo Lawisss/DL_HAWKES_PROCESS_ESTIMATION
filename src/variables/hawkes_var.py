@@ -11,8 +11,8 @@ File containing all hawkes variables.
 MIN_ITV_BETA: float = 1.0                 # Beta minimum interval (Exponential - decay rate)
 MAX_ITV_BETA: float = 3.0                 # Beta maximum interval (Exponential - decay rate)
 
-MIN_ITV_K: float = 0.01                   # K minimum interval (Power law - amplitude ratio)
-MAX_ITV_K: float = 10                     # K maximum interval (Power law - amplitude ratio)
+MIN_ITV_K: float = 0.1                    # K minimum interval (Power law - amplitude ratio)
+MAX_ITV_K: float = 1                      # K maximum interval (Power law - amplitude ratio)
 
 MIN_ITV_C: float = 0.1                    # C minimum interval (Power law - scaling factor)
 MAX_ITV_C: float = 2.0                    # C maximum interval (Power law - scaling factor)

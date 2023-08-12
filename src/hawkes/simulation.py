@@ -55,15 +55,13 @@ def hawkes_simulation(params: Optional[TypedDict] = {"mu": 0.1, "alpha": 0.5, "b
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, record: bool = True, filename: Optional[str] ='hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
+def hawkes_simulations(params: dict, record: bool = True, filename: Optional[str] ='hawkes_simulations.parquet', args: Optional[Callable] = None, **kwargs) -> np.ndarray:
     
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
 
     Args:
-        alpha (np.ndarray): Excitation matrix of each Hawkes process
-        beta (np.ndarray): Decay matrix of each Hawkes process
-        mu (np.ndarray): Baseline intensity of each Hawkes process
+        params (dict): Kernel function hyperparameters
         record (bool, optional): Record results in parquet file (default: True)
         filename (str, optional): Parquet filename to save results (default: "hawkes_simulations.parquet")
         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
@@ -79,7 +77,7 @@ def hawkes_simulations(alpha: np.ndarray, beta: np.ndarray, mu: np.ndarray, reco
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Started simulations
-    simulated_events_seqs = [np.array(hawkes_simulation(params={"mu": mu[i], "alpha": alpha[i], "beta": beta[i]})[1], dtype=np.float32) for i in range(dict_args['process_num'])]
+    simulated_events_seqs = [np.array(hawkes_simulation(params={f"{key}":value[i] for key, value in params.items()})[1], dtype=np.float32) for i in range(dict_args['process_num'])]
 
     # Written parquet file
     if record is True:
