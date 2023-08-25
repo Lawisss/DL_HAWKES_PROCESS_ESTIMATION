@@ -20,21 +20,21 @@ MAX_ITV_C: float = 2.0                    # C maximum interval (Power law - scal
 MIN_ITV_P: float = 1.0                    # P minimum interval (Power law - power law exponent)
 MAX_ITV_P: float = 3.0                    # P maximum interval (Power law - power law exponent)
 
-MIN_ITV_ETA: float = 0.05                 # Eta minimum interval
-MAX_ITV_ETA: float = 0.8                  # Eta maximum interval
+MIN_ITV_ETA: float = 0.05                 # Eta minimum interval (Branching ratio)
+MAX_ITV_ETA: float = 0.8                  # Eta maximum interval (Branching ratio)
 
 EXPECTED_ACTIVITY: int = 500              # Total number of expected events 
 STD: float = 10                           # Standard deviation for generating epsilon
 
 # Hawkes Process simulation/estimation parameters (simulation.py, discretisation.py)
 
-KERNEL: str = 'pow'                       # Type of kernel function
+KERNEL: str = 'exp'                       # Type of kernel function
 BASELINE: str = 'const'                   # Type of baseline function
 
 TIME_ITV_START: int = 0                   # Start time interval for simulation
 TIME_HORIZON: int = 100                   # Time horizon for simulation
 
-PROCESS_NUM: int = 100_000                # Number of processes to simulate
+PROCESS_NUM: int = 5_000                  # Number of processes to simulate
 
 END_T: int = 200                          # End time for estimation
 NUM_SEQ: int = 100                        # Number of sequences for estimation

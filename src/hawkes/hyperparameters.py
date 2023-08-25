@@ -18,7 +18,7 @@ from tools.utils import write_parquet
 
 # Generated Hawkes process exponential hyperparameters (alpha, beta, mu)
 
-def exp_hyperparams(record: bool = True, filename: Optional[str] = "exp_hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def exp_hyperparams(record: bool = True, filename: Optional[str] = "exp_hawkes_hyperparams.parquet", args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Generated and saved Hawkes process exponential hyperparameters

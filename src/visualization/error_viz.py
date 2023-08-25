@@ -143,10 +143,80 @@ def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["
 
 # Variables effects boxplots function
 
-def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarray] = None, label_names: List[str] = ["MLP"], 
-                     error_names: List[str] = ["$\eta$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)", "$\mu$ Error ($\Delta$ = 5.0)"], 
-                     error_rel_names: List[str] = ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"],
-                     showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
+# def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarray] = None, label_names: List[str] = ["MLP"], 
+#                      error_names: List[str] = ["$\eta$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)", "$\mu$ Error ($\Delta$ = 5.0)"], 
+#                      error_rel_names: List[str] = ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"],
+#                      showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
+    
+#     """
+#     Plotted absolute/relative errors boxplots to measure variables effects
+
+#     Args:
+#         errors (List[np.ndarray], optional): Models eta and mu errors (default: None)
+#         errors_rel (List[np.ndarray], optional): Models eta and mu relative errors (default: None)
+#         label_names (List[str], optional): Models names (default: ["Benchmark", "MLP"])
+#         error_names (List[str], optional): Errors names (default: ["$\eta$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)", "$\mu$ Error ($\Delta$ = 5.0)"])
+#         error_rel_names (List[str], optional): Relative Errors names (default: ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"])
+#         showfliers (bool, optional): Show outliers (default: True)
+#         folder (str, optional): Sub-folder name in results folder (default: "photos")
+#         filename (str, optional): Parquet filename (default: "error_boxplots.pdf")
+#         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+#     Returns:
+#         None: Function does not return anything
+#     """
+        
+#     # Default parameters
+#     default_params = {"dirpath": prep.DIRPATH}
+
+#     # Initialized parameters
+#     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+#     # Converted to array
+#     errors = [error.to_numpy() if not isinstance(error, np.ndarray) else error for error in errors]
+#     errors_rel = [error_rel.to_numpy() if not isinstance(error_rel, np.ndarray) else error_rel for error_rel in errors_rel]
+
+#     # Regrouped errors and labels
+#     errors_list = list(map(np.ndarray.flatten, [error[:, i] for error in errors for i in range(error.shape[1])]))
+#     errors_rel_list = list(map(np.ndarray.flatten, [error_rel[:, i] for error_rel in errors_rel for i in range(error_rel.shape[1])]))
+#     labels_errors = [f"{label_name} {error_name}" for label_name in label_names for error_name in error_names]
+#     labels_errors_rel = [f"{label_name} {error_rel_name}" for label_name in label_names for error_rel_name in error_rel_names]
+
+#     # Built boxplots
+#     plt.style.use(['science', 'ieee'])
+    
+#     _, (ax1, ax2) = plt.subplots(2, 1, figsize=(45, 15))
+
+#     for ax in (ax1, ax2):
+#         ax.grid(which='major', color='#999999', linestyle='--')
+#         ax.minorticks_on()
+#         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
+
+#     ax1.boxplot(errors_list, labels=labels_errors, showfliers=showfliers) 
+#     ax2.boxplot(errors_rel_list, labels=labels_errors_rel, showfliers=showfliers)
+
+#     ax1.set_title('Errors Comparison', fontsize=16, pad=15)
+#     ax2.set_title('Relative Errors Comparison', fontsize=16, pad=15)
+
+#     ax1.set_xlabel('Model', fontsize=16, labelpad=15)
+#     ax1.set_ylabel('Error', fontsize=16, labelpad=15)
+#     ax1.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+#     ax2.set_xlabel('Model', fontsize=16, labelpad=15)
+#     ax2.set_ylabel('Relative Error', fontsize=16, labelpad=15)
+#     ax2.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+#     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
+#     plt.tight_layout(h_pad=3)
+#     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
+#     plt.show()
+
+def effects_boxplot(eta_errors = None, eta_errors_rel = None, mu_errors = None, mu_errors_rel = None, label_names = ["MLE"], 
+                     eta_error_names = ["$\eta$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)"], 
+                     eta_error_rel_names = ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)"],
+                     mu_error_names = ["$\mu$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 5.0)"],
+                     mu_error_rel_names = ["$\mu$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"],
+                     showfliers: bool = True, folder = "photos", filename = "error_boxplots.pdf", args = None) -> None:
     
     """
     Plotted absolute/relative errors boxplots to measure variables effects
@@ -165,7 +235,7 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
     Returns:
         None: Function does not return anything
     """
-        
+
     # Default parameters
     default_params = {"dirpath": prep.DIRPATH}
 
@@ -173,30 +243,40 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Converted to array
-    errors = [error.to_numpy() if not isinstance(error, np.ndarray) else error for error in errors]
-    errors_rel = [error_rel.to_numpy() if not isinstance(error_rel, np.ndarray) else error_rel for error_rel in errors_rel]
+    eta_errors = [eta_error.to_numpy() if not isinstance(eta_error, np.ndarray) else eta_error for eta_error in eta_errors]
+    eta_errors_rel = [eta_error_rel.to_numpy() if not isinstance(eta_error_rel, np.ndarray) else eta_error_rel for eta_error_rel in eta_errors_rel]
+    mu_errors = [mu_error.to_numpy() if not isinstance(mu_error, np.ndarray) else mu_error for mu_error in mu_errors]
+    mu_errors_rel = [mu_error_rel.to_numpy() if not isinstance(mu_error_rel, np.ndarray) else mu_error_rel for mu_error_rel in mu_errors_rel]
 
     # Regrouped errors and labels
-    errors_list = list(map(np.ndarray.flatten, [error[:, i] for error in errors for i in range(error.shape[1])]))
-    errors_rel_list = list(map(np.ndarray.flatten, [error_rel[:, i] for error_rel in errors_rel for i in range(error_rel.shape[1])]))
-    labels_errors = [f"{label_name} {error_name}" for label_name in label_names for error_name in error_names]
-    labels_errors_rel = [f"{label_name} {error_rel_name}" for label_name in label_names for error_rel_name in error_rel_names]
+    eta_errors_list = list(map(np.ndarray.flatten, [eta_error[:, i] for eta_error in eta_errors for i in range(eta_error.shape[1])]))
+    eta_errors_rel_list = list(map(np.ndarray.flatten, [eta_error_rel[:, i] for eta_error_rel in eta_errors_rel for i in range(eta_error_rel.shape[1])]))
+    mu_errors_list = list(map(np.ndarray.flatten, [mu_error[:, i] for mu_error in mu_errors for i in range(mu_error.shape[1])]))
+    mu_errors_rel_list = list(map(np.ndarray.flatten, [mu_error_rel[:, i] for mu_error_rel in mu_errors_rel for i in range(mu_error_rel.shape[1])]))
+    eta_labels_errors = [f"{label_name} {eta_error_name}" for label_name in label_names for eta_error_name in eta_error_names]
+    eta_labels_errors_rel = [f"{label_name} {eta_error_rel_name}" for label_name in label_names for eta_error_rel_name in eta_error_rel_names]
+    mu_labels_errors = [f"{label_name} {mu_error_name}" for label_name in label_names for mu_error_name in mu_error_names]
+    mu_labels_errors_rel = [f"{label_name} {mu_error_rel_name}" for label_name in label_names for mu_error_rel_name in mu_error_rel_names]
 
     # Built boxplots
     plt.style.use(['science', 'ieee'])
     
-    _, (ax1, ax2) = plt.subplots(2, 1, figsize=(45, 15))
+    _, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(45, 25))
 
-    for ax in (ax1, ax2):
+    for ax in (ax1, ax2, ax3, ax4):
         ax.grid(which='major', color='#999999', linestyle='--')
         ax.minorticks_on()
         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
 
-    ax1.boxplot(errors_list, labels=labels_errors, showfliers=showfliers) 
-    ax2.boxplot(errors_rel_list, labels=labels_errors_rel, showfliers=showfliers)
+    ax1.boxplot(eta_errors_list, labels=eta_labels_errors, showfliers=showfliers) 
+    ax2.boxplot(eta_errors_rel_list, labels=eta_labels_errors_rel, showfliers=showfliers)
+    ax3.boxplot(mu_errors_list, labels=mu_labels_errors, showfliers=showfliers) 
+    ax4.boxplot(mu_errors_rel_list, labels=mu_labels_errors_rel, showfliers=showfliers)
 
-    ax1.set_title('Errors Comparison', fontsize=16, pad=15)
-    ax2.set_title('Relative Errors Comparison', fontsize=16, pad=15)
+    ax1.set_title('Errors Comparison ($\eta$)', fontsize=16, pad=15)
+    ax2.set_title('Relative Errors Comparison ($\eta$)', fontsize=16, pad=15)
+    ax3.set_title('Errors Comparison ($\mu$)', fontsize=16, pad=15)
+    ax4.set_title('Relative Errors Comparison ($\mu$)', fontsize=16, pad=15)
 
     ax1.set_xlabel('Model', fontsize=16, labelpad=15)
     ax1.set_ylabel('Error', fontsize=16, labelpad=15)
@@ -205,6 +285,14 @@ def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarra
     ax2.set_xlabel('Model', fontsize=16, labelpad=15)
     ax2.set_ylabel('Relative Error', fontsize=16, labelpad=15)
     ax2.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+    ax3.set_xlabel('Model', fontsize=16, labelpad=15)
+    ax3.set_ylabel('Relative Error', fontsize=16, labelpad=15)
+    ax3.tick_params(axis='both', which='major', labelsize=14, pad=8)
+
+    ax4.set_xlabel('Model', fontsize=16, labelpad=15)
+    ax4.set_ylabel('Relative Error', fontsize=16, labelpad=15)
+    ax4.tick_params(axis='both', which='major', labelsize=14, pad=8)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout(h_pad=3)

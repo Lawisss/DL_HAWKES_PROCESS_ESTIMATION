@@ -55,7 +55,7 @@ def hawkes_simulation(params: Optional[TypedDict] = {"mu": 0.1, "alpha": 0.5, "b
 
 # Simulated several Hawkes processes
 
-def hawkes_simulations(params: dict, record: bool = True, filename: Optional[str] ='hawkes_simulations.parquet', args: Optional[Callable] = None, **kwargs) -> np.ndarray:
+def hawkes_simulations(params: dict, record: bool = True, filename: Optional[str] ='hawkes_simulations.parquet', args: Optional[Callable] = None) -> np.ndarray:
     
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
@@ -85,10 +85,60 @@ def hawkes_simulations(params: dict, record: bool = True, filename: Optional[str
 
     return simulated_events_seqs
 
-
 # MLE function
 
-def MLE(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: bool = True, filename: Optional[str] ='predictions_mle.parquet', args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def mle(simulated_events_seqs: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: bool = True, filename: Optional[str] ='predictions_mle.parquet', args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    """
+    Simulated several Hawkes processes using parameters, and saved results to Parquet file 
+
+    Args:
+        simulated_events_seqs (np.ndarray): Hawkes Processes
+        eta_true (np.ndarray): True branching ratio
+        mu_true (np.ndarray): True baseline intensity
+        record (bool, optional): Record results in parquet file (default: True)
+        filename (str, optional): Parquet filename to save results (default: "predictions_mle.parquet")
+        args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]: Simulated event sequences of each Hawkes process
+    """
+
+    # Default parameters
+    default_params = {"kernel": hwk.KERNEL,
+                      "baseline": hwk.BASELINE,
+                      "time_itv_start": hwk.TIME_ITV_START,
+                      "time_horizon": hwk.TIME_HORIZON,
+                      "process_num": hwk.PROCESS_NUM}
+
+    # Initialized parameters
+    dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
+
+    # Estimated Hawkes process parameters with the given kernel, baseline, and parameters
+    hawkes_process = hk.estimator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline'])
+
+    # Initialized parameters
+    eta_pred, mu_pred = np.zeros(dict_args['process_num'], dtype=np.float32), np.zeros(dict_args['process_num'], dtype=np.float32)
+
+    # Started estimations
+    for i in range(dict_args['process_num']):
+
+        # Fitted events
+        hawkes_process.fit(simulated_events_seqs[i, 0], [dict_args['time_itv_start'], dict_args['time_horizon']])
+
+        # Stored baseline intensity / branching ratio
+        eta_pred[i], mu_pred[i] = hawkes_process.br, hawkes_process.parameter['mu']
+    
+    # Written parquet file
+    if record is True:
+        write_parquet(pl.DataFrame(np.column_stack((eta_true, mu_true, eta_pred, mu_pred)), schema=["eta_true", "mu_true", "eta_pred", "mu_pred"]), filename=filename)
+
+    return np.column_stack((eta_pred, mu_pred)), eta_pred, mu_pred
+
+
+# Randomized MLE function
+
+def randomized_mle(counts: np.ndarray, eta_true: np.ndarray, mu_true: np.ndarray, record: bool = True, filename: Optional[str] ='predictions_randomized_mle.parquet', args: Optional[Callable] = None) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     """
     Simulated several Hawkes processes using parameters, and saved results to Parquet file 
