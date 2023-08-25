@@ -131,10 +131,10 @@ def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["
 
     ax.boxplot(errors_list, labels=labels, showfliers=showfliers)
 
-    ax.set_title('Error Comparison', fontsize=16, pad=15)
-    ax.set_xlabel('Model', fontsize=16, labelpad=15)
-    ax.set_ylabel('Error', fontsize=16, labelpad=15)
-    ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    ax.set_title('Error Comparison', fontsize=33, pad=22)
+    ax.set_xlabel('Model', fontsize=33, labelpad=22)
+    ax.set_ylabel('Error', fontsize=33, labelpad=22)
+    ax.tick_params(axis='both', which='major', labelsize=26, pad=10)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
@@ -143,75 +143,7 @@ def errors_boxplots(errors: List[np.ndarray] = None, label_names: List[str] = ["
 
 # Variables effects boxplots function
 
-# def effects_boxplots(errors: List[np.ndarray] = None, errors_rel: List[np.ndarray] = None, label_names: List[str] = ["MLP"], 
-#                      error_names: List[str] = ["$\eta$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)", "$\mu$ Error ($\Delta$ = 5.0)"], 
-#                      error_rel_names: List[str] = ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"],
-#                      showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "error_boxplots.pdf", args: Optional[Callable] = None) -> None:
-    
-#     """
-#     Plotted absolute/relative errors boxplots to measure variables effects
-
-#     Args:
-#         errors (List[np.ndarray], optional): Models eta and mu errors (default: None)
-#         errors_rel (List[np.ndarray], optional): Models eta and mu relative errors (default: None)
-#         label_names (List[str], optional): Models names (default: ["Benchmark", "MLP"])
-#         error_names (List[str], optional): Errors names (default: ["$\eta$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)", "$\mu$ Error ($\Delta$ = 5.0)"])
-#         error_rel_names (List[str], optional): Relative Errors names (default: ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\mu$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\mu$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\mu$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\mu$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)", "$\mu$ Relative Error ($\Delta$ = 5.0)"])
-#         showfliers (bool, optional): Show outliers (default: True)
-#         folder (str, optional): Sub-folder name in results folder (default: "photos")
-#         filename (str, optional): Parquet filename (default: "error_boxplots.pdf")
-#         args (Callable, optional): Arguments if you use run.py instead of tutorial.ipynb (default: None)
-
-#     Returns:
-#         None: Function does not return anything
-#     """
-        
-#     # Default parameters
-#     default_params = {"dirpath": prep.DIRPATH}
-
-#     # Initialized parameters
-#     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
-
-#     # Converted to array
-#     errors = [error.to_numpy() if not isinstance(error, np.ndarray) else error for error in errors]
-#     errors_rel = [error_rel.to_numpy() if not isinstance(error_rel, np.ndarray) else error_rel for error_rel in errors_rel]
-
-#     # Regrouped errors and labels
-#     errors_list = list(map(np.ndarray.flatten, [error[:, i] for error in errors for i in range(error.shape[1])]))
-#     errors_rel_list = list(map(np.ndarray.flatten, [error_rel[:, i] for error_rel in errors_rel for i in range(error_rel.shape[1])]))
-#     labels_errors = [f"{label_name} {error_name}" for label_name in label_names for error_name in error_names]
-#     labels_errors_rel = [f"{label_name} {error_rel_name}" for label_name in label_names for error_rel_name in error_rel_names]
-
-#     # Built boxplots
-#     plt.style.use(['science', 'ieee'])
-    
-#     _, (ax1, ax2) = plt.subplots(2, 1, figsize=(45, 15))
-
-#     for ax in (ax1, ax2):
-#         ax.grid(which='major', color='#999999', linestyle='--')
-#         ax.minorticks_on()
-#         ax.grid(which='minor', color='#999999', linestyle='--', alpha=0.25)
-
-#     ax1.boxplot(errors_list, labels=labels_errors, showfliers=showfliers) 
-#     ax2.boxplot(errors_rel_list, labels=labels_errors_rel, showfliers=showfliers)
-
-#     ax1.set_title('Errors Comparison', fontsize=16, pad=15)
-#     ax2.set_title('Relative Errors Comparison', fontsize=16, pad=15)
-
-#     ax1.set_xlabel('Model', fontsize=16, labelpad=15)
-#     ax1.set_ylabel('Error', fontsize=16, labelpad=15)
-#     ax1.tick_params(axis='both', which='major', labelsize=14, pad=8)
-
-#     ax2.set_xlabel('Model', fontsize=16, labelpad=15)
-#     ax2.set_ylabel('Relative Error', fontsize=16, labelpad=15)
-#     ax2.tick_params(axis='both', which='major', labelsize=14, pad=8)
-
-#     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
-#     plt.tight_layout(h_pad=3)
-#     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
-#     plt.show()
-
-def effects_boxplot(eta_errors = None, eta_errors_rel = None, mu_errors = None, mu_errors_rel = None, label_names = ["MLE"], 
+def effects_boxplots(eta_errors = None, eta_errors_rel = None, mu_errors = None, mu_errors_rel = None, label_names = ["MLE"], 
                      eta_error_names = ["$\eta$ Error ($\Delta$ = 0.25)", "$\eta$ Error ($\Delta$ = 0.5)", "$\eta$ Error ($\Delta$ = 1.0)", "$\eta$ Error ($\Delta$ = 2.0)", "$\eta$ Error ($\Delta$ = 5.0)"], 
                      eta_error_rel_names = ["$\eta$ Relative Error ($\Delta$ = 0.25)", "$\eta$ Relative Error ($\Delta$ = 0.5)", "$\eta$ Relative Error ($\Delta$ = 1.0)", "$\eta$ Relative Error ($\Delta$ = 2.0)", "$\eta$ Relative Error ($\Delta$ = 5.0)"],
                      mu_error_names = ["$\mu$ Error ($\Delta$ = 0.25)", "$\mu$ Error ($\Delta$ = 0.5)", "$\mu$ Error ($\Delta$ = 1.0)", "$\mu$ Error ($\Delta$ = 2.0)", "$\mu$ Error ($\Delta$ = 5.0)"],
@@ -273,26 +205,26 @@ def effects_boxplot(eta_errors = None, eta_errors_rel = None, mu_errors = None, 
     ax3.boxplot(mu_errors_list, labels=mu_labels_errors, showfliers=showfliers) 
     ax4.boxplot(mu_errors_rel_list, labels=mu_labels_errors_rel, showfliers=showfliers)
 
-    ax1.set_title('Errors Comparison ($\eta$)', fontsize=16, pad=15)
-    ax2.set_title('Relative Errors Comparison ($\eta$)', fontsize=16, pad=15)
-    ax3.set_title('Errors Comparison ($\mu$)', fontsize=16, pad=15)
-    ax4.set_title('Relative Errors Comparison ($\mu$)', fontsize=16, pad=15)
+    ax1.set_title('Errors Comparison ($\eta$)', fontsize=33, pad=22)
+    ax2.set_title('Relative Errors Comparison ($\eta$)', fontsize=33, pad=22)
+    ax3.set_title('Errors Comparison ($\mu$)', fontsize=33, pad=22)
+    ax4.set_title('Relative Errors Comparison ($\mu$)', fontsize=33, pad=22)
 
-    ax1.set_xlabel('Model', fontsize=16, labelpad=15)
-    ax1.set_ylabel('Error', fontsize=16, labelpad=15)
-    ax1.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    ax1.set_xlabel('Model', fontsize=33, labelpad=22)
+    ax1.set_ylabel('Error', fontsize=33, labelpad=22)
+    ax1.tick_params(axis='both', which='major', labelsize=26, pad=10)
 
-    ax2.set_xlabel('Model', fontsize=16, labelpad=15)
-    ax2.set_ylabel('Relative Error', fontsize=16, labelpad=15)
-    ax2.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    ax2.set_xlabel('Model', fontsize=33, labelpad=22)
+    ax2.set_ylabel('Relative Error', fontsize=33, labelpad=22)
+    ax2.tick_params(axis='both', which='major', labelsize=26, pad=10)
 
-    ax3.set_xlabel('Model', fontsize=16, labelpad=15)
-    ax3.set_ylabel('Relative Error', fontsize=16, labelpad=15)
-    ax3.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    ax3.set_xlabel('Model', fontsize=33, labelpad=22)
+    ax3.set_ylabel('Relative Error', fontsize=33, labelpad=22)
+    ax3.tick_params(axis='both', which='major', labelsize=26, pad=10)
 
-    ax4.set_xlabel('Model', fontsize=16, labelpad=15)
-    ax4.set_ylabel('Relative Error', fontsize=16, labelpad=15)
-    ax4.tick_params(axis='both', which='major', labelsize=14, pad=8)
+    ax4.set_xlabel('Model', fontsize=33, labelpad=22)
+    ax4.set_ylabel('Relative Error', fontsize=33, labelpad=22)
+    ax4.tick_params(axis='both', which='major', labelsize=26, pad=10)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout(h_pad=3)
@@ -355,21 +287,21 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
 
     ax.set_xticks(positions)
     ax.set_yticks(ax.get_yticks())
-    ax.set_xticklabels(deltas, fontsize=16)
-    ax.set_yticklabels(ax.get_yticklabels(), fontsize=16)
+    ax.set_xticklabels(deltas, fontsize=33)
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=33)
     
     # Branching ratio ylim: bottom=0.06, top=0.36, bottom=0.23, top=0.6, bottom=0.56, top=0.87
     # Baseline intensity ylim: bottom=3.5, top=4.8, bottom=0.5, top=3.9, bottom=0.2, top=1.5
 
     # ax.set_ylim(bottom=3.5, top=4.8) 
-    ax.tick_params(axis='both', which='both', pad=8)
+    ax.tick_params(axis='both', which='both', pad=10)
     ax.axhline(y=median_true, color='orange', linestyle='--')
-    ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=12)
+    ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=28)
     
     # Branching ratio / Baseline Intensity
-    ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(eta_true), fontsize=16, pad=15)
-    ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=16, labelpad=15)
-    ax.set_ylabel(r'Branching ratio predictions ($\hat{\eta})$', fontsize=16, labelpad=15)
+    ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(eta_true), fontsize=33, pad=22)
+    ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=33, labelpad=22)
+    ax.set_ylabel(r'Branching ratio predictions ($\hat{\eta})$', fontsize=33, labelpad=22)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout()
@@ -428,14 +360,14 @@ def reconstruction_plot(decoded_intensities: List[np.ndarray], integrated_intens
 
         nrmse = np.sqrt(np.mean((decoded - integrated)**2)) / (np.max(integrated) - np.min(integrated))
         
-        ax.set_title(r"Intensity Reconstruction ($\beta$ = {0}, $\eta$ = {1}, NRMSE = {2:.4f})".format(params_name[0], params_name[1], nrmse), fontsize=16, pad=15)
-        ax.set_xlabel("Time", fontsize=16, labelpad=15)
-        ax.set_ylabel("Intensity", fontsize=16, labelpad=15)
-        ax.tick_params(axis="both", which="major", labelsize=14, pad=8)
-        ax.legend(loc="best", fontsize=12)
+        ax.set_title(r"Intensity Reconstruction ($\beta$ = {0}, $\eta$ = {1}, NRMSE = {2:.4f})".format(params_name[0], params_name[1], nrmse), fontsize=33, pad=22)
+        ax.set_xlabel("Time", fontsize=33, labelpad=22)
+        ax.set_ylabel("Intensity", fontsize=33, labelpad=22)
+        ax.tick_params(axis="both", which="major", labelsize=26, pad=10)
+        ax.legend(loc="best", fontsize=28)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
-    plt.tight_layout(pad=4, h_pad=4)
+    plt.tight_layout(pad=5, h_pad=5)
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
 
@@ -491,14 +423,14 @@ def nrmse_boxplot(vae_errors: List[np.ndarray], dd_errors: List[np.ndarray], lab
     
     ax.set_xticks(positions * 0.96)
     ax.set_yticks(ax.get_yticks())
-    ax.set_xticklabels(xlabels, fontsize=16)
-    ax.set_yticklabels(ax.get_yticklabels(), fontsize=16)
+    ax.set_xticklabels(xlabels, fontsize=33)
+    ax.set_yticklabels(ax.get_yticklabels(), fontsize=33)
 
-    ax.set_title('Reconstruction Error Comparison', fontsize=16, pad=15)
-    ax.set_xlabel('Parameters', fontsize=16, labelpad=15)
-    ax.set_ylabel('Error (NRMSE)', fontsize=16, labelpad=15)
-    ax.tick_params(axis='both', which='major', labelsize=14, pad=8)
-    ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=12)
+    ax.set_title('Reconstruction Error Comparison', fontsize=33, pad=22)
+    ax.set_xlabel('Parameters', fontsize=33, labelpad=22)
+    ax.set_ylabel('Error (NRMSE)', fontsize=33, labelpad=22)
+    ax.tick_params(axis='both', which='major', labelsize=26, pad=10)
+    ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=28)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
@@ -553,14 +485,14 @@ def density_plot(encoded_parameters: List[np.ndarray], decoded_parameters: List[
         ax.scatter(x=encoded_parameter[:, 0], y=encoded_parameter[:, 1], color="sienna2", s=25)
         ax.text(0.15, 3.8, "True value", color="sienna2")
 
-        ax.set_title(r"Density Estimation ($\beta$ = {0}, $\eta$ = {1})".format(params_name[0], params_name[1]), fontsize=16, pad=15)
-        ax.set_xlabel(r"$\eta$", fontsize=16, labelpad=15)
-        ax.set_ylabel(r"$\beta$", fontsize=16, labelpad=15)
-        ax.tick_params(axis="both", which="major", labelsize=14, pad=8)
-        ax.legend(loc="best", fontsize=12)
+        ax.set_title(r"Density Estimation ($\beta$ = {0}, $\eta$ = {1})".format(params_name[0], params_name[1]), fontsize=33, pad=22)
+        ax.set_xlabel(r"$\eta$", fontsize=33, labelpad=22)
+        ax.set_ylabel(r"$\beta$", fontsize=33, labelpad=22)
+        ax.tick_params(axis="both", which="major", labelsize=26, pad=10)
+        ax.legend(loc="best", fontsize=28)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
-    plt.tight_layout(pad=4, h_pad=4)
+    plt.tight_layout(pad=5, h_pad=5)
     plt.savefig(os.path.join(dict_args['dirpath'], folder, filename), backend='pgf')
     plt.show()
 
