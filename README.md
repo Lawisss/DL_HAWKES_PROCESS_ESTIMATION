@@ -105,7 +105,7 @@ python -m tutorial.ipynb
 ## Roadmap
 
 - Refine and improve work on MLE, MLP and LSTM models (Methods, Fine-tuning, Optimization).
-- Explore the extension of the $T$ horizon and other parameter ranges (extreme values or extended intervals).
+- Explore the extension of the horizon $T$ and other parameter ranges (extreme values or extended intervals).
 - Extend approaches to new machine learning techniques (self-attention mechanisms, transformers).
 
 ## Contact
