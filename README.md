@@ -30,7 +30,7 @@
 - Simulated hyperparameters and binned HP based on parameters (horizon time, kernel function, baseline).
 - Estimated using MLP and LSTM regressor the binned HP parameters (Branching ratio: $\eta$, Baseline intensity: $\mu$).
 - Inferred using Poisson-VAE (dueling decoder) the joint distribution of ${{\eta,\mu}}$ and the conditional intensity $\lambda$.
-- Assessed and compared estimations and errors according to parameters ($\Delta$, $E$, $\eta$, $\beta$).
+- Assessed and compared model estimations and errors according to parameters ($\Delta$, $E$, $\eta$, $\beta$).
 
 ### Prerequisites
 
@@ -104,9 +104,9 @@ python -m tutorial.ipynb
 
 ## Roadmap
 
-- Leveraged document-level sentiment annotations abundant online (consumer reviews for movies or products).
-- Described our dataset ([Large Movie Review Dataset](https://ai.stanford.edu/~amaas/data/sentiment/)) and our model.
-- Evaluated our approach on a large dataset of informal movie reviews to compare it with published results.
+- Refine and improve work on MLE, MLP and LSTM models (Methods, Fine-tuning, Optimization).
+- Explore the extension of the $T$ horizon and other parameter ranges (extreme values or extended intervals).
+- Extend approaches to new machine learning techniques (self-attention mechanisms, transformers).
 
 ## Contact
 
