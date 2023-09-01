@@ -11,8 +11,6 @@ import argparse
 from typing import Optional
 
 from dl.mlp_model import MLPTrainer
-from dl.linear_model import linear_model
-from tools.utils import read_parquet
 from hawkes.simulation import hawkes_simulations
 from hawkes.discretisation import discretise
 from hawkes.hyperparameters import hyper_params_simulation

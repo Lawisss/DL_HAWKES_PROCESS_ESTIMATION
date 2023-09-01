@@ -19,7 +19,7 @@
 ## Description
 
 - Estimated binned Hawkes processes using variational bayesian methods and deep learning in Python (Pytorch).
-- Simulated and predicted baseline intensity, self-exciting and intensity decay rate using MLP (CUDA, MPI).
+- Simulated and predicted baseline intensity, self-exciting and intensity decay rate using NN (CUDA, MPI).
 - Inferred observation distributions and conditional intensity leveraging unsupervised technique (Autoencoders).
 - Extended methods to Hawkes processes with more complex dimensions, excitation kernels and HPC architecture.
 
@@ -28,9 +28,9 @@
 ## Getting Started
 
 - Simulated hyperparameters and binned HP based on parameters (horizon time, kernel function, baseline).
-- Estimated using MLP regressor the binned HP parameters (Branching ratio: $\eta$, Baseline intensity: $\mu$).
+- Estimated using MLP and LSTM regressor the binned HP parameters (Branching ratio: $\eta$, Baseline intensity: $\mu$).
 - Inferred using Poisson-VAE (dueling decoder) the joint distribution of ${{\eta,\mu}}$ and the conditional intensity $\lambda$.
-- Assessed and compared results according to parameters (Branching Ratio, Expected Activity, Discretisation step).
+- Assessed and compared estimations according to parameters ($\Delta$, $E$, $\eta$, $\beta$).
 
 ### Prerequisites
 
@@ -67,8 +67,8 @@ python -m tutorial.ipynb
 ## Usage
 
 - To run the code: [tutorial.ipynb](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/tutorial.ipynb). This file allows you to load python files and results.
-- To get details about model architecture, training and visualization, see [report](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/report/report.pdf).
-- To leverage preprocessing, AHP/MLP/VAE parameters and results, use global [variable](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/src/variables) files.
+- To get details about model architecture, training, testing and visualization, see [report](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/report/report.pdf).
+- To leverage preprocessing, AHP/MLP/LSTM/VAE parameters and results, use global [variable](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/src/variables) files.
 - To deepen incomplete pytest unit tests, check files in [test](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/tree/main/test) folder.
 
 |                                         File                                                                       |               Extension               |               Folder                  |               Complete                |               Function                |
@@ -82,14 +82,17 @@ python -m tutorial.ipynb
 | [dataset](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/preprocessing/dataset.py)     | .py                                   | preprocessing               | ✔️                                   | Preprocessed HP
 | [linear_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/linear_model.py)    | .py                                   | dl                        | ✔️                                   | Executed Linear model               |
 | [mlp_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/mlp_model.py)       | .py                                   | dl                         | ✔️                                   | Executed MLP model                |
-| [vae_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/vae_model.py)    | .py                                   | dl                        | ✔️                                   | Executed VAE model               |
+| [lstm_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/lstm_model.py)       | .py                                   | dl                         | ✔️                                   | Executed LSTM model                |
+| [vae_model](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/vae_model.py)    | .py                                   | dl                        | ✔️                                   | Executed Poisson-VAE model               |
+| [dueling_decoder](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/dl/dueling_decoder.py)    | .py                                   | dl                        | ✔️                                   | Executed Dueling Decoder model               |
 [eval](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/evaluation/eval.py)   | .py                                   | evaluation                     | ✔️                                   | Errors evaluation
 [error_viz](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/visualization/error_viz.py)   | .py                                   | visualization                     | ✔️                                   | Errors visualization
 | [hawkes_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/hawkes_var.py)     | .py                                 | variables                           | ✔️                                   | Monitored HP variables          |
 | [prep_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/prep_var.py)     | .py                                   | variables                     | ✔️                                   | Monitored preprocessing variables   |
 [parser_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/parser_var.py)   | .py                                   | variables                     | ✔️                                   | Monitored parser variables |
 | [mlp_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/mlp_var.py)   | .py                                   | variables                        | ✔️                                   | Monitored MLP variables                   |
-[vae_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/vae_var.py)   | .py                                   | variables                        | ✔️                                   | Monitored VAE variables                   |
+| [lstm_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/lstm_var.py)   | .py                                   | variables                        | ✔️                                   | Monitored LSTM variables                   |
+[vae_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/vae_var.py)   | .py                                   | variables                        | ✔️                                   | Monitored Poisson-VAE variables                   |
 [eval_var](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/variables/eval_var.py)   | .py                                   | variables                     | ✔️                                   | Monitored evaluation variables               |
 [utils](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/utils/utils.py)   | .py                                   | utils                        | ✔️                                   | Executed saving/loading                  |
 [utils_mpi](https://github.com/Lawisss/DL_HAWKES_PROCESS_ESTIMATION/blob/main/src/utils/utils_mpi.py)   | .py                                   | utils                        | ❌                                  | Executed MPI saving/loading                   |
