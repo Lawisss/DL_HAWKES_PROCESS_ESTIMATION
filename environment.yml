@@ -71,6 +71,7 @@ dependencies:
     - hawkes==1.0.0
     - pillow==9.5.0
     - scipy==1.10.1
+    - seaborn=0.12.2
     - torchinfo==1.7.2
     - polars==0.17.14
     - SciencePlots==2.0.1
