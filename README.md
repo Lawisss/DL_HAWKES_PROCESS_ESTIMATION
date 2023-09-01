@@ -30,7 +30,7 @@
 - Simulated hyperparameters and binned HP based on parameters (horizon time, kernel function, baseline).
 - Estimated using MLP and LSTM regressor the binned HP parameters (Branching ratio: $\eta$, Baseline intensity: $\mu$).
 - Inferred using Poisson-VAE (dueling decoder) the joint distribution of ${{\eta,\mu}}$ and the conditional intensity $\lambda$.
-- Assessed and compared model estimations and errors according to parameters ($\Delta$, $E$, $\eta$, $\beta$).
+- Assessed and compared model estimations and errors according to HP parameters ($\Delta$, $E$, $\eta$, $\beta$).
 
 ### Prerequisites
 
