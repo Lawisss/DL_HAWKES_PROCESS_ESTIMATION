@@ -1,7 +1,9 @@
  📦VAE_HAWKES_PROCESS_ESTIMATION
  ┣ 📂src
  ┃ ┣ 📂dl
+ ┃ ┃ ┣ 📜dueling_decoder.py
  ┃ ┃ ┣ 📜linear_model.py
+ ┃ ┃ ┣ 📜lstm_model.py
  ┃ ┃ ┣ 📜mlp_model.py
  ┃ ┃ ┣ 📜vae_model.py
  ┃ ┃ ┗ 📜__init__.py
@@ -24,11 +26,7 @@
  ┃ ┣ 📂slurm
  ┃ ┃ ┗ 📂script
  ┃ ┃ ┃ ┣ 📜config.sh
- ┃ ┃ ┃ ┣ 📜discretisation.sh
- ┃ ┃ ┃ ┣ 📜hawkes.sh
- ┃ ┃ ┃ ┣ 📜hyperparameters.sh
- ┃ ┃ ┃ ┣ 📜main.sh
- ┃ ┃ ┃ ┣ 📜mlp.sh
+ ┃ ┃ ┃ ┣ 📜run.sh
  ┃ ┃ ┃ ┗ 📜___init__.py
  ┃ ┣ 📂tools
  ┃ ┃ ┣ 📜utils.py
@@ -37,6 +35,7 @@
  ┃ ┣ 📂variables
  ┃ ┃ ┣ 📜eval_var.py
  ┃ ┃ ┣ 📜hawkes_var.py
+ ┃ ┃ ┣ 📜lstm_var.py
  ┃ ┃ ┣ 📜mlp_var.py
  ┃ ┃ ┣ 📜parser_var.py
  ┃ ┃ ┣ 📜prep_var.py
