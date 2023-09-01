@@ -193,7 +193,7 @@ def effects_boxplots(eta_errors = None, eta_errors_rel = None, mu_errors = None,
     # Built boxplots
     plt.style.use(['science', 'ieee'])
     
-    _, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(45, 25))
+    _, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(45, 35))
 
     for ax in (ax1, ax2, ax3, ax4):
         ax.grid(which='major', color='#999999', linestyle='--')
@@ -205,26 +205,26 @@ def effects_boxplots(eta_errors = None, eta_errors_rel = None, mu_errors = None,
     ax3.boxplot(mu_errors_list, labels=mu_labels_errors, showfliers=showfliers) 
     ax4.boxplot(mu_errors_rel_list, labels=mu_labels_errors_rel, showfliers=showfliers)
 
-    ax1.set_title('Errors Comparison ($\eta$)', fontsize=33, pad=22)
-    ax2.set_title('Relative Errors Comparison ($\eta$)', fontsize=33, pad=22)
-    ax3.set_title('Errors Comparison ($\mu$)', fontsize=33, pad=22)
-    ax4.set_title('Relative Errors Comparison ($\mu$)', fontsize=33, pad=22)
+    ax1.set_title('Errors Comparison ($\eta$)', fontsize=40, pad=28)
+    ax2.set_title('Relative Errors Comparison ($\eta$)', fontsize=40, pad=28)
+    ax3.set_title('Errors Comparison ($\mu$)', fontsize=40, pad=28)
+    ax4.set_title('Relative Errors Comparison ($\mu$)', fontsize=40, pad=28)
 
-    ax1.set_xlabel('Model', fontsize=33, labelpad=22)
-    ax1.set_ylabel('Error', fontsize=33, labelpad=22)
-    ax1.tick_params(axis='both', which='major', labelsize=26, pad=10)
+    ax1.set_xlabel('Model', fontsize=40, labelpad=28)
+    ax1.set_ylabel('Error', fontsize=40, labelpad=28)
+    ax1.tick_params(axis='both', which='major', labelsize=33, pad=12)
 
-    ax2.set_xlabel('Model', fontsize=33, labelpad=22)
-    ax2.set_ylabel('Relative Error', fontsize=33, labelpad=22)
-    ax2.tick_params(axis='both', which='major', labelsize=26, pad=10)
+    ax2.set_xlabel('Model', fontsize=40, labelpad=28)
+    ax2.set_ylabel('Relative Error', fontsize=40, labelpad=28)
+    ax2.tick_params(axis='both', which='major', labelsize=33, pad=12)
 
-    ax3.set_xlabel('Model', fontsize=33, labelpad=22)
-    ax3.set_ylabel('Relative Error', fontsize=33, labelpad=22)
-    ax3.tick_params(axis='both', which='major', labelsize=26, pad=10)
+    ax3.set_xlabel('Model', fontsize=40, labelpad=28)
+    ax3.set_ylabel('Relative Error', fontsize=40, labelpad=28)
+    ax3.tick_params(axis='both', which='major', labelsize=26, pad=12)
 
-    ax4.set_xlabel('Model', fontsize=33, labelpad=22)
-    ax4.set_ylabel('Relative Error', fontsize=33, labelpad=22)
-    ax4.tick_params(axis='both', which='major', labelsize=26, pad=10)
+    ax4.set_xlabel('Model', fontsize=40, labelpad=28)
+    ax4.set_ylabel('Relative Error', fontsize=40, labelpad=28)
+    ax4.tick_params(axis='both', which='major', labelsize=26, pad=12)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout(h_pad=3)
@@ -234,7 +234,7 @@ def effects_boxplots(eta_errors = None, eta_errors_rel = None, mu_errors = None,
 
 # Predictions boxplots function
 
-def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], eta_true: Optional[float] = 0.2, median_true: Optional[float] = None, deltas: List[float] = [0.1, 0.25, 0.5, 1.0, 2.0, 5.0, 10], labels = ['MLE', 'MLP', 'LSTM'], 
+def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], eta_true: Optional[float] = 0.2, median_true: Optional[float] = None, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
                   showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "pred_boxplots.pdf", args: Optional[Callable] = None) -> None:
     
     """
@@ -271,7 +271,7 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     # Built boxplots
     plt.style.use(['science', 'ieee'])
 
-    _, ax = plt.subplots(figsize=(18, 9))
+    _, ax = plt.subplots(figsize=(40, 18))
     sns.set_palette("muted")
 
     ax.grid(which='major', color='#999999', linestyle='--')
@@ -299,7 +299,7 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     ax.legend(handles=legend_labels, labels=labels, loc="best", fontsize=28)
     
     # Branching ratio / Baseline Intensity
-    ax.set_title(r'Predictions boxplots ($\eta$ = {0})'.format(eta_true), fontsize=33, pad=22)
+    ax.set_title(r'Predictions boxplots ($\eta$ = {0}, $\beta$ = 2.0)'.format(eta_true), fontsize=33, pad=22)
     ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=33, labelpad=22)
     ax.set_ylabel(r'Branching ratio predictions ($\hat{\eta})$', fontsize=33, labelpad=22)
 
