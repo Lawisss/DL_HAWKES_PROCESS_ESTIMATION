@@ -234,7 +234,7 @@ def effects_boxplots(eta_errors = None, eta_errors_rel = None, mu_errors = None,
 
 # Predictions boxplots function
 
-def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], eta_true: Optional[float] = 0.2, median_true: Optional[float] = None, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0], labels = ['MLE', 'MLP', 'LSTM'], 
+def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm_preds: List[np.ndarray], eta_true: Optional[float] = 0.2, median_true: Optional[float] = None, deltas: List[float] = [0.25, 0.5, 1.0, 2.0, 5.0, 10.0, 15.0, 20.0, 25.0], labels = ['MLE', 'MLP', 'LSTM'], 
                   showfliers: bool = True, folder: Optional[str] = "photos", filename: Optional[str] = "pred_boxplots.pdf", args: Optional[Callable] = None) -> None:
     
     """
@@ -301,7 +301,7 @@ def pred_boxplots(mle_preds: List[np.ndarray], mlp_preds: List[np.ndarray], lstm
     # Branching ratio / Baseline Intensity
     ax.set_title(r'Predictions boxplots ($\eta$ = {0}, $\beta$ = 2.0)'.format(eta_true), fontsize=33, pad=22)
     ax.set_xlabel(r'Discretisation step ($\Delta$)', fontsize=33, labelpad=22)
-    ax.set_ylabel(r'Branching ratio predictions ($\hat{\eta})$', fontsize=33, labelpad=22)
+    ax.set_ylabel(r'Baseline Intensity predictions ($\hat{\mu})$', fontsize=33, labelpad=22)
 
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "pgf.texsystem": "pdflatex"})
     plt.tight_layout()

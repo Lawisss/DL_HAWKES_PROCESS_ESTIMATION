@@ -35,6 +35,7 @@ def hawkes_simulation(params: Optional[TypedDict] = {"mu": 0.1, "alpha": 0.5, "b
     # Default parameters
     default_params = {"kernel": hwk.KERNEL, 
                       "baseline": hwk.BASELINE, 
+                      "num_exp": hwk.NUM_EXP,
                       "time_itv_start": hwk.TIME_ITV_START,
                       "time_horizon": hwk.TIME_HORIZON}
 
@@ -42,7 +43,7 @@ def hawkes_simulation(params: Optional[TypedDict] = {"mu": 0.1, "alpha": 0.5, "b
     dict_args = {k: getattr(args, k, v) for k, v in default_params.items()}
 
     # Created Hawkes process with a given kernel, baseline and parameters
-    hawkes_process = hk.simulator().set_kernel(dict_args['kernel']).set_baseline(dict_args['baseline']).set_parameter(params)
+    hawkes_process = hk.simulator().set_kernel(dict_args['kernel'], dict_args['num_exp']).set_baseline(dict_args['baseline']).set_parameter(params)
     # Simulated Hawkes process in a given time interval
     t = hawkes_process.simulate([dict_args['time_itv_start'], dict_args['time_horizon']])
     

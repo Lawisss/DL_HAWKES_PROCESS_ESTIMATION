@@ -45,6 +45,8 @@ def exp_hyperparams(record: bool = True, filename: Optional[str] = "exp_hawkes_h
                       "max_itv_eta": hwk.MAX_ITV_ETA,
                       "min_itv_beta": hwk.MIN_ITV_BETA,
                       "max_itv_beta": hwk.MAX_ITV_BETA,
+                      "min_itv_f": hwk.MIN_ITV_F,
+                      "max_itv_f": hwk.MAX_ITV_F,
                       "time_horizon": hwk.TIME_HORIZON}
 
     # Initialized parameters
@@ -54,16 +56,20 @@ def exp_hyperparams(record: bool = True, filename: Optional[str] = "exp_hawkes_h
     epsilon = np.random.normal(dict_args['expected_activity'], dict_args['std'], dict_args['process_num'])
     eta = np.random.uniform(dict_args['min_itv_eta'], dict_args['max_itv_eta'], dict_args['process_num'])
     beta = np.random.uniform(dict_args['min_itv_beta'], dict_args['max_itv_beta'], dict_args['process_num'])
+    # eta = np.random.uniform(dict_args['min_itv_eta'], dict_args['max_itv_eta'], dict_args['process_num'])
+    #f = np.random.uniform(dict_args['min_itv_f'], dict_args['max_itv_f'], dict_args['process_num'])
 
     # Calculated alpha/mu vectors from beta/eta vectors (alpha = eta because of library exponential formula)
-    alpha = eta
+    alpha = eta 
+    # alpha = [f * eta, (1 - f) * eta]
+    # beta = [f * (1 / eta), (1 - f) * (1 / eta)]
     mu = (epsilon / dict_args['time_horizon']) * (1 - eta)
 
     # Written parquet file
     if record is True:
-        write_parquet(pl.DataFrame({"alpha": alpha, "beta": beta, "eta": eta, "mu": mu}), filename=filename)
+        write_parquet(pl.DataFrame({"alpha": [alpha], "beta": [beta], "eta": eta, "mu": mu}), filename=filename)
 
-    return np.array([alpha, beta, eta, mu], dtype=np.float32).T, alpha, beta, eta, mu
+    return np.array([[alpha], [beta], eta, mu], dtype=np.float32).T, [alpha], [beta], eta, mu
 
 
 # Generated Hawkes process power law hyperparameters (k, c, p)
